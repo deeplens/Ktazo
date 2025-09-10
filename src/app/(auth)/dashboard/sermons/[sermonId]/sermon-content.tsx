@@ -295,9 +295,10 @@ export function SermonContent({ sermon, weeklyContent, onGenerateContent, onGene
               <CardTitle className="flex items-center gap-2"><UploadCloud /> Sermon Audio</CardTitle>
             </CardHeader>
             <CardContent>
-                <div className="text-center p-4 border border-dashed rounded-lg">
-                    <p className="text-sm text-muted-foreground">sermon_audio.mp3</p>
-                    <Button variant="link" size="sm">Download</Button>
+                <div className="p-4 border border-dashed rounded-lg">
+                    <audio controls src={sermon.mp3Url} className="w-full">
+                        Your browser does not support the audio element.
+                    </audio>
                 </div>
             </CardContent>
           </Card>
