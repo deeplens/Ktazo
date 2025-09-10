@@ -1,7 +1,7 @@
 /**
  * @fileOverview Translates sermon content to a specified language.
  *
- * - translateSermonContent - A function that translates sermon content using the Google Translate API.
+ * - translateSermonContent - A function that translates sermon content using an AI model.
  * - TranslateSermonContentInput - The input type for the translateSermonContent function.
  * - TranslateSermonContentOutput - The return type for the translateSermonContent function.
  */
@@ -12,14 +12,28 @@ import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 
 const TranslateSermonContentInputSchema = z.object({
-  text: z.string().describe('The text content to translate.'),
   targetLanguage: z.string().describe('The target language code (e.g., es for Spanish).'),
+  title: z.string().describe('The sermon title.'),
+  transcript: z.string().describe('The sermon transcript.'),
+  summaryShort: z.string().describe('The short summary.'),
+  summaryLong: z.string().describe('The long summary.'),
+  devotionals: z.array(z.object({
+    day: z.string(),
+    content: z.string(),
+  })).describe('The daily devotionals.'),
 });
 
 export type TranslateSermonContentInput = z.infer<typeof TranslateSermonContentInputSchema>;
 
 const TranslateSermonContentOutputSchema = z.object({
-  translatedText: z.string().describe('The translated text content.'),
+  title: z.string().describe('The translated sermon title.'),
+  transcript: z.string().describe('The translated sermon transcript.'),
+  summaryShort: z.string().describe('The translated short summary.'),
+  summaryLong: z.string().describe('The translated long summary.'),
+  devotionals: z.array(z.object({
+    day: z.string(),
+    content: z.string(),
+  })).describe('The translated daily devotionals.'),
 });
 
 export type TranslateSermonContentOutput = z.infer<typeof TranslateSermonContentOutputSchema>;
@@ -32,7 +46,16 @@ const translatePrompt = ai.definePrompt({
   name: 'translateSermonContentPrompt',
   input: {schema: TranslateSermonContentInputSchema},
   output: {schema: TranslateSermonContentOutputSchema},
-  prompt: `Translate the following text to {{targetLanguage}}:\n\n{{{text}}}`,
+  prompt: `Translate all the following text content to {{targetLanguage}}.
+  
+  Retain the original JSON structure and field names. The "day" field in the devotionals should not be translated.
+
+  Title: {{{title}}}
+  Transcript: {{{transcript}}}
+  Short Summary: {{{summaryShort}}}
+  Long Summary: {{{summaryLong}}}
+  Devotionals: {{{json devos=devotionals}}}
+  `,
   config: {
         safetySettings: [
           {
@@ -59,4 +82,3 @@ const translateSermonContentFlow = ai.defineFlow(
     return output!;
   }
 );
-

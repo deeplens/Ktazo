@@ -28,8 +28,10 @@ import { WeeklyContentView } from "@/components/sermons/weekly-content-view";
 import { useAuth } from "@/lib/auth.tsx";
 import { Sermon, WeeklyContent } from "@/lib/types";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { deleteSermon } from "@/lib/mock-data";
+import { addSermon, deleteSermon } from "@/lib/mock-data";
 import { useToast } from "@/hooks/use-toast";
+import { translateSermonContent } from "@/ai/flows/translate-sermon-content";
+import { useState } from "react";
 
 interface SermonContentProps {
     sermon: Sermon | null;
@@ -44,6 +46,7 @@ export function SermonContent({ sermon, weeklyContent, onGenerateContent, onGene
   const { user } = useAuth();
   const router = useRouter();
   const { toast } = useToast();
+  const [isTranslating, setIsTranslating] = useState(false);
   
   if (!sermon) {
     notFound();
@@ -59,10 +62,57 @@ export function SermonContent({ sermon, weeklyContent, onGenerateContent, onGene
     router.refresh(); // To ensure the sermon list is updated
   }
 
+  const handleTranslate = async (targetLanguage: 'es' | 'pt') => {
+    if (!sermon || !weeklyContent) {
+        toast({ variant: "destructive", title: "Cannot Translate", description: "Content must be generated before translation." });
+        return;
+    }
+    setIsTranslating(true);
+    try {
+        const translatedContent = await translateSermonContent({
+            targetLanguage,
+            title: sermon.title,
+            transcript: sermon.transcript,
+            summaryShort: weeklyContent.summaryShort,
+            summaryLong: weeklyContent.summaryLong,
+            devotionals: weeklyContent.devotionals
+        });
+
+        const newSermon: Sermon = {
+            ...sermon,
+            id: `sermon-${Date.now()}`,
+            title: translatedContent.title,
+            transcript: translatedContent.transcript,
+            status: 'READY_FOR_REVIEW',
+            languages: [...sermon.languages, targetLanguage],
+            // In a real app, you would create a new weeklyContent object too
+        };
+        
+        // This is a simplified approach for the demo.
+        // A real app would also create a new, translated weeklyContent record.
+        addSermon(newSermon);
+
+        toast({
+            title: "Translation Complete",
+            description: `Sermon translated to ${targetLanguage === 'es' ? 'Spanish' : 'Portuguese'} and added as a new sermon draft.`
+        });
+        
+        router.push(`/dashboard/sermons/${newSermon.id}`);
+
+    } catch (error) {
+        console.error("Translation failed", error);
+        toast({ variant: "destructive", title: "Translation Failed", description: "An error occurred during translation." });
+    } finally {
+        setIsTranslating(false);
+    }
+  }
+
+
   const canManage = user?.role === 'ADMIN' || user?.role === 'PASTOR' || user?.role === 'MASTER';
   const canApprove = canManage;
   const canPublish = canManage;
   const canDelete = canManage;
+  const canTranslate = canManage && !!weeklyContent;
 
   return (
     <div className="mx-auto grid max-w-6xl flex-1 auto-rows-max gap-4">
@@ -206,8 +256,16 @@ export function SermonContent({ sermon, weeklyContent, onGenerateContent, onGene
             </CardHeader>
             <CardContent>
                 <p className="text-sm text-muted-foreground mb-4">Translate this sermon and its content into another language.</p>
-                <Button variant="outline" className="w-full mb-2">Translate to Spanish</Button>
-                <Button variant="outline" className="w-full">Translate to Portuguese</Button>
+                <Button 
+                    variant="outline" 
+                    className="w-full mb-2" 
+                    onClick={() => handleTranslate('es')}
+                    disabled={!canTranslate || isTranslating}
+                >
+                    {isTranslating ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : null}
+                    Translate to Spanish
+                </Button>
+                <Button variant="outline" className="w-full" disabled>Translate to Portuguese</Button>
             </CardContent>
           </Card>
         </div>
