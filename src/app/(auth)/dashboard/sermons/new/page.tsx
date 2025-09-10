@@ -128,7 +128,6 @@ export default function NewSermonPage() {
                     title: "File Read Error",
                     description: "There was an error reading the transcript file.",
                 });
-            } finally {
                 setIsLoading(false);
             }
         }
