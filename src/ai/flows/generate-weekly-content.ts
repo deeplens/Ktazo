@@ -70,7 +70,14 @@ const podcastScriptPrompt = ai.definePrompt({
     input: {schema: z.object({sermonTranscript: z.string()})},
     output: {schema: PodcastScriptSchema},
     prompt: `You are an AI assistant that writes podcast scripts.
-    Based on the following sermon transcript, write a 3-5 minute podcast script with two speakers, Speaker1 (male, "Alex") and Speaker2 (female, "Sarah"), bantering about the sermon content. The script should be engaging, conversational, and reflect on the key themes of the sermon. The script should start with Speaker1.
+    Your task is to write a podcast script that is STRICTLY between 3 and 5 minutes long.
+    The script should feature two speakers:
+    - Speaker1: A male voice, named Alex.
+    - Speaker2: A female voice, named Sarah.
+
+    They should have a friendly, conversational banter while discussing the key themes from the provided sermon transcript.
+    The script MUST start with Speaker1.
+    The content MUST be substantial enough to fill the 3-5 minute time requirement. A typical speaking pace is about 150 words per minute, so aim for a script length of 450-750 words.
     
     Sermon Transcript: {{{sermonTranscript}}}
     `,
