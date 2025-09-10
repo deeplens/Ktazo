@@ -13,7 +13,7 @@ import { useAuth } from '@/lib/auth.tsx';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { PlusCircle } from 'lucide-react';
+import { PlusCircle, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 
 function CrossIcon(props: React.SVGProps<SVGSVGElement>) {
@@ -38,19 +38,19 @@ function CrossIcon(props: React.SVGProps<SVGSVGElement>) {
 }
 
 export function AppShell({ children }: { children: React.ReactNode }) {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    if (user === null) {
+    if (!loading && !user) {
       router.push('/');
     }
-  }, [user, router]);
+  }, [user, loading, router]);
   
-  if (!user) {
+  if (loading || !user) {
     return (
         <div className="flex items-center justify-center min-h-screen">
-            {/* You can add a loading spinner here */}
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
     );
   }
