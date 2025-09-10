@@ -9,7 +9,7 @@ export const mockUsers: User[] = [
   { id: 'user-member-3', tenantId: 'tenant-1', authId: 'auth-member-3', role: 'MEMBER', name: 'Member User 3', email: 'member3@ktazo.com', lastLoginAt: new Date(Date.now() - 86400000 * 5).toISOString(), points: 210 },
 ];
 
-export const mockSermons: Sermon[] = [
+const initialSermons: Sermon[] = [
   {
     id: 'sermon-1',
     tenantId: 'tenant-1',
@@ -65,6 +65,33 @@ export const mockSermons: Sermon[] = [
     updatedAt: new Date().toISOString(),
   },
 ];
+
+
+const SERMON_STORAGE_KEY = 'ktazo-sermons';
+
+export const getMockSermons = (): Sermon[] => {
+    if (typeof window !== 'undefined') {
+        const storedSermons = sessionStorage.getItem(SERMON_STORAGE_KEY);
+        if (storedSermons) {
+            try {
+                return JSON.parse(storedSermons);
+            } catch (e) {
+                console.error("Could not parse stored sermons", e);
+                return initialSermons;
+            }
+        }
+    }
+    return initialSermons;
+}
+
+export const addSermon = (sermon: Sermon) => {
+    if (typeof window !== 'undefined') {
+        const sermons = getMockSermons();
+        const updatedSermons = [sermon, ...sermons];
+        sessionStorage.setItem(SERMON_STORAGE_KEY, JSON.stringify(updatedSermons));
+    }
+}
+
 
 export const mockWeeklyContent: WeeklyContent[] = [
     {

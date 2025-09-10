@@ -7,8 +7,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { UploadCloud, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { mockSermons } from "@/lib/mock-data";
+import { addSermon } from "@/lib/mock-data";
 import { transcribeSermon } from "@/ai/flows/transcribe-sermon";
+import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Textarea } from "@/components/ui/textarea";
 
 export default function NewSermonPage() {
     const [title, setTitle] = useState('');
@@ -16,6 +19,8 @@ export default function NewSermonPage() {
     const [date, setDate] = useState('');
     const [file, setFile] = useState<File | null>(null);
     const [isLoading, setIsLoading] = useState(false);
+    const [transcript, setTranscript] = useState('');
+    const [showTranscriptDialog, setShowTranscriptDialog] = useState(false);
     const router = useRouter();
     const { toast } = useToast();
 
@@ -47,27 +52,8 @@ export default function NewSermonPage() {
             const audioDataUri = await fileToDataURI(file);
             
             const transcriptionResult = await transcribeSermon({ mp3Url: audioDataUri });
-
-            const newSermon = {
-                id: `sermon-${mockSermons.length + 1}`,
-                tenantId: 'tenant-1',
-                title,
-                series,
-                date,
-                mp3Url: `path/to/${file.name}`,
-                transcript: transcriptionResult.transcript,
-                status: 'READY_FOR_REVIEW' as const,
-                languages: ['en'],
-                createdAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString(),
-            };
-            mockSermons.unshift(newSermon);
-
-            toast({
-                title: "Transcription Complete",
-                description: `"${title}" has been transcribed and is ready for review.`,
-            });
-            router.push('/dashboard/sermons');
+            setTranscript(transcriptionResult.transcript);
+            setShowTranscriptDialog(true);
 
         } catch (error) {
             console.error("Transcription failed", error);
@@ -80,6 +66,30 @@ export default function NewSermonPage() {
             setIsLoading(false);
         }
     };
+
+    const handleConfirmTranscript = () => {
+        const newSermon = {
+            id: `sermon-${Date.now()}`,
+            tenantId: 'tenant-1',
+            title,
+            series,
+            date,
+            mp3Url: `path/to/${file?.name}`,
+            transcript: transcript,
+            status: 'READY_FOR_REVIEW' as const,
+            languages: ['en'],
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+        };
+        addSermon(newSermon);
+
+        toast({
+            title: "Sermon Added",
+            description: `"${title}" has been transcribed and is ready for review.`,
+        });
+        setShowTranscriptDialog(false);
+        router.push('/dashboard/sermons');
+    }
 
     return (
         <div className="max-w-4xl mx-auto">
@@ -142,6 +152,24 @@ export default function NewSermonPage() {
                     </Button>
                 </CardFooter>
             </form>
+            
+            <AlertDialog open={showTranscriptDialog} onOpenChange={setShowTranscriptDialog}>
+                <AlertDialogContent className="max-w-3xl">
+                    <AlertDialogHeader>
+                    <AlertDialogTitle>Transcription Result</AlertDialogTitle>
+                    <AlertDialogDescription>
+                        Review the generated transcript below. You can edit it later from the sermon detail page.
+                    </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <ScrollArea className="h-96 w-full rounded-md border p-4">
+                        <pre className="text-sm whitespace-pre-wrap">{transcript}</pre>
+                    </ScrollArea>
+                    <AlertDialogFooter>
+                        <Button variant="outline" onClick={() => setShowTranscriptDialog(false)}>Cancel</Button>
+                        <AlertDialogAction onClick={handleConfirmTranscript}>Confirm and Add Sermon</AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     );
 }

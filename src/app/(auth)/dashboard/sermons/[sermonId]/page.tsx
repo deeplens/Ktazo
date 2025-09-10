@@ -19,14 +19,14 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
-import { mockSermons, mockWeeklyContent } from "@/lib/mock-data";
+import { getMockSermons, mockWeeklyContent } from "@/lib/mock-data";
 import { Label } from "@/components/ui/label";
 import { WeeklyContentView } from "@/components/sermons/weekly-content-view";
 import { SermonContent } from "./sermon-content";
 
 // Note: This is now a server component to correctly handle params
 export default async function SermonDetailPage({ params }: { params: { sermonId: string } }) {
-  const sermon = mockSermons.find(s => s.id === params.sermonId);
+  const sermon = getMockSermons().find(s => s.id === params.sermonId);
 
   if (!sermon) {
     notFound();

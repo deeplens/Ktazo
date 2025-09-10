@@ -1,5 +1,6 @@
+'use client';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { mockSermons, mockWeeklyContent } from "@/lib/mock-data";
+import { getMockSermons, mockWeeklyContent } from "@/lib/mock-data";
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "../ui/button";
@@ -14,9 +15,17 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { ChatbotPanel } from "../chatbot/chatbot-panel";
+import { useEffect, useState } from "react";
+import { Sermon } from "@/lib/types";
 
 export function MemberDashboard() {
-  const publishedSermon = mockSermons.find(s => s.status === 'PUBLISHED');
+  const [publishedSermon, setPublishedSermon] = useState<Sermon | undefined>(undefined);
+
+  useEffect(() => {
+    const sermons = getMockSermons();
+    setPublishedSermon(sermons.find(s => s.status === 'PUBLISHED'));
+  }, []);
+
   if (!publishedSermon) return <p>No weekly content published yet.</p>;
   
   const weeklyContent = mockWeeklyContent.find(wc => wc.sermonId === publishedSermon.id);

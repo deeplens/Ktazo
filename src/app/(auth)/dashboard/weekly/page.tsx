@@ -1,5 +1,5 @@
 'use client';
-import { mockSermons } from "@/lib/mock-data";
+import { getMockSermons } from "@/lib/mock-data";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
@@ -7,7 +7,7 @@ import { useEffect } from "react";
 export default function WeeklyRedirectPage() {
     const router = useRouter();
     useEffect(() => {
-        const latestPublished = mockSermons.find(s => s.status === 'PUBLISHED');
+        const latestPublished = getMockSermons().find(s => s.status === 'PUBLISHED');
         if (latestPublished) {
             router.replace(`/dashboard/weekly/${latestPublished.id}`);
         }

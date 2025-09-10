@@ -1,3 +1,4 @@
+'use client';
 import { PlusCircle, File } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -23,8 +24,9 @@ import {
     TabsTrigger,
 } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { mockSermons } from "@/lib/mock-data";
+import { getMockSermons } from "@/lib/mock-data";
 import { Sermon } from "@/lib/types";
+import { useEffect, useState } from "react";
 
 
 const statusStyles: { [key: string]: string } = {
@@ -78,7 +80,12 @@ const SermonTable = ({sermons}: {sermons: Sermon[]}) => (
 )
 
 export default function SermonsPage() {
-    const allSermons = mockSermons;
+    const [allSermons, setAllSermons] = useState<Sermon[]>([]);
+
+    useEffect(() => {
+        setAllSermons(getMockSermons());
+    }, []);
+
     const published = allSermons.filter(s => s.status === 'PUBLISHED');
     const approved = allSermons.filter(s => s.status === 'APPROVED');
     const readyForReview = allSermons.filter(s => s.status === 'READY_FOR_REVIEW');

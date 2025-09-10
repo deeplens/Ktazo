@@ -1,11 +1,14 @@
+'use client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { mockSermons } from "@/lib/mock-data";
+import { getMockSermons } from "@/lib/mock-data";
 import Link from "next/link";
 import { ArrowRight, CheckCircle, Edit, FileText, UploadCloud } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Sermon } from "@/lib/types";
+import { useEffect, useState } from "react";
 
-const statusInfo = {
+const statusInfo: any = {
     DRAFT: { icon: Edit, label: "Draft", color: "bg-gray-500" },
     READY_FOR_REVIEW: { icon: FileText, label: "Ready for Review", color: "bg-yellow-500" },
     APPROVED: { icon: CheckCircle, label: "Approved", color: "bg-blue-500" },
@@ -13,8 +16,14 @@ const statusInfo = {
 }
 
 export function AdminPastorDashboard() {
-  const sermonsToReview = mockSermons.filter(s => s.status === 'READY_FOR_REVIEW');
-  const drafts = mockSermons.filter(s => s.status === 'DRAFT');
+  const [sermons, setSermons] = useState<Sermon[]>([]);
+
+  useEffect(() => {
+    setSermons(getMockSermons());
+  }, []);
+
+  const sermonsToReview = sermons.filter(s => s.status === 'READY_FOR_REVIEW');
+  const drafts = sermons.filter(s => s.status === 'DRAFT');
 
   return (
     <div className="grid gap-6">
@@ -95,14 +104,14 @@ export function AdminPastorDashboard() {
                         </tr>
                     </thead>
                     <tbody>
-                        {mockSermons.slice(0, 4).map(sermon => (
+                        {sermons.slice(0, 4).map(sermon => (
                             <tr key={sermon.id} className="border-t">
                                 <td className="py-3 pr-4">{sermon.title}</td>
                                 <td className="py-3 pr-4 text-muted-foreground">{sermon.date}</td>
                                 <td className="py-3 pr-4">
                                     <Badge variant="secondary" className="flex items-center gap-1.5 w-fit">
-                                        <sermon.statusInfo.icon className="h-3 w-3" />
-                                        {sermon.statusInfo.label}
+                                        <statusInfo[sermon.status].icon className="h-3 w-3" />
+                                        {statusInfo[sermon.status].label}
                                     </Badge>
                                 </td>
                                 <td className="py-3 text-right">
@@ -120,8 +129,3 @@ export function AdminPastorDashboard() {
     </div>
   );
 }
-
-// Add status info to mock data for easier rendering
-mockSermons.forEach(sermon => {
-    (sermon as any).statusInfo = statusInfo[sermon.status];
-});

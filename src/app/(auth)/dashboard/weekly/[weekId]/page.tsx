@@ -1,7 +1,7 @@
 'use client';
 import { notFound } from "next/navigation";
 import Image from "next/image";
-import { mockSermons, mockWeeklyContent, mockGames, mockReflectionQuestions } from "@/lib/mock-data";
+import { getMockSermons, mockWeeklyContent, mockGames, mockReflectionQuestions } from "@/lib/mock-data";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 export default function WeeklyPage({ params }: { params: { weekId: string } }) {
-  const sermon = mockSermons.find(s => s.id === params.weekId);
+  const sermon = getMockSermons().find(s => s.id === params.weekId);
   if (!sermon || !sermon.weeklyContentId) {
     notFound();
   }
