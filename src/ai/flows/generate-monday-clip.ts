@@ -87,19 +87,14 @@ const generateMondayClipFlow = ai.defineFlow(
     outputSchema: GenerateMondayClipOutputSchema,
   },
   async input => {
-    console.log('[[DEBUG]] Starting generateMondayClipFlow');
-    
     try {
-        console.log('[[DEBUG]] Generating podcast script...');
         const scriptResponse = await podcastScriptPrompt(input);
         const script = scriptResponse.output?.podcastScript;
 
         if (!script) {
-            console.error('[[DEBUG]] Podcast script generation failed to produce output.');
             throw new Error('Podcast script generation failed.');
         }
         
-        console.log('[[DEBUG]] Generating TTS audio...');
         const { media } = await ai.generate({
             model: googleAI.model('gemini-2.5-flash-preview-tts'),
             config: {
@@ -138,11 +133,10 @@ const generateMondayClipFlow = ai.defineFlow(
         const wavBase64 = await toWav(audioBuffer);
         const mondayClipUrl = `data:audio/wav;base64,${wavBase64}`;
 
-        console.log('[[DEBUG]] Finishing generateMondayClipFlow successfully.');
         return { mondayClipUrl };
 
     } catch (error) {
-        console.error('[[DEBUG]] Error in Monday clip generation:', error);
+        console.error('Error in Monday clip generation:', error);
         return { mondayClipUrl: 'error' };
     }
   }
