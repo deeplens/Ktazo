@@ -40,12 +40,13 @@ export default function SermonDetailPage() {
     if (!sermon || !user) return;
     setIsGenerating(true);
     try {
-        // In a real app, you would save this to a DB and associate it with the sermon
+        console.log('[[DEBUG]] Calling generateWeeklyContent');
         const generated = await generateWeeklyContent({ 
             sermonId: sermon.id, 
             tenantId: user.tenantId,
             sermonTranscript: sermon.transcript
         });
+        console.log('[[DEBUG]] Received content from generateWeeklyContent', generated);
         
         // For this mock implementation, we'll just create it in memory
         const newContent: WeeklyContent = {
@@ -82,7 +83,7 @@ export default function SermonDetailPage() {
     if (!sermon || !weeklyContent) return;
     setIsGeneratingAudio(true);
     try {
-        const result = await generateMondayClip({ sermonTranscript: sermon.transcript });
+        const result = await generateMondayClip({ summaryLong: weeklyContent.summaryLong });
         
         if (result.mondayClipUrl === 'error') {
             throw new Error("Podcast generation failed on the server.");

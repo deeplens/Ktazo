@@ -15,7 +15,7 @@ import {z} from 'genkit';
 import wav from 'wav';
 
 const GenerateMondayClipInputSchema = z.object({
-  sermonTranscript: z.string().describe('The full transcript of the sermon.'),
+  summaryLong: z.string().describe('The long summary of the sermon devotional.'),
 });
 export type GenerateMondayClipInput = z.infer<typeof GenerateMondayClipInputSchema>;
 
@@ -59,19 +59,19 @@ async function toWav(
 const podcastScriptPrompt = ai.definePrompt({
     name: 'podcastScriptPrompt',
     input: { schema: GenerateMondayClipInputSchema },
-    output: { schema: z.object({ podcastScript: z.string().describe("A 3-5 minute podcast script with two speakers.") }) },
+    output: { schema: z.object({ podcastScript: z.string().describe("A 2 minute podcast script with two speakers.") }) },
     prompt: `You are an expert podcast script writer for a church.
   
-    Sermon Transcript: {{{sermonTranscript}}}
+    Devotional Summary: {{{summaryLong}}}
   
-    Generate a 3-5 minute, two-speaker podcast-style discussion based on the provided sermon transcript. The script should be engaging and insightful for a general audience.
+    Generate a 2-minute, two-speaker podcast-style discussion based on the provided devotional summary. The script should be engaging and insightful for a general audience.
   
     Follow these instructions:
-    - The script must be between 3 and 5 minutes long when spoken.
+    - The script must be approximately 2 minutes long when spoken.
     - The script must have two distinct speakers, labeled as Speaker1 and Speaker2.
-    - The dialogue should be conversational and reflect on the key themes of the sermon.
+    - The dialogue should be conversational and reflect on the key themes of the devotional.
     - Do not include any introductory or concluding remarks outside of the dialogue itself.
-    - Ensure the script is substantial enough to meet the 3-5 minute length requirement.
+    - Ensure the script is substantial enough to meet the 2 minute length requirement.
     
     Example format:
     Speaker1: Hello and welcome! Today we're discussing the main points from this week's sermon.
