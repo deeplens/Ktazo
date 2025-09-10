@@ -8,18 +8,46 @@ import { Button } from "@/components/ui/button";
 import { Gamepad2, Headphones, MessageCircleQuestion, Users, User, HeartHand, MessageSquare } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Sermon } from "@/lib/types";
+import { useEffect, useState } from "react";
 
 export default function WeeklyPage({ params }: { params: { weekId: string } }) {
-  const sermon = getMockSermons().find(s => s.id === params.weekId);
+  const [sermon, setSermon] = useState<Sermon | undefined>(undefined);
+
+  useEffect(() => {
+    const sermons = getMockSermons();
+    setSermon(sermons.find(s => s.id === params.weekId));
+  }, [params.weekId]);
+
+  if (sermon === undefined) {
+    return <div>Loading...</div>; // Or a skeleton loader
+  }
+
   if (!sermon || !sermon.weeklyContentId) {
     notFound();
   }
 
   const weeklyContent = mockWeeklyContent.find(wc => wc.id === sermon.weeklyContentId);
   if (!weeklyContent) {
-    notFound();
+    // This is mock, let's create a placeholder if it doesn't exist
+     const placeholderContent = {
+        id: 'wc-placeholder',
+        tenantId: 'tenant-1',
+        sermonId: sermon.id,
+        themeImageUrl: 'https://picsum.photos/seed/placeholder/1200/800',
+        summaryShort: 'Summary not available.',
+        summaryLong: 'Devotional guide not available.',
+        devotionals: [],
+        mondayClipUrl: '',
+    };
+    return <WeeklyPageContent sermon={sermon} weeklyContent={placeholderContent} />;
   }
   
+  return <WeeklyPageContent sermon={sermon} weeklyContent={weeklyContent} />;
+}
+
+
+function WeeklyPageContent({ sermon, weeklyContent }: { sermon: Sermon, weeklyContent: any }) {
   const games = mockGames.filter(g => g.sermonId === sermon.id);
   const reflectionQuestions = mockReflectionQuestions.filter(rq => rq.sermonId === sermon.id);
 
@@ -60,17 +88,17 @@ export default function WeeklyPage({ params }: { params: { weekId: string } }) {
             </CardHeader>
             <CardContent>
               <Accordion type="single" collapsible defaultValue="item-0">
-                {weeklyContent.devotionals.map((devotional, index) => (
+                {weeklyContent.devotionals.map((devotional: any, index: number) => (
                   <AccordionItem value={`item-${index}`} key={index}>
                     <AccordionTrigger className="text-lg font-semibold">{devotional.day}</AccordionTrigger>
                     <AccordionContent className="prose prose-stone dark:prose-invert max-w-none">
-                      {devotional.day === 'Monday' ? (
+                      {devotional.day === 'Monday' && weeklyContent.mondayClipUrl ? (
                         <div className="flex items-center gap-4 p-4 bg-accent/50 rounded-lg">
                            <Headphones className="h-10 w-10 text-primary"/>
                            <div>
                                 <h4 className="font-bold">Listen to the Monday Clip</h4>
                                 <p className="text-sm text-muted-foreground">{devotional.content}</p>
-                                <Button size="sm" className="mt-2">Play Audio</Button>
+                                <audio controls src={weeklyContent.mondayClipUrl} className="mt-2 w-full"></audio>
                            </div>
                         </div>
                       ) : (

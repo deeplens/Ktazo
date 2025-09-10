@@ -35,7 +35,11 @@ export default function SermonDetailPage() {
     setIsGenerating(true);
     try {
         // In a real app, you would save this to a DB and associate it with the sermon
-        const generated = await generateWeeklyContent({ sermonId: sermon.id, tenantId: user.tenantId });
+        const generated = await generateWeeklyContent({ 
+            sermonId: sermon.id, 
+            tenantId: user.tenantId,
+            sermonTranscript: sermon.transcript
+        });
         
         // For this mock implementation, we'll just create it in memory
         const newContent: WeeklyContent = {
