@@ -1,3 +1,4 @@
+
 'use client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -5,7 +6,8 @@ import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Globe, Palette, Volume2 } from "lucide-react";
+import { Church, Globe, Palette, Volume2 } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
 
 export default function SettingsPage() {
     return (
@@ -14,6 +16,41 @@ export default function SettingsPage() {
                 <h1 className="text-3xl font-bold tracking-tight font-headline">Settings</h1>
                 <p className="text-muted-foreground">Configure your congregation's preferences and settings.</p>
             </div>
+
+            <Card>
+                <CardHeader>
+                    <CardTitle className="flex items-center gap-2"><Church /> Congregation Identity</CardTitle>
+                    <CardDescription>Provide details about your church. This information helps the AI understand your unique voice and style.</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                     <div className="space-y-2">
+                        <Label htmlFor="church-name">Church Name</Label>
+                        <Input id="church-name" placeholder="e.g., First Community Church" />
+                    </div>
+                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                            <Label htmlFor="city">City</Label>
+                            <Input id="city" placeholder="e.g., Springfield" />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="state">State</Label>
+                            <Input id="state" placeholder="e.g., Illinois" />
+                        </div>
+                    </div>
+                     <div className="space-y-2">
+                        <Label htmlFor="contact-info">Contact Info</Label>
+                        <Input id="contact-info" placeholder="e.g., office@firstcommunity.org" />
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="church-voice">Church Voice & Identity</Label>
+                        <Textarea 
+                            id="church-voice"
+                            placeholder="Describe your church's doctrine, emphasis, and identity. For example: 'We are a conservative Baptist congregation ministering to mainly blue-collar former Catholics...'"
+                            rows={5}
+                        />
+                    </div>
+                </CardContent>
+            </Card>
             
             <Card>
                 <CardHeader>
