@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useRouter } from "next/navigation";
@@ -73,10 +74,10 @@ export function SermonContent({
 
   const [sermon, setSermon] = useState(initialSermon);
   const [sermonDetails, setSermonDetails] = useState({
-      title: initialSermon.title,
-      speaker: initialSermon.speaker,
-      series: initialSermon.series,
-      date: initialSermon.date,
+      title: initialSermon.title || '',
+      speaker: initialSermon.speaker || '',
+      series: initialSermon.series || '',
+      date: initialSermon.date || '',
   });
   const [isTranslating, setIsTranslating] = useState(false);
   const [isCleaning, setIsCleaning] = useState(false);
@@ -93,10 +94,10 @@ export function SermonContent({
   useEffect(() => {
     setSermon(initialSermon);
     setSermonDetails({
-        title: initialSermon.title,
-        speaker: initialSermon.speaker,
-        series: initialSermon.series,
-        date: initialSermon.date,
+        title: initialSermon.title || '',
+        speaker: initialSermon.speaker || '',
+        series: initialSermon.series || '',
+        date: initialSermon.date || '',
     });
     setOriginalTranscript(initialSermon.transcript);
     setTranslatedTranscript(initialSermon.translatedTranscript || null);
@@ -512,3 +513,5 @@ export function SermonContent({
     </div>
   );
 }
+
+    
