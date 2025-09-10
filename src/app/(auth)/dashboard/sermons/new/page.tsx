@@ -12,7 +12,7 @@ import { addSermon } from "@/lib/mock-data";
 import { transcribeSermon } from "@/ai/flows/transcribe-sermon";
 import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { cn } from "@/lib/utils";
 
 export default function NewSermonPage() {
     const [title, setTitle] = useState('');
@@ -23,7 +23,7 @@ export default function NewSermonPage() {
     const [isLoading, setIsLoading] = useState(false);
     const [transcript, setTranscript] = useState('');
     const [showTranscriptDialog, setShowTranscriptDialog] = useState(false);
-    const [activeTab, setActiveTab] = useState('audio');
+    const [uploadType, setUploadType] = useState<'audio' | 'text'>('audio');
     const router = useRouter();
     const { toast } = useToast();
 
@@ -83,7 +83,7 @@ export default function NewSermonPage() {
 
         setIsLoading(true);
 
-        if (activeTab === 'audio') {
+        if (uploadType === 'audio') {
             if (!audioFile) {
                  toast({
                     variant: 'destructive',
@@ -164,59 +164,79 @@ export default function NewSermonPage() {
                             </div>
                         </div>
                         
-                        <Tabs value={activeTab} onValueChange={setActiveTab} className="pt-2">
-                            <TabsList className="grid w-full grid-cols-2">
-                                <TabsTrigger value="audio"><UploadCloud className="mr-2 h-4 w-4"/>Upload Audio</TabsTrigger>
-                                <TabsTrigger value="text"><FileText className="mr-2 h-4 w-4"/>Upload Transcript</TabsTrigger>
-                            </TabsList>
-                            <TabsContent value="audio" className="mt-4 space-y-2">
-                                <Label htmlFor="audio-file">Audio File (MP3)</Label>
-                                <div className="flex items-center justify-center w-full">
-                                    <Label htmlFor="audio-file" className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-card hover:bg-accent">
-                                        <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                                            <UploadCloud className="w-8 h-8 mb-4 text-muted-foreground" />
-                                            <p className="mb-2 text-sm text-muted-foreground">
-                                                {audioFile ? 
-                                                <span className="font-semibold">{audioFile.name}</span> : 
-                                                <><span className="font-semibold">Click to upload</span> or drag and drop</>}
-                                            </p>
-                                            <p className="text-xs text-muted-foreground">MP3 audio file</p>
-                                        </div>
-                                        <Input id="audio-file" type="file" className="hidden" accept=".mp3" onChange={(e) => setAudioFile(e.target.files?.[0] || null)} disabled={isLoading} />
-                                    </Label>
-                                </div> 
-                            </TabsContent>
-                            <TabsContent value="text" className="mt-4 space-y-2">
-                                <Label htmlFor="text-file">Transcript File</Label>
-                                 <div className="flex items-center justify-center w-full">
-                                    <Label htmlFor="text-file" className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-card hover:bg-accent">
-                                        <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                                            <FileText className="w-8 h-8 mb-4 text-muted-foreground" />
-                                            <p className="mb-2 text-sm text-muted-foreground">
-                                                {textFile ? 
-                                                <span className="font-semibold">{textFile.name}</span> : 
-                                                <><span className="font-semibold">Click to upload</span> or drag and drop</>}
-                                            </p>
-                                            <p className="text-xs text-muted-foreground">TXT, MD, or DOCX file</p>
-                                        </div>
-                                        <Input id="text-file" type="file" className="hidden" accept=".txt,.md,.docx" onChange={(e) => setTextFile(e.target.files?.[0] || null)} disabled={isLoading} />
-                                    </Label>
-                                </div> 
-                            </TabsContent>
-                        </Tabs>
+                        <div className="space-y-4 pt-2">
+                             <Label>Sermon Source</Label>
+                             <div className="grid grid-cols-2 gap-2">
+                                <Button 
+                                    type="button"
+                                    variant={uploadType === 'audio' ? 'default' : 'outline'}
+                                    onClick={() => setUploadType('audio')}
+                                    disabled={isLoading}
+                                >
+                                    <UploadCloud className="mr-2 h-4 w-4"/>Upload Audio
+                                </Button>
+                                <Button 
+                                    type="button"
+                                    variant={uploadType === 'text' ? 'default' : 'outline'}
+                                    onClick={() => setUploadType('text')}
+                                    disabled={isLoading}
+                                >
+                                    <FileText className="mr-2 h-4 w-4"/>Upload Transcript
+                                </Button>
+                             </div>
+                             
+                             {uploadType === 'audio' ? (
+                                <div className="space-y-2">
+                                    <Label htmlFor="audio-file">Audio File (MP3)</Label>
+                                    <div className="flex items-center justify-center w-full">
+                                        <Label htmlFor="audio-file" className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-card hover:bg-accent">
+                                            <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                                                <UploadCloud className="w-8 h-8 mb-4 text-muted-foreground" />
+                                                <p className="mb-2 text-sm text-muted-foreground">
+                                                    {audioFile ? 
+                                                    <span className="font-semibold">{audioFile.name}</span> : 
+                                                    <><span className="font-semibold">Click to upload</span> or drag and drop</>}
+                                                </p>
+                                                <p className="text-xs text-muted-foreground">MP3 audio file</p>
+                                            </div>
+                                            <Input id="audio-file" type="file" className="hidden" accept=".mp3" onChange={(e) => setAudioFile(e.target.files?.[0] || null)} disabled={isLoading} />
+                                        </Label>
+                                    </div> 
+                                </div>
+                             ) : (
+                                <div className="space-y-2">
+                                    <Label htmlFor="text-file">Transcript File</Label>
+                                     <div className="flex items-center justify-center w-full">
+                                        <Label htmlFor="text-file" className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-card hover:bg-accent">
+                                            <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                                                <FileText className="w-8 h-8 mb-4 text-muted-foreground" />
+                                                <p className="mb-2 text-sm text-muted-foreground">
+                                                    {textFile ? 
+                                                    <span className="font-semibold">{textFile.name}</span> : 
+                                                    <><span className="font-semibold">Click to upload</span> or drag and drop</>}
+                                                </p>
+                                                <p className="text-xs text-muted-foreground">TXT, MD, or DOCX file</p>
+                                            </div>
+                                            <Input id="text-file" type="file" className="hidden" accept=".txt,.md,.docx" onChange={(e) => setTextFile(e.target.files?.[0] || null)} disabled={isLoading} />
+                                        </Label>
+                                    </div> 
+                                </div>
+                             )}
+
+                        </div>
 
                     </CardContent>
                 </Card>
                 <CardFooter className="flex justify-end gap-2 mt-4 px-0">
                     <Button variant="outline" type="button" onClick={() => router.back()} disabled={isLoading}>Cancel</Button>
-                    <Button type="submit" disabled={isLoading || !title || (activeTab === 'audio' && !audioFile) || (activeTab === 'text' && !textFile)}>
+                    <Button type="submit" disabled={isLoading || !title || (uploadType === 'audio' && !audioFile) || (uploadType === 'text' && !textFile)}>
                         {isLoading ? (
                             <>
                                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                {activeTab === 'audio' ? 'Transcribing...' : 'Adding...'}
+                                {uploadType === 'audio' ? 'Transcribing...' : 'Adding...'}
                             </>
                         ) : (
-                             activeTab === 'audio' ? 'Upload and Transcribe' : 'Add Sermon'
+                             uploadType === 'audio' ? 'Upload and Transcribe' : 'Add Sermon'
                         )}
                     </Button>
                 </CardFooter>
@@ -242,5 +262,3 @@ export default function NewSermonPage() {
         </div>
     );
 }
-
-    
