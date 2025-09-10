@@ -24,11 +24,6 @@ const GenerateWeeklyContentOutputSchema = z.object({
   summaryShort: z.string().describe('A short summary of the sermon.'),
   summaryLong: z.string().describe('A longer devotional guide summary of the sermon.'),
   devotionals: z.array(z.string()).describe('An array of five daily devotionals (Mon-Fri).'),
-  reflectionQuestionsYouth: z.array(z.string()).describe('Reflection questions for youth.'),
-  reflectionQuestionsFamilies: z.array(z.string()).describe('Reflection questions for families.'),
-  reflectionQuestionsSmallGroups: z.array(z.string()).describe('Reflection questions for small groups.'),
-  reflectionQuestionsIndividuals: z.array(z.string()).describe('Reflection questions for individuals.'),
-  gameConfiguration: z.string().describe('Configuration for interactive games (youth: timed quiz, flashcards; adults: word search, matching).'),
 });
 export type GenerateWeeklyContentOutput = z.infer<typeof GenerateWeeklyContentOutputSchema>;
 
@@ -56,11 +51,6 @@ const generateWeeklyContentPrompt = ai.definePrompt({
   - A short summary (summaryShort).
   - A longer devotional guide summary (summaryLong).
   - Five daily devotionals for Monday, Tuesday, Wednesday, Thursday, and Friday (devotionals).
-  - Reflection questions for youth (reflectionQuestionsYouth).
-  - Reflection questions for families (reflectionQuestionsFamilies).
-  - Reflection questions for small groups (reflectionQuestionsSmallGroups).
-  - Reflection questions for individuals (reflectionQuestionsIndividuals).
-  - Configuration for interactive games (youth: timed quiz, flashcards; adults: word search, matching) (gameConfiguration).
   `,
 });
 
@@ -81,3 +71,4 @@ const generateWeeklyContentFlow = ai.defineFlow(
     return content;
   }
 );
+
