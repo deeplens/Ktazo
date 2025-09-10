@@ -1,3 +1,4 @@
+
 'use client';
 import { notFound } from "next/navigation";
 import Image from "next/image";
@@ -119,23 +120,6 @@ function WeeklyPageContent({ sermon, weeklyContent }: { sermon: Sermon, weeklyCo
               </Accordion>
             </CardContent>
           </Card>
-          
-          <Card id="reflection-questions">
-            <CardHeader>
-              <CardTitle className="font-headline flex items-center gap-2"><MessageCircleQuestion /> Reflection Questions</CardTitle>
-              <CardDescription>Ponder these questions on your own, or discuss them with your family, friends, or small group.</CardDescription>
-            </CardHeader>
-            <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {weeklyContent.reflectionQuestions.map(group => (
-                    <div key={group.audience} className="p-4 bg-background rounded-lg border">
-                        <h3 className="font-semibold flex items-center gap-2 mb-2">{getIconForAudience(group.audience)} {group.audience}</h3>
-                        <ul className="list-disc list-inside space-y-2 text-sm text-muted-foreground">
-                            {group.questions.map((q, i) => <li key={i}>{q}</li>)}
-                        </ul>
-                    </div>
-                ))}
-            </CardContent>
-          </Card>
         </div>
 
         <div className="space-y-8">
@@ -168,6 +152,23 @@ function WeeklyPageContent({ sermon, weeklyContent }: { sermon: Sermon, weeklyCo
                                 </div>
                             </DialogContent>
                         </Dialog>
+                    ))}
+                </CardContent>
+            </Card>
+
+            <Card id="reflection-questions">
+                <CardHeader>
+                <CardTitle className="font-headline flex items-center gap-2"><MessageCircleQuestion /> Reflection Questions</CardTitle>
+                <CardDescription>Ponder these questions on your own, or discuss them with your family, friends, or small group.</CardDescription>
+                </CardHeader>
+                <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {weeklyContent.reflectionQuestions.map(group => (
+                        <div key={group.audience} className="p-4 bg-background rounded-lg border">
+                            <h3 className="font-semibold flex items-center gap-2 mb-2">{getIconForAudience(group.audience)} {group.audience}</h3>
+                            <ul className="list-disc list-inside space-y-2 text-sm text-muted-foreground">
+                                {group.questions.map((q, i) => <li key={i}>{q}</li>)}
+                            </ul>
+                        </div>
                     ))}
                 </CardContent>
             </Card>
