@@ -11,6 +11,8 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Sermon, WeeklyContent } from "@/lib/types";
 import { useEffect, useState } from "react";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 
 export default function WeeklyPage({ params }: { params: { weekId: string } }) {
   const [sermon, setSermon] = useState<Sermon | undefined>(undefined);
@@ -175,16 +177,24 @@ function WeeklyPageContent({ sermon, weeklyContent }: { sermon: Sermon, weeklyCo
           <CardTitle className="font-headline flex items-center gap-2"><MessageCircleQuestion /> Reflection Questions</CardTitle>
           <CardDescription>Ponder these questions on your own, or discuss them with your family, friends, or small group.</CardDescription>
           </CardHeader>
-          <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {weeklyContent.reflectionQuestions.map(group => (
-                  <div key={group.audience} className="p-4 bg-background rounded-lg border">
-                      <h3 className="font-semibold flex items-center gap-2 mb-2">{getIconForAudience(group.audience)} {group.audience}</h3>
-                      <ul className="list-disc list-inside space-y-2 text-sm text-muted-foreground">
-                          {group.questions.map((q, i) => <li key={i}>{q}</li>)}
-                      </ul>
+          <CardContent className="space-y-6">
+              {weeklyContent.reflectionQuestions.map((group, groupIndex) => (
+                  <div key={group.audience}>
+                      <h3 className="font-semibold flex items-center gap-2 mb-4 text-lg border-b pb-2">{getIconForAudience(group.audience)} {group.audience}</h3>
+                      <div className="space-y-6">
+                          {group.questions.map((q, i) => (
+                            <div key={i} className="grid w-full gap-2">
+                                <Label htmlFor={`question-${groupIndex}-${i}`} className="text-base">{q}</Label>
+                                <Textarea placeholder="Type your answer here..." id={`question-${groupIndex}-${i}`} rows={4}/>
+                            </div>
+                          ))}
+                      </div>
                   </div>
               ))}
           </CardContent>
+          <CardFooter>
+              <Button>Save Answers</Button>
+          </CardFooter>
       </Card>
     </div>
   );
