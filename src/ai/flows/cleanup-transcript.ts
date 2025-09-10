@@ -31,14 +31,13 @@ const cleanupPrompt = ai.definePrompt({
   output: {schema: CleanupTranscriptOutputSchema},
   prompt: `You are an expert editor. Your task is to take the following raw sermon transcript and clean it up for readability.
 
-  Do not change the words or the meaning of the content.
-  
   Your tasks are:
   - Add appropriate punctuation (periods, commas, question marks).
   - Correct capitalization.
   - Add paragraph breaks where appropriate to break up large blocks of text and improve structure.
   - Ensure consistent spacing.
   - Fix any obvious formatting errors.
+  - Do not change the words or the meaning of the content.
 
   Return the result in a JSON object with the key "cleanedTranscript".
   
