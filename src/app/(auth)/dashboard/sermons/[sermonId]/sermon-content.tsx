@@ -1,5 +1,5 @@
 'use client';
-import { notFound } from "next/navigation";
+import { notFound, useRouter } from "next/navigation";
 import {
   ChevronLeft,
   UploadCloud,
@@ -9,7 +9,8 @@ import {
   CheckCircle,
   Eye,
   Loader2,
-  MicVocal
+  MicVocal,
+  Trash2
 } from "lucide-react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
@@ -26,6 +27,9 @@ import { Label } from "@/components/ui/label";
 import { WeeklyContentView } from "@/components/sermons/weekly-content-view";
 import { useAuth } from "@/lib/auth.tsx";
 import { Sermon, WeeklyContent } from "@/lib/types";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { deleteSermon } from "@/lib/mock-data";
+import { useToast } from "@/hooks/use-toast";
 
 interface SermonContentProps {
     sermon: Sermon | null;
@@ -36,14 +40,27 @@ interface SermonContentProps {
 
 export function SermonContent({ sermon, weeklyContent, onGenerateContent, isGenerating }: SermonContentProps) {
   const { user } = useAuth();
+  const router = useRouter();
+  const { toast } = useToast();
   
   if (!sermon) {
     notFound();
+  }
+  
+  const handleDelete = () => {
+    deleteSermon(sermon.id);
+    toast({
+      title: "Sermon Deleted",
+      description: `"${sermon.title}" has been permanently deleted.`
+    })
+    router.push('/dashboard/sermons');
+    router.refresh(); // To ensure the sermon list is updated
   }
 
   const canManage = user?.role === 'ADMIN' || user?.role === 'PASTOR' || user?.role === 'MASTER';
   const canApprove = canManage;
   const canPublish = canManage;
+  const canDelete = canManage;
 
   return (
     <div className="mx-auto grid max-w-6xl flex-1 auto-rows-max gap-4">
@@ -135,15 +152,33 @@ export function SermonContent({ sermon, weeklyContent, onGenerateContent, isGene
         <div className="grid auto-rows-max items-start gap-4 lg:gap-8">
           <Card>
             <CardHeader>
-              <CardTitle>Sermon Status</CardTitle>
+              <CardTitle>Sermon Actions</CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="grid gap-6">
-                <div className="grid gap-3">
-                  <Label htmlFor="status">Status</Label>
+            <CardContent className="grid gap-3">
+                <div className="grid gap-1.5">
+                  <Label>Status</Label>
                   <p className="text-sm text-muted-foreground">{sermon.status.replace('_', ' ')}</p>
                 </div>
-              </div>
+                 {canDelete && (
+                    <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                            <Button variant="destructive" className="w-full"><Trash2 className="mr-2"/>Delete Sermon</Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                        <AlertDialogHeader>
+                            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                                This action cannot be undone. This will permanently delete the sermon &quot;{sermon.title}&quot;
+                                and all of its associated weekly content.
+                            </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction onClick={handleDelete}>Confirm Delete</AlertDialogAction>
+                        </AlertDialogFooter>
+                        </AlertDialogContent>
+                    </AlertDialog>
+                )}
             </CardContent>
           </Card>
 

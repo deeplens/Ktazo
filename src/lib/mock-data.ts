@@ -81,8 +81,14 @@ export const getMockSermons = (): Sermon[] => {
                 return JSON.parse(storedSermons);
             } catch (e) {
                 console.error("Could not parse stored sermons", e);
+                // If parsing fails, initialize with default
+                sessionStorage.setItem(SERMON_STORAGE_KEY, JSON.stringify(initialSermons));
                 return initialSermons;
             }
+        } else {
+             // If no data, initialize with default
+             sessionStorage.setItem(SERMON_STORAGE_KEY, JSON.stringify(initialSermons));
+             return initialSermons;
         }
     }
     return initialSermons;
@@ -95,6 +101,14 @@ export const addSermon = (sermon: Sermon) => {
         sessionStorage.setItem(SERMON_STORAGE_KEY, JSON.stringify(updatedSermons));
     }
 }
+
+export const deleteSermon = (sermonId: string) => {
+    if (typeof window !== 'undefined') {
+        const sermons = getMockSermons();
+        const updatedSermons = sermons.filter(s => s.id !== sermonId);
+        sessionStorage.setItem(SERMON_STORAGE_KEY, JSON.stringify(updatedSermons));
+    }
+};
 
 
 export const mockWeeklyContent: WeeklyContent[] = [
