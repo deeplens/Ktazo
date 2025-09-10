@@ -36,17 +36,18 @@ export default function WeeklyPage({ params }: { params: { weekId: string } }) {
   }
 
   if (!sermon || !weeklyContent) {
+     const placeholderSermon = getMockSermons().find(s => s.id === params.weekId);
      const placeholderContent: WeeklyContent = {
         id: 'wc-placeholder',
         tenantId: 'tenant-1',
-        sermonId: sermon?.id || 'sermon-placeholder',
+        sermonId: placeholderSermon?.id || 'sermon-placeholder',
         summaryShort: 'Summary not available.',
         summaryLong: 'Devotional guide not available.',
         devotionals: [],
         reflectionQuestions: [],
         games: [],
     };
-    return <WeeklyPageContent sermon={sermon || {} as Sermon} weeklyContent={placeholderContent} />;
+    return <WeeklyPageContent sermon={placeholderSermon || {} as Sermon} weeklyContent={placeholderContent} />;
   }
   
   return <WeeklyPageContent sermon={sermon} weeklyContent={weeklyContent} />;
@@ -64,6 +65,10 @@ function WeeklyPageContent({ sermon, weeklyContent }: { sermon: Sermon, weeklyCo
         default: return <Users className="h-4 w-4" />;
     }
   };
+
+  if (!weeklyContent) {
+    return <div>No content available for this week.</div>
+  }
 
   return (
     <div className="container mx-auto py-8 px-4 space-y-8">
@@ -148,11 +153,14 @@ function WeeklyPageContent({ sermon, weeklyContent }: { sermon: Sermon, weeklyCo
               {weeklyContent.games?.map((game: Game, index: number) => (
                   <Dialog key={index}>
                       <DialogTrigger asChild>
-                          <Card className="hover:bg-accent/50 cursor-pointer transition-colors">
+                          <Card className="hover:bg-accent/50 cursor-pointer transition-colors flex flex-col h-full">
                               <CardHeader>
                                   <CardTitle className="text-lg">{game.title}</CardTitle>
                                   <Badge variant="secondary" className="w-fit">{game.audience}</Badge>
                               </CardHeader>
+                              <CardContent className="flex-grow">
+                                <p className="text-sm text-muted-foreground">An interactive '{game.type}' game.</p>
+                              </CardContent>
                           </Card>
                       </DialogTrigger>
                       <DialogContent className="max-w-2xl">
