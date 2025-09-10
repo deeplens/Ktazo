@@ -8,7 +8,8 @@ import {
   Languages,
   CheckCircle,
   Eye,
-  Loader2
+  Loader2,
+  MicVocal
 } from "lucide-react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
@@ -53,9 +54,15 @@ export function SermonContent({ sermon, weeklyContent, onGenerateContent, isGene
             <span className="sr-only">Back</span>
           </Link>
         </Button>
-        <h1 className="flex-1 shrink-0 whitespace-nowrap text-xl font-semibold tracking-tight sm:grow-0 font-headline">
-          {sermon.title}
-        </h1>
+        <div className="flex-1 shrink-0">
+            <h1 className="whitespace-nowrap text-xl font-semibold tracking-tight sm:grow-0 font-headline">
+            {sermon.title}
+            </h1>
+            <p className="text-sm text-muted-foreground flex items-center gap-2 mt-1">
+                <MicVocal className="h-4 w-4"/> {sermon.speaker}
+            </p>
+        </div>
+
         <Badge variant="outline" className="ml-auto sm:ml-0">
           {sermon.status.replace('_', ' ')}
         </Badge>

@@ -110,6 +110,7 @@ export function AdminPastorDashboard() {
               <thead>
                 <tr className="text-left">
                   <th className="pb-2 font-medium">Title</th>
+                  <th className="pb-2 font-medium">Speaker</th>
                   <th className="pb-2 font-medium">Date</th>
                   <th className="pb-2 font-medium">Status</th>
                   <th className="pb-2 font-medium"></th>
@@ -121,6 +122,7 @@ export function AdminPastorDashboard() {
                   return (
                     <tr key={sermon.id} className="border-t">
                       <td className="py-3 pr-4">{sermon.title}</td>
+                      <td className="py-3 pr-4 text-muted-foreground">{sermon.speaker}</td>
                       <td className="py-3 pr-4 text-muted-foreground">{sermon.date}</td>
                       <td className="py-3 pr-4">
                         <Badge

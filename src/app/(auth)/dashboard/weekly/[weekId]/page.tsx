@@ -5,7 +5,7 @@ import { getMockSermons, mockWeeklyContent, mockGames, mockReflectionQuestions }
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
-import { Gamepad2, Headphones, MessageCircleQuestion, Users, User, HeartHand, MessageSquare } from "lucide-react";
+import { Gamepad2, Headphones, MessageCircleQuestion, Users, User, HeartHand, MessageSquare, MicVocal } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Sermon } from "@/lib/types";
@@ -75,7 +75,10 @@ function WeeklyPageContent({ sermon, weeklyContent }: { sermon: Sermon, weeklyCo
         <div className="absolute bottom-0 left-0 p-8">
             <Badge variant="secondary" className="mb-2">Weekly Theme</Badge>
             <h1 className="text-3xl md:text-5xl font-bold text-white font-headline">{sermon.title}</h1>
-            <p className="text-white/80 mt-2">{sermon.series}</p>
+            <p className="text-white/80 mt-2 flex items-center gap-2">
+                <MicVocal className="h-5 w-5"/>
+                {sermon.speaker}
+            </p>
         </div>
       </div>
 

@@ -16,6 +16,7 @@ export interface Sermon {
   tenantId: string;
   title: string;
   series: string;
+  speaker: string;
   date: string;
   mp3Url: string;
   transcript: string;

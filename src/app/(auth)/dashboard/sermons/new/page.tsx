@@ -17,6 +17,7 @@ import { cn } from "@/lib/utils";
 export default function NewSermonPage() {
     const [title, setTitle] = useState('');
     const [series, setSeries] = useState('');
+    const [speaker, setSpeaker] = useState('');
     const [date, setDate] = useState('');
     const [audioFile, setAudioFile] = useState<File | null>(null);
     const [textFile, setTextFile] = useState<File | null>(null);
@@ -51,6 +52,7 @@ export default function NewSermonPage() {
             tenantId: 'tenant-1',
             title,
             series,
+            speaker,
             date,
             mp3Url: source === 'audio' && audioFile ? `path/to/${audioFile.name}` : '',
             transcript: finalTranscript,
@@ -73,11 +75,11 @@ export default function NewSermonPage() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!title) {
+        if (!title || !speaker) {
             toast({
                 variant: 'destructive',
-                title: "Missing Title",
-                description: "Please provide a sermon title.",
+                title: "Missing Information",
+                description: "Please provide a sermon title and speaker.",
             });
             return;
         }
@@ -155,6 +157,10 @@ export default function NewSermonPage() {
                             <Label htmlFor="title">Sermon Title</Label>
                             <Input id="title" placeholder="e.g., The Good Shepherd" value={title} onChange={(e) => setTitle(e.target.value)} required disabled={isLoading} />
                         </div>
+                         <div className="space-y-2">
+                            <Label htmlFor="speaker">Speaker</Label>
+                            <Input id="speaker" placeholder="e.g., Pastor John Doe" value={speaker} onChange={(e) => setSpeaker(e.target.value)} required disabled={isLoading} />
+                        </div>
                         <div className="grid md:grid-cols-2 gap-4">
                             <div className="space-y-2">
                                 <Label htmlFor="series">Series (Optional)</Label>
@@ -231,7 +237,7 @@ export default function NewSermonPage() {
                 </Card>
                 <CardFooter className="flex justify-end gap-2 mt-4 px-0">
                     <Button variant="outline" type="button" onClick={() => router.back()} disabled={isLoading}>Cancel</Button>
-                    <Button type="submit" disabled={isLoading || !title || (uploadType === 'audio' && !audioFile) || (uploadType === 'text' && !textFile)}>
+                    <Button type="submit" disabled={isLoading || !title || !speaker || (uploadType === 'audio' && !audioFile) || (uploadType === 'text' && !textFile)}>
                         {isLoading ? (
                             <>
                                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />

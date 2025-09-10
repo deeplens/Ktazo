@@ -46,7 +46,7 @@ const SermonTable = ({sermons}: {sermons: Sermon[]}) => (
         <TableHeader>
         <TableRow>
             <TableHead>Title</TableHead>
-            <TableHead>Series</TableHead>
+            <TableHead>Speaker</TableHead>
             <TableHead className="hidden md:table-cell">Date</TableHead>
             <TableHead>Status</TableHead>
             <TableHead>
@@ -58,7 +58,7 @@ const SermonTable = ({sermons}: {sermons: Sermon[]}) => (
         {sermons.map(sermon => (
             <TableRow key={sermon.id}>
                 <TableCell className="font-medium">{sermon.title}</TableCell>
-                <TableCell className="text-muted-foreground">{sermon.series}</TableCell>
+                <TableCell className="text-muted-foreground">{sermon.speaker}</TableCell>
                 <TableCell className="hidden md:table-cell text-muted-foreground">{sermon.date}</TableCell>
                 <TableCell>
                     <Badge 
