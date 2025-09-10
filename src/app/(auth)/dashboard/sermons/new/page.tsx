@@ -12,15 +12,14 @@ import { addSermon } from "@/lib/mock-data";
 import { transcribeSermon } from "@/ai/flows/transcribe-sermon";
 import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function NewSermonPage() {
     const [title, setTitle] = useState('');
     const [series, setSeries] = useState('');
     const [date, setDate] = useState('');
-    const [file, setFile] = useState<File | null>(null);
-    const [pastedTranscript, setPastedTranscript] = useState('');
+    const [audioFile, setAudioFile] = useState<File | null>(null);
+    const [textFile, setTextFile] = useState<File | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [transcript, setTranscript] = useState('');
     const [showTranscriptDialog, setShowTranscriptDialog] = useState(false);
@@ -31,13 +30,20 @@ export default function NewSermonPage() {
     const fileToDataURI = (file: File): Promise<string> => {
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
-            reader.onload = () => {
-                resolve(reader.result as string);
-            };
+            reader.onload = () => resolve(reader.result as string);
             reader.onerror = reject;
             reader.readAsDataURL(file);
         });
     }
+
+     const fileToText = (file: File): Promise<string> => {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result as string);
+            reader.onerror = reject;
+            reader.readAsText(file);
+        });
+    };
 
     const handleConfirmSermon = (finalTranscript: string, source: 'audio' | 'text') => {
          const newSermon = {
@@ -46,7 +52,7 @@ export default function NewSermonPage() {
             title,
             series,
             date,
-            mp3Url: source === 'audio' ? `path/to/${file?.name}` : '',
+            mp3Url: source === 'audio' && audioFile ? `path/to/${audioFile.name}` : '',
             transcript: finalTranscript,
             status: 'READY_FOR_REVIEW' as const,
             languages: ['en'],
@@ -78,7 +84,7 @@ export default function NewSermonPage() {
         setIsLoading(true);
 
         if (activeTab === 'audio') {
-            if (!file) {
+            if (!audioFile) {
                  toast({
                     variant: 'destructive',
                     title: "Missing File",
@@ -88,7 +94,7 @@ export default function NewSermonPage() {
                 return;
             }
              try {
-                const audioDataUri = await fileToDataURI(file);
+                const audioDataUri = await fileToDataURI(audioFile);
                 const transcriptionResult = await transcribeSermon({ mp3Url: audioDataUri });
                 setTranscript(transcriptionResult.transcript);
                 setShowTranscriptDialog(true);
@@ -103,18 +109,28 @@ export default function NewSermonPage() {
                 setIsLoading(false);
             }
         } else { // Text tab
-            if (!pastedTranscript.trim()) {
+            if (!textFile) {
                  toast({
                     variant: 'destructive',
-                    title: "Missing Transcript",
-                    description: "Please paste the sermon transcript.",
+                    title: "Missing Transcript File",
+                    description: "Please upload a text file for the transcript.",
                 });
                 setIsLoading(false);
                 return;
             }
-            // No transcription needed, go straight to creating the sermon
-            handleConfirmSermon(pastedTranscript, 'text');
-            setIsLoading(false);
+            try {
+                const textContent = await fileToText(textFile);
+                handleConfirmSermon(textContent, 'text');
+            } catch (error) {
+                 console.error("File read failed", error);
+                toast({
+                    variant: 'destructive',
+                    title: "File Read Error",
+                    description: "There was an error reading the transcript file.",
+                });
+            } finally {
+                setIsLoading(false);
+            }
         }
     };
 
@@ -123,7 +139,7 @@ export default function NewSermonPage() {
         <div className="max-w-4xl mx-auto">
              <div>
                 <h1 className="text-3xl font-bold tracking-tight font-headline">Upload New Sermon</h1>
-                <p className="text-muted-foreground">Add a new sermon to your congregation's library by uploading an audio file or pasting the text directly.</p>
+                <p className="text-muted-foreground">Add a new sermon to your congregation's library by uploading an audio or transcript file.</p>
             </div>
 
             <form onSubmit={handleSubmit}>
@@ -151,7 +167,7 @@ export default function NewSermonPage() {
                         <Tabs value={activeTab} onValueChange={setActiveTab} className="pt-2">
                             <TabsList className="grid w-full grid-cols-2">
                                 <TabsTrigger value="audio"><UploadCloud className="mr-2 h-4 w-4"/>Upload Audio</TabsTrigger>
-                                <TabsTrigger value="text"><FileText className="mr-2 h-4 w-4"/>Enter Text</TabsTrigger>
+                                <TabsTrigger value="text"><FileText className="mr-2 h-4 w-4"/>Upload Transcript</TabsTrigger>
                             </TabsList>
                             <TabsContent value="audio" className="mt-4 space-y-2">
                                 <Label htmlFor="audio-file">Audio File (MP3)</Label>
@@ -160,26 +176,32 @@ export default function NewSermonPage() {
                                         <div className="flex flex-col items-center justify-center pt-5 pb-6">
                                             <UploadCloud className="w-8 h-8 mb-4 text-muted-foreground" />
                                             <p className="mb-2 text-sm text-muted-foreground">
-                                                {file ? 
-                                                <span className="font-semibold">{file.name}</span> : 
+                                                {audioFile ? 
+                                                <span className="font-semibold">{audioFile.name}</span> : 
                                                 <><span className="font-semibold">Click to upload</span> or drag and drop</>}
                                             </p>
                                             <p className="text-xs text-muted-foreground">MP3 audio file</p>
                                         </div>
-                                        <Input id="audio-file" type="file" className="hidden" accept=".mp3" onChange={(e) => setFile(e.target.files?.[0] || null)} disabled={isLoading} />
+                                        <Input id="audio-file" type="file" className="hidden" accept=".mp3" onChange={(e) => setAudioFile(e.target.files?.[0] || null)} disabled={isLoading} />
                                     </Label>
                                 </div> 
                             </TabsContent>
                             <TabsContent value="text" className="mt-4 space-y-2">
-                                <Label htmlFor="transcript-text">Sermon Transcript</Label>
-                                <Textarea
-                                    id="transcript-text"
-                                    placeholder="Paste the full sermon transcript here..."
-                                    className="min-h-48"
-                                    value={pastedTranscript}
-                                    onChange={(e) => setPastedTranscript(e.target.value)}
-                                    disabled={isLoading}
-                                />
+                                <Label htmlFor="text-file">Transcript File</Label>
+                                 <div className="flex items-center justify-center w-full">
+                                    <Label htmlFor="text-file" className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-card hover:bg-accent">
+                                        <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                                            <FileText className="w-8 h-8 mb-4 text-muted-foreground" />
+                                            <p className="mb-2 text-sm text-muted-foreground">
+                                                {textFile ? 
+                                                <span className="font-semibold">{textFile.name}</span> : 
+                                                <><span className="font-semibold">Click to upload</span> or drag and drop</>}
+                                            </p>
+                                            <p className="text-xs text-muted-foreground">TXT, MD, or DOCX file</p>
+                                        </div>
+                                        <Input id="text-file" type="file" className="hidden" accept=".txt,.md,.docx" onChange={(e) => setTextFile(e.target.files?.[0] || null)} disabled={isLoading} />
+                                    </Label>
+                                </div> 
                             </TabsContent>
                         </Tabs>
 
@@ -187,7 +209,7 @@ export default function NewSermonPage() {
                 </Card>
                 <CardFooter className="flex justify-end gap-2 mt-4 px-0">
                     <Button variant="outline" type="button" onClick={() => router.back()} disabled={isLoading}>Cancel</Button>
-                    <Button type="submit" disabled={isLoading || !title || (activeTab === 'audio' && !file) || (activeTab === 'text' && !pastedTranscript)}>
+                    <Button type="submit" disabled={isLoading || !title || (activeTab === 'audio' && !audioFile) || (activeTab === 'text' && !textFile)}>
                         {isLoading ? (
                             <>
                                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -220,3 +242,5 @@ export default function NewSermonPage() {
         </div>
     );
 }
+
+    
