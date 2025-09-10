@@ -65,7 +65,9 @@ export default function NewSermonPage() {
             series,
             speaker,
             date,
-            mp3Url: source === 'audio' && audioDataUrl ? audioDataUrl : '',
+            // Use a placeholder URL to avoid quota errors, but keep original for transcription.
+            // In a real app, this would be a URL from a cloud storage service.
+            mp3Url: source === 'audio' && audioFile ? `path/to/${audioFile.name}` : '',
             transcript: finalTranscript,
             status: 'READY_FOR_REVIEW' as const,
             languages: ['en'],
