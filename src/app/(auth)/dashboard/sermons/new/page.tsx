@@ -1,3 +1,4 @@
+
 'use client';
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -5,22 +6,25 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { UploadCloud, Loader2 } from "lucide-react";
+import { UploadCloud, Loader2, FileText } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { addSermon } from "@/lib/mock-data";
 import { transcribeSermon } from "@/ai/flows/transcribe-sermon";
 import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Textarea } from "@/components/ui/textarea";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function NewSermonPage() {
     const [title, setTitle] = useState('');
     const [series, setSeries] = useState('');
     const [date, setDate] = useState('');
     const [file, setFile] = useState<File | null>(null);
+    const [pastedTranscript, setPastedTranscript] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [transcript, setTranscript] = useState('');
     const [showTranscriptDialog, setShowTranscriptDialog] = useState(false);
+    const [activeTab, setActiveTab] = useState('audio');
     const router = useRouter();
     const { toast } = useToast();
 
@@ -35,47 +39,15 @@ export default function NewSermonPage() {
         });
     }
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!file || !title) {
-            toast({
-                variant: 'destructive',
-                title: "Missing Information",
-                description: "Please provide a title and select an MP3 file.",
-            });
-            return;
-        }
-
-        setIsLoading(true);
-        
-        try {
-            const audioDataUri = await fileToDataURI(file);
-            
-            const transcriptionResult = await transcribeSermon({ mp3Url: audioDataUri });
-            setTranscript(transcriptionResult.transcript);
-            setShowTranscriptDialog(true);
-
-        } catch (error) {
-            console.error("Transcription failed", error);
-            toast({
-                variant: 'destructive',
-                title: "Transcription Failed",
-                description: "There was an error processing your audio file. Please try again.",
-            });
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    const handleConfirmTranscript = () => {
-        const newSermon = {
+    const handleConfirmSermon = (finalTranscript: string, source: 'audio' | 'text') => {
+         const newSermon = {
             id: `sermon-${Date.now()}`,
             tenantId: 'tenant-1',
             title,
             series,
             date,
-            mp3Url: `path/to/${file?.name}`,
-            transcript: transcript,
+            mp3Url: source === 'audio' ? `path/to/${file?.name}` : '',
+            transcript: finalTranscript,
             status: 'READY_FOR_REVIEW' as const,
             languages: ['en'],
             createdAt: new Date().toISOString(),
@@ -85,17 +57,73 @@ export default function NewSermonPage() {
 
         toast({
             title: "Sermon Added",
-            description: `"${title}" has been transcribed and is ready for review.`,
+            description: `"${title}" has been added and is ready for review.`,
         });
-        setShowTranscriptDialog(false);
+        
+        if(showTranscriptDialog) setShowTranscriptDialog(false);
         router.push('/dashboard/sermons');
     }
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!title) {
+            toast({
+                variant: 'destructive',
+                title: "Missing Title",
+                description: "Please provide a sermon title.",
+            });
+            return;
+        }
+
+        setIsLoading(true);
+
+        if (activeTab === 'audio') {
+            if (!file) {
+                 toast({
+                    variant: 'destructive',
+                    title: "Missing File",
+                    description: "Please select an MP3 file to upload.",
+                });
+                setIsLoading(false);
+                return;
+            }
+             try {
+                const audioDataUri = await fileToDataURI(file);
+                const transcriptionResult = await transcribeSermon({ mp3Url: audioDataUri });
+                setTranscript(transcriptionResult.transcript);
+                setShowTranscriptDialog(true);
+            } catch (error) {
+                console.error("Transcription failed", error);
+                toast({
+                    variant: 'destructive',
+                    title: "Transcription Failed",
+                    description: "There was an error processing your audio file. Please try again.",
+                });
+            } finally {
+                setIsLoading(false);
+            }
+        } else { // Text tab
+            if (!pastedTranscript.trim()) {
+                 toast({
+                    variant: 'destructive',
+                    title: "Missing Transcript",
+                    description: "Please paste the sermon transcript.",
+                });
+                setIsLoading(false);
+                return;
+            }
+            // No transcription needed, go straight to creating the sermon
+            handleConfirmSermon(pastedTranscript, 'text');
+            setIsLoading(false);
+        }
+    };
+
 
     return (
         <div className="max-w-4xl mx-auto">
              <div>
                 <h1 className="text-3xl font-bold tracking-tight font-headline">Upload New Sermon</h1>
-                <p className="text-muted-foreground">Add a new sermon to your congregation's library.</p>
+                <p className="text-muted-foreground">Add a new sermon to your congregation's library by uploading an audio file or pasting the text directly.</p>
             </div>
 
             <form onSubmit={handleSubmit}>
@@ -119,35 +147,54 @@ export default function NewSermonPage() {
                                 <Input id="date" type="date" value={date} onChange={(e) => setDate(e.target.value)} disabled={isLoading} />
                             </div>
                         </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="audio-file">Audio File (MP3)</Label>
-                             <div className="flex items-center justify-center w-full">
-                                <Label htmlFor="audio-file" className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-card hover:bg-accent">
-                                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                                        <UploadCloud className="w-8 h-8 mb-4 text-muted-foreground" />
-                                        <p className="mb-2 text-sm text-muted-foreground">
-                                            {file ? 
-                                            <span className="font-semibold">{file.name}</span> : 
-                                            <><span className="font-semibold">Click to upload</span> or drag and drop</>}
-                                        </p>
-                                        <p className="text-xs text-muted-foreground">MP3 audio file</p>
-                                    </div>
-                                    <Input id="audio-file" type="file" className="hidden" accept=".mp3" onChange={(e) => setFile(e.target.files?.[0] || null)} disabled={isLoading} />
-                                </Label>
-                            </div> 
-                        </div>
+                        
+                        <Tabs value={activeTab} onValueChange={setActiveTab} className="pt-2">
+                            <TabsList className="grid w-full grid-cols-2">
+                                <TabsTrigger value="audio"><UploadCloud className="mr-2 h-4 w-4"/>Upload Audio</TabsTrigger>
+                                <TabsTrigger value="text"><FileText className="mr-2 h-4 w-4"/>Enter Text</TabsTrigger>
+                            </TabsList>
+                            <TabsContent value="audio" className="mt-4 space-y-2">
+                                <Label htmlFor="audio-file">Audio File (MP3)</Label>
+                                <div className="flex items-center justify-center w-full">
+                                    <Label htmlFor="audio-file" className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-card hover:bg-accent">
+                                        <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                                            <UploadCloud className="w-8 h-8 mb-4 text-muted-foreground" />
+                                            <p className="mb-2 text-sm text-muted-foreground">
+                                                {file ? 
+                                                <span className="font-semibold">{file.name}</span> : 
+                                                <><span className="font-semibold">Click to upload</span> or drag and drop</>}
+                                            </p>
+                                            <p className="text-xs text-muted-foreground">MP3 audio file</p>
+                                        </div>
+                                        <Input id="audio-file" type="file" className="hidden" accept=".mp3" onChange={(e) => setFile(e.target.files?.[0] || null)} disabled={isLoading} />
+                                    </Label>
+                                </div> 
+                            </TabsContent>
+                            <TabsContent value="text" className="mt-4 space-y-2">
+                                <Label htmlFor="transcript-text">Sermon Transcript</Label>
+                                <Textarea
+                                    id="transcript-text"
+                                    placeholder="Paste the full sermon transcript here..."
+                                    className="min-h-48"
+                                    value={pastedTranscript}
+                                    onChange={(e) => setPastedTranscript(e.target.value)}
+                                    disabled={isLoading}
+                                />
+                            </TabsContent>
+                        </Tabs>
+
                     </CardContent>
                 </Card>
                 <CardFooter className="flex justify-end gap-2 mt-4 px-0">
                     <Button variant="outline" type="button" onClick={() => router.back()} disabled={isLoading}>Cancel</Button>
-                    <Button type="submit" disabled={isLoading || !file || !title}>
+                    <Button type="submit" disabled={isLoading || !title || (activeTab === 'audio' && !file) || (activeTab === 'text' && !pastedTranscript)}>
                         {isLoading ? (
                             <>
                                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                Transcribing...
+                                {activeTab === 'audio' ? 'Transcribing...' : 'Adding...'}
                             </>
                         ) : (
-                            "Upload and Transcribe"
+                             activeTab === 'audio' ? 'Upload and Transcribe' : 'Add Sermon'
                         )}
                     </Button>
                 </CardFooter>
@@ -166,7 +213,7 @@ export default function NewSermonPage() {
                     </ScrollArea>
                     <AlertDialogFooter>
                         <Button variant="outline" onClick={() => setShowTranscriptDialog(false)}>Cancel</Button>
-                        <AlertDialogAction onClick={handleConfirmTranscript}>Confirm and Add Sermon</AlertDialogAction>
+                        <AlertDialogAction onClick={() => handleConfirmSermon(transcript, 'audio')}>Confirm and Add Sermon</AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>
