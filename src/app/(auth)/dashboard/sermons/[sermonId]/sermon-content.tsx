@@ -35,10 +35,12 @@ interface SermonContentProps {
     sermon: Sermon | null;
     weeklyContent?: WeeklyContent;
     onGenerateContent: () => Promise<void>;
+    onGenerateAudio: () => Promise<void>;
     isGenerating: boolean;
+    isGeneratingAudio: boolean;
 }
 
-export function SermonContent({ sermon, weeklyContent, onGenerateContent, isGenerating }: SermonContentProps) {
+export function SermonContent({ sermon, weeklyContent, onGenerateContent, onGenerateAudio, isGenerating, isGeneratingAudio }: SermonContentProps) {
   const { user } = useAuth();
   const router = useRouter();
   const { toast } = useToast();
@@ -123,7 +125,11 @@ export function SermonContent({ sermon, weeklyContent, onGenerateContent, isGene
             </CardHeader>
             <CardContent>
                 {weeklyContent ? (
-                    <WeeklyContentView content={weeklyContent} />
+                    <WeeklyContentView 
+                        content={weeklyContent} 
+                        onGenerateAudio={onGenerateAudio}
+                        isGeneratingAudio={isGeneratingAudio}
+                    />
                 ) : (
                     <div className="flex flex-col items-center justify-center text-center p-8 border-2 border-dashed rounded-lg">
                         <p className="mb-4 text-muted-foreground">No content has been generated for this sermon yet.</p>

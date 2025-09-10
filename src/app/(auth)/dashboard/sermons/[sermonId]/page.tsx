@@ -7,6 +7,7 @@ import { SermonContent } from "./sermon-content";
 import { useEffect, useState } from "react";
 import { Sermon, WeeklyContent } from "@/lib/types";
 import { generateWeeklyContent } from "@/ai/flows/generate-weekly-content";
+import { generateMondayClip } from "@/ai/flows/generate-monday-clip";
 import { useAuth } from "@/lib/auth";
 import { useToast } from "@/hooks/use-toast";
 
@@ -21,6 +22,7 @@ export default function SermonDetailPage() {
   const [sermon, setSermon] = useState<Sermon | null | undefined>(undefined);
   const [weeklyContent, setWeeklyContent] = useState<WeeklyContent | undefined>(undefined);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isGeneratingAudio, setIsGeneratingAudio] = useState(false);
 
   useEffect(() => {
     if (sermonId) {
@@ -54,7 +56,7 @@ export default function SermonDetailPage() {
             summaryShort: generated.summaryShort,
             summaryLong: generated.summaryLong,
             devotionals: generated.devotionals.map((d, i) => ({ day: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'][i], content: d })),
-            mondayClipUrl: generated.mondayClipUrl,
+            mondayClipUrl: undefined, // Audio is generated separately now
         };
         
         setWeeklyContent(newContent);
@@ -76,6 +78,36 @@ export default function SermonDetailPage() {
     }
   };
 
+  const handleGenerateAudio = async () => {
+    if (!sermon || !weeklyContent) return;
+    setIsGeneratingAudio(true);
+    try {
+        const result = await generateMondayClip({ sermonTranscript: sermon.transcript });
+        
+        if (result.mondayClipUrl === 'error') {
+            throw new Error("Podcast generation failed on the server.");
+        }
+
+        const updatedContent = { ...weeklyContent, mondayClipUrl: result.mondayClipUrl };
+        setWeeklyContent(updatedContent);
+
+        toast({
+            title: "Audio Generated",
+            description: "The Monday audio overview has been successfully generated.",
+        });
+
+    } catch (error) {
+        console.error("Audio generation failed", error);
+        toast({
+            variant: "destructive",
+            title: "Audio Generation Failed",
+            description: "An unexpected error occurred. The AI may be busy or the request may have timed out. Please try again.",
+        });
+    } finally {
+        setIsGeneratingAudio(false);
+    }
+  };
+
 
   if (sermon === undefined) {
     // Loading state, can show a skeleton here if desired
@@ -90,6 +122,8 @@ export default function SermonDetailPage() {
             sermon={sermon} 
             weeklyContent={weeklyContent} 
             onGenerateContent={handleGenerateContent}
+            onGenerateAudio={handleGenerateAudio}
             isGenerating={isGenerating}
+            isGeneratingAudio={isGeneratingAudio}
          />;
 }

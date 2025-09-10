@@ -142,7 +142,6 @@ export const mockWeeklyContent: WeeklyContent[] = [
             { day: 'Thursday', content: 'How can we show our faith by our works in our community this week?' },
             { day: 'Friday', content: 'Faith without works is dead. Pray for a faith that is alive and active.' },
         ],
-        mondayClipUrl: '/path/to/monday_clip_2.mp3',
     }
 ];
 

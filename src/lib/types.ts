@@ -35,7 +35,7 @@ export interface WeeklyContent {
   summaryShort: string;
   summaryLong: string;
   devotionals: { day: string; content: string }[];
-  mondayClipUrl: string;
+  mondayClipUrl?: string;
 }
 
 export interface Game {

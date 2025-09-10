@@ -29,7 +29,6 @@ const GenerateWeeklyContentOutputSchema = z.object({
   reflectionQuestionsIndividuals: z.array(z.string()).describe('Reflection questions for individuals.'),
   gameConfiguration: z.string().describe('Configuration for interactive games (youth: timed quiz, flashcards; adults: word search, matching).'),
   themedImageUrl: z.string().describe('A themed image URL for the week (Google \"Nano Banana\" image gen placeholder).'),
-  mondayClipUrl: z.string().optional().describe('URL for the Monday podcast-style TTS clip. This is no longer generated.'),
 });
 export type GenerateWeeklyContentOutput = z.infer<typeof GenerateWeeklyContentOutputSchema>;
 
@@ -70,15 +69,10 @@ const generateWeeklyContentFlow = ai.defineFlow(
   async input => {
     console.log('[[DEBUG]] Starting generateWeeklyContentFlow');
     
-    const contentResponse = await generateWeeklyContentPrompt(input);
-    
-    console.log('[[DEBUG]] Completed initial content generation.');
-    const content = contentResponse.output!;
+    const { output } = await generateWeeklyContentPrompt(input);
+    const content = output!;
     
     console.log('[[DEBUG]] Finishing generateWeeklyContentFlow.');
-    return {
-        ...content,
-        mondayClipUrl: '', // No longer generating audio
-    };
+    return content;
   }
 );
