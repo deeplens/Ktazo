@@ -1,10 +1,11 @@
+
 'use client';
 
 import { WeeklyContent } from "@/lib/types";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "../ui/accordion";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
 import { Separator } from "../ui/separator";
-import { Headphones, Loader2, Sparkles, Users, User, MessageCircleQuestion } from "lucide-react";
+import { Headphones, Loader2, Sparkles, Users, User, MessageCircleQuestion, Gamepad2 } from "lucide-react";
 import { Button } from "../ui/button";
 
 interface WeeklyContentViewProps {
@@ -97,35 +98,37 @@ export function WeeklyContentView({ content, onGenerateAudio, isGeneratingAudio 
           </Accordion>
         </CardContent>
       </Card>
+      
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2"><Gamepad2 /> Interactive Games</CardTitle>
+           <CardDescription>
+            Configurations for generated games based on the sermon.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-muted-foreground">
+            Game configurations will be displayed here once generated...
+          </p>
+        </CardContent>
+      </Card>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2"><MessageCircleQuestion /> Reflection Questions</CardTitle>
-              <CardDescription>Generated questions for different groups.</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {content.reflectionQuestions.map((group) => (
-                <div key={group.audience}>
-                  <h3 className="font-semibold flex items-center gap-2 mb-2 text-sm">{getIconForAudience(group.audience)} {group.audience}</h3>
-                  <ul className="list-disc list-inside space-y-2 text-sm text-muted-foreground pl-2">
-                      {group.questions.map((q, i) => <li key={i}>{q}</li>)}
-                  </ul>
-                </div>
-              ))}
-            </CardContent>
-        </Card>
-        <Card>
+      <Card>
           <CardHeader>
-            <CardTitle>Interactive Games</CardTitle>
+            <CardTitle className="flex items-center gap-2"><MessageCircleQuestion /> Reflection Questions</CardTitle>
+            <CardDescription>Generated questions for different groups.</CardDescription>
           </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground">
-              Configurations for generated games...
-            </p>
+          <CardContent className="space-y-4">
+            {content.reflectionQuestions.map((group) => (
+              <div key={group.audience}>
+                <h3 className="font-semibold flex items-center gap-2 mb-2 text-sm">{getIconForAudience(group.audience)} {group.audience}</h3>
+                <ul className="list-disc list-inside space-y-2 text-sm text-muted-foreground pl-2">
+                    {group.questions.map((q, i) => <li key={i}>{q}</li>)}
+                </ul>
+              </div>
+            ))}
           </CardContent>
-        </Card>
-      </div>
+      </Card>
     </div>
   );
 }
