@@ -11,7 +11,8 @@ import {
   Eye,
   Loader2,
   MicVocal,
-  Trash2
+  Trash2,
+  Download
 } from "lucide-react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
@@ -295,10 +296,16 @@ export function SermonContent({ sermon, weeklyContent, onGenerateContent, onGene
               <CardTitle className="flex items-center gap-2"><UploadCloud /> Sermon Audio</CardTitle>
             </CardHeader>
             <CardContent>
-                <div className="p-4 border border-dashed rounded-lg">
+                <div className="space-y-4">
                     <audio controls src={sermon.mp3Url} className="w-full">
                         Your browser does not support the audio element.
                     </audio>
+                    <Button variant="outline" className="w-full" asChild>
+                        <a href={sermon.mp3Url} download>
+                            <Download className="mr-2 h-4 w-4" />
+                            Download MP3
+                        </a>
+                    </Button>
                 </div>
             </CardContent>
           </Card>
