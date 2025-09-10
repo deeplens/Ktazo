@@ -1,5 +1,4 @@
 
-
 'use client';
 import { notFound, useParams } from "next/navigation";
 import { getMockSermons, mockWeeklyContent } from "@/lib/mock-data";
@@ -36,7 +35,7 @@ export default function SermonDetailPage() {
     }
   }, [sermonId]);
 
-  const handleGenerateContent = async () => {
+  const handleGenerateContent = async (transcript: string, language?: string) => {
     if (!sermon || !user) return;
     setIsGenerating(true);
     try {
@@ -44,7 +43,8 @@ export default function SermonDetailPage() {
         const generated = await generateWeeklyContent({ 
             sermonId: sermon.id, 
             tenantId: user.tenantId,
-            sermonTranscript: sermon.transcript
+            sermonTranscript: transcript,
+            targetLanguage: language
         });
         console.log('[[DEBUG]] Received content from generateWeeklyContent', generated);
         
@@ -64,7 +64,7 @@ export default function SermonDetailPage() {
 
         toast({
             title: "Content Generated",
-            description: "Weekly content has been successfully generated.",
+            description: `Weekly content has been successfully generated ${language ? `in ${language}` : ''}.`,
         });
 
     } catch (error) {

@@ -1,3 +1,4 @@
+
 'use client';
 import { notFound, useRouter } from "next/navigation";
 import {
@@ -30,13 +31,14 @@ import { Sermon, WeeklyContent } from "@/lib/types";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { addSermon, deleteSermon } from "@/lib/mock-data";
 import { useToast } from "@/hooks/use-toast";
-import { translateSermonContent } from "@/ai/flows/translate-sermon-content";
+import { translateTranscript } from "@/ai/flows/translate-transcript";
 import { useState } from "react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface SermonContentProps {
     sermon: Sermon | null;
     weeklyContent?: WeeklyContent;
-    onGenerateContent: () => Promise<void>;
+    onGenerateContent: (transcript: string, language?: string) => Promise<void>;
     onGenerateAudio: () => Promise<void>;
     isGenerating: boolean;
     isGeneratingAudio: boolean;
@@ -47,7 +49,9 @@ export function SermonContent({ sermon, weeklyContent, onGenerateContent, onGene
   const router = useRouter();
   const { toast } = useToast();
   const [isTranslating, setIsTranslating] = useState(false);
-  
+  const [translatedTranscript, setTranslatedTranscript] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState("original");
+
   if (!sermon) {
     notFound();
   }
@@ -62,57 +66,43 @@ export function SermonContent({ sermon, weeklyContent, onGenerateContent, onGene
     router.refresh(); // To ensure the sermon list is updated
   }
 
-  const handleTranslate = async (targetLanguage: 'es' | 'pt') => {
-    if (!sermon || !weeklyContent) {
-        toast({ variant: "destructive", title: "Cannot Translate", description: "Content must be generated before translation." });
-        return;
-    }
+  const handleTranslate = async () => {
+    if (!sermon) return;
     setIsTranslating(true);
     try {
-        const translatedContent = await translateSermonContent({
-            targetLanguage,
-            title: sermon.title,
+        const result = await translateTranscript({
             transcript: sermon.transcript,
-            summaryShort: weeklyContent.summaryShort,
-            summaryLong: weeklyContent.summaryLong,
-            devotionals: weeklyContent.devotionals
+            targetLanguage: 'Spanish'
         });
-
-        const newSermon: Sermon = {
-            ...sermon,
-            id: `sermon-${Date.now()}`,
-            title: translatedContent.title,
-            transcript: translatedContent.transcript,
-            status: 'READY_FOR_REVIEW',
-            languages: [...sermon.languages, targetLanguage],
-            // In a real app, you would create a new weeklyContent object too
-        };
-        
-        // This is a simplified approach for the demo.
-        // A real app would also create a new, translated weeklyContent record.
-        addSermon(newSermon);
-
+        setTranslatedTranscript(result.translatedTranscript);
         toast({
             title: "Translation Complete",
-            description: `Sermon translated to ${targetLanguage === 'es' ? 'Spanish' : 'Portuguese'} and added as a new sermon draft.`
+            description: "The transcript has been translated to Spanish."
         });
-        
-        router.push(`/dashboard/sermons/${newSermon.id}`);
-
+        setActiveTab("spanish");
     } catch (error) {
         console.error("Translation failed", error);
-        toast({ variant: "destructive", title: "Translation Failed", description: "An error occurred during translation." });
+        toast({ variant: "destructive", title: "Translation Failed", description: "An error occurred during transcript translation." });
     } finally {
         setIsTranslating(false);
     }
   }
+
+  const handleGenerate = () => {
+    if (activeTab === 'original') {
+        onGenerateContent(sermon.transcript);
+    } else if (activeTab === 'spanish' && translatedTranscript) {
+        onGenerateContent(translatedTranscript, 'Spanish');
+    }
+  };
 
 
   const canManage = user?.role === 'ADMIN' || user?.role === 'PASTOR' || user?.role === 'MASTER';
   const canApprove = canManage;
   const canPublish = canManage;
   const canDelete = canManage;
-  const canTranslate = canManage && !!weeklyContent;
+
+  const generateButtonText = activeTab === 'spanish' ? "Generate Weekly Content in Spanish" : "Generate Weekly Content";
 
   return (
     <div className="mx-auto grid max-w-6xl flex-1 auto-rows-max gap-4">
@@ -151,18 +141,39 @@ export function SermonContent({ sermon, weeklyContent, onGenerateContent, onGene
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="grid gap-6">
-                <div className="grid gap-3">
-                  <Label htmlFor="description">Sermon Transcript</Label>
-                  <Textarea
-                    id="description"
-                    defaultValue={sermon.transcript}
-                    className="min-h-96"
-                    disabled={!canManage}
-                  />
-                </div>
-                {canManage && <Button>Save Transcript</Button>}
-              </div>
+                <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+                    <div className="flex justify-between items-center mb-4">
+                        <TabsList>
+                            <TabsTrigger value="original">Original</TabsTrigger>
+                            <TabsTrigger value="spanish" disabled={!translatedTranscript}>Spanish</TabsTrigger>
+                        </TabsList>
+                        {canManage && !translatedTranscript && (
+                             <Button onClick={handleTranslate} disabled={isTranslating} variant="outline" size="sm">
+                                {isTranslating ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Languages className="mr-2 h-4 w-4"/>}
+                                Translate to Spanish
+                             </Button>
+                        )}
+                    </div>
+                    <TabsContent value="original">
+                        <Textarea
+                            id="description"
+                            defaultValue={sermon.transcript}
+                            className="min-h-96"
+                            disabled={!canManage}
+                        />
+                         {canManage && <Button className="mt-4">Save Transcript</Button>}
+                    </TabsContent>
+                    <TabsContent value="spanish">
+                         <Textarea
+                            id="description-es"
+                            value={translatedTranscript || ''}
+                            className="min-h-96"
+                            disabled={!canManage}
+                            onChange={(e) => setTranslatedTranscript(e.target.value)}
+                        />
+                         {canManage && <Button className="mt-4">Save Spanish Transcript</Button>}
+                    </TabsContent>
+                </Tabs>
             </CardContent>
           </Card>
           
@@ -184,8 +195,8 @@ export function SermonContent({ sermon, weeklyContent, onGenerateContent, onGene
                     <div className="flex flex-col items-center justify-center text-center p-8 border-2 border-dashed rounded-lg">
                         <p className="mb-4 text-muted-foreground">No content has been generated for this sermon yet.</p>
                         <Button 
-                          onClick={onGenerateContent} 
-                          disabled={sermon.status === 'DRAFT' || isGenerating}
+                          onClick={handleGenerate} 
+                          disabled={sermon.status === 'DRAFT' || isGenerating || (activeTab === 'spanish' && !translatedTranscript)}
                         >
                             {isGenerating ? (
                                 <>
@@ -195,7 +206,7 @@ export function SermonContent({ sermon, weeklyContent, onGenerateContent, onGene
                             ) : (
                                 <>
                                     <Sparkles className="mr-2 h-4 w-4" />
-                                    Generate Weekly Content
+                                    {generateButtonText}
                                 </>
                             )}
                         </Button>
@@ -250,24 +261,6 @@ export function SermonContent({ sermon, weeklyContent, onGenerateContent, onGene
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader>
-                <CardTitle className="flex items-center gap-2"><Languages /> Translation</CardTitle>
-            </CardHeader>
-            <CardContent>
-                <p className="text-sm text-muted-foreground mb-4">Translate this sermon and its content into another language.</p>
-                <Button 
-                    variant="outline" 
-                    className="w-full mb-2" 
-                    onClick={() => handleTranslate('es')}
-                    disabled={!canTranslate || isTranslating}
-                >
-                    {isTranslating ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : null}
-                    Translate to Spanish
-                </Button>
-                <Button variant="outline" className="w-full" disabled>Translate to Portuguese</Button>
-            </CardContent>
-          </Card>
         </div>
       </div>
     </div>

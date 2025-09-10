@@ -12,7 +12,7 @@ import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 
 const TranslateSermonContentInputSchema = z.object({
-  targetLanguage: z.string().describe('The target language code (e.g., es for Spanish).'),
+  targetLanguage: z.string().describe('The target language (e.g., Spanish).'),
   title: z.string().describe('The sermon title.'),
   transcript: z.string().describe('The sermon transcript.'),
   summaryShort: z.string().describe('The short summary.'),
