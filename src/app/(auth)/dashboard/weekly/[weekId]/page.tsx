@@ -13,6 +13,7 @@ import { Sermon, WeeklyContent, Game } from "@/lib/types";
 import { useEffect, useState } from "react";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { GamePlayer } from "@/components/games/game-player";
 
 export default function WeeklyPage({ params }: { params: { weekId: string } }) {
   const [sermon, setSermon] = useState<Sermon | undefined>(undefined);
@@ -154,17 +155,14 @@ function WeeklyPageContent({ sermon, weeklyContent }: { sermon: Sermon, weeklyCo
                               </CardHeader>
                           </Card>
                       </DialogTrigger>
-                      <DialogContent>
+                      <DialogContent className="max-w-2xl">
                           <DialogHeader>
                           <DialogTitle>{game.title}</DialogTitle>
                           <DialogDescription>
-                              This is a placeholder for the '{game.type}' game.
+                              An interactive '{game.type}' game for {game.audience}.
                           </DialogDescription>
                           </DialogHeader>
-                          <div className="py-8 text-center">
-                              <p>Game content would be loaded here.</p>
-                              <Button className="mt-4">Start Game</Button>
-                          </div>
+                          <GamePlayer game={game} />
                       </DialogContent>
                   </Dialog>
               ))}
