@@ -1,5 +1,5 @@
 
-import type { Sermon, User, WeeklyContent, Game, ReflectionQuestionGroup } from './types';
+import type { Sermon, User, WeeklyContent, Game, ReflectionQuestionGroup as ReflectionQuestionGroupType } from './types';
 
 export const mockUsers: User[] = [
   { id: 'user-master-1', tenantId: 'tenant-1', authId: 'auth-master-1', role: 'MASTER', name: 'Master User', email: 'master@ktazo.com', lastLoginAt: new Date().toISOString(), points: 0 },
@@ -62,7 +62,7 @@ const initialSermons: Sermon[] = [
     series: 'Genesis',
     speaker: 'Pastor John',
     date: '2024-04-21',
-    mp3Url: 'https://storage.googleapis.com/studioprod-55829.appspot.com/652932b172a5a544256c70c2/sermons/kE3z98a4aT6s1B2aY1E2/audio.mp3',
+    mp3Url: '',
     transcript: '',
     status: 'DRAFT',
     languages: ['en'],
@@ -134,7 +134,6 @@ export const mockWeeklyContent: WeeklyContent[] = [
         id: 'wc-1',
         tenantId: 'tenant-1',
         sermonId: 'sermon-1',
-        themeImageUrl: 'https://picsum.photos/seed/ktazo-wc1/1200/800',
         summaryShort: 'A brief look at Psalm 23, highlighting God\'s role as our provider and protector.',
         summaryLong: 'This week\'s devotional guide explores the deep comfort and assurance found in Psalm 23. We delve into the metaphor of the shepherd and his sheep, understanding how God leads us, provides for our needs, restores our souls, and walks with us through life\'s darkest valleys. It\'s a message of profound trust and unwavering divine care.',
         devotionals: [
@@ -144,13 +143,30 @@ export const mockWeeklyContent: WeeklyContent[] = [
             { day: 'Thursday', content: 'Even though I walk through the valley of the shadow of death, I will fear no evil. How does God\'s presence comfort you in fearful times?' },
             { day: 'Friday', content: 'Surely goodness and mercy shall follow me all the days of my life. Meditate on God\'s persistent goodness.' },
         ],
+        reflectionQuestions: [
+            {
+                audience: 'Individuals',
+                questions: [
+                    'In what areas of your life do you need to trust God as your shepherd right now?',
+                    'How can you find "green pastures" and "still waters" for your soul this week?',
+                    'Reflect on a "dark valley" experience. How did you see God\'s presence with you?',
+                ],
+            },
+            {
+                audience: 'Small Groups',
+                questions: [
+                    'Share as a group about what "The Lord is my shepherd" means to each of you personally.',
+                    'Discuss the difference between "wanting" and "needing" in the context of Psalm 23.',
+                    'How can we, as a group, help each other stay on the "paths of righteousness"?',
+                ],
+            },
+        ],
         mondayClipUrl: 'https://storage.googleapis.com/studioprod-55829.appspot.com/652932b172a5a544256c70c2/sermons/kE3z98a4aT6s1B2aY1E2/audio.mp3',
     },
      {
         id: 'wc-2',
         tenantId: 'tenant-1',
         sermonId: 'sermon-2',
-        themeImageUrl: 'https://picsum.photos/seed/ktazo-wc2/1200/800',
         summaryShort: 'Exploring the connection between genuine faith and tangible actions as described in the book of James.',
         summaryLong: 'This study from the book of James challenges us to examine the nature of our faith. Is it a passive belief or an active, living force? We will see that James is not advocating for salvation by works, but is instead arguing that true, saving faith inevitably produces good works. It is a call to a faith that is visible, practical, and transformative.',
         devotionals: [
@@ -160,6 +176,7 @@ export const mockWeeklyContent: WeeklyContent[] = [
             { day: 'Thursday', content: 'How can we show our faith by our works in our community this week?' },
             { day: 'Friday', content: 'Faith without works is dead. Pray for a faith that is alive and active.' },
         ],
+        reflectionQuestions: [],
     }
 ];
 
@@ -170,7 +187,7 @@ export const mockGames: Game[] = [
     { id: 'game-4', sermonId: 'sermon-2', type: 'matching', title: 'Key Terms Matching', audience: 'Adults' },
 ];
 
-export const mockReflectionQuestions: ReflectionQuestionGroup[] = [
+export const mockReflectionQuestions: ReflectionQuestionGroupType[] = [
     {
         id: 'rq-1',
         sermonId: 'sermon-1',

@@ -1,7 +1,7 @@
 'use client';
 import { notFound } from "next/navigation";
 import Image from "next/image";
-import { getMockSermons, mockWeeklyContent, mockGames, mockReflectionQuestions } from "@/lib/mock-data";
+import { getMockSermons, mockWeeklyContent, mockGames } from "@/lib/mock-data";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
@@ -33,14 +33,14 @@ export default function WeeklyPage({ params }: { params: { weekId: string } }) {
 
   if (!sermon || !sermon.weeklyContentId || !weeklyContent) {
     // This is mock, let's create a placeholder if it doesn't exist
-     const placeholderContent = {
+     const placeholderContent: WeeklyContent = {
         id: 'wc-placeholder',
         tenantId: 'tenant-1',
         sermonId: sermon?.id || 'sermon-placeholder',
-        themeImageUrl: 'https://picsum.photos/seed/placeholder/1200/800',
         summaryShort: 'Summary not available.',
         summaryLong: 'Devotional guide not available.',
         devotionals: [],
+        reflectionQuestions: [],
     };
     return <WeeklyPageContent sermon={sermon || {} as Sermon} weeklyContent={placeholderContent} />;
   }
@@ -51,7 +51,6 @@ export default function WeeklyPage({ params }: { params: { weekId: string } }) {
 
 function WeeklyPageContent({ sermon, weeklyContent }: { sermon: Sermon, weeklyContent: WeeklyContent }) {
   const games = mockGames.filter(g => g.sermonId === sermon.id);
-  const reflectionQuestions = mockReflectionQuestions.filter(rq => rq.sermonId === sermon.id);
 
   const getIconForAudience = (audience: string) => {
     switch (audience) {
@@ -65,9 +64,10 @@ function WeeklyPageContent({ sermon, weeklyContent }: { sermon: Sermon, weeklyCo
 
   return (
     <div className="container mx-auto py-8 px-4">
+      {weeklyContent.id !== 'wc-placeholder' && (
       <div className="relative w-full h-64 md:h-96 rounded-2xl overflow-hidden mb-8 shadow-lg">
         <Image 
-          src={weeklyContent.themeImageUrl} 
+          src={`https://picsum.photos/seed/${sermon.id}/1200/800`}
           alt={`Theme for ${sermon.title}`} 
           fill 
           className="object-cover"
@@ -83,6 +83,7 @@ function WeeklyPageContent({ sermon, weeklyContent }: { sermon: Sermon, weeklyCo
             </p>
         </div>
       </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-8">
@@ -125,8 +126,8 @@ function WeeklyPageContent({ sermon, weeklyContent }: { sermon: Sermon, weeklyCo
               <CardDescription>Ponder these questions on your own, or discuss them with your family, friends, or small group.</CardDescription>
             </CardHeader>
             <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {reflectionQuestions.map(group => (
-                    <div key={group.id} className="p-4 bg-background rounded-lg border">
+                {weeklyContent.reflectionQuestions.map(group => (
+                    <div key={group.audience} className="p-4 bg-background rounded-lg border">
                         <h3 className="font-semibold flex items-center gap-2 mb-2">{getIconForAudience(group.audience)} {group.audience}</h3>
                         <ul className="list-disc list-inside space-y-2 text-sm text-muted-foreground">
                             {group.questions.map((q, i) => <li key={i}>{q}</li>)}

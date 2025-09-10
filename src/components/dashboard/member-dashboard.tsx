@@ -49,7 +49,7 @@ export function MemberDashboard() {
           <CardContent>
             <div className="relative aspect-[16/9] w-full rounded-lg overflow-hidden mb-4">
                 <Image 
-                    src={weeklyContent.themeImageUrl} 
+                    src={`https://picsum.photos/seed/${publishedSermon.id}/1200/800`} 
                     alt={`Theme image for ${publishedSermon.title}`} 
                     fill
                     className="object-cover"

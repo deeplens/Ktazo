@@ -20,10 +20,16 @@ const GenerateWeeklyContentInputSchema = z.object({
 });
 export type GenerateWeeklyContentInput = z.infer<typeof GenerateWeeklyContentInputSchema>;
 
+const ReflectionQuestionGroupSchema = z.object({
+    audience: z.enum(['Individuals', 'Families', 'Small Groups', 'Youth']),
+    questions: z.array(z.string()).describe('An array of 3-4 reflection questions for the specified audience.'),
+});
+
 const GenerateWeeklyContentOutputSchema = z.object({
   summaryShort: z.string().describe('A short summary of the sermon.'),
   summaryLong: z.string().describe('A longer devotional guide summary of the sermon.'),
   devotionals: z.array(z.string()).describe('An array of five daily devotionals (Mon-Fri).'),
+  reflectionQuestions: z.array(ReflectionQuestionGroupSchema).describe('An array of reflection question groups for different audiences.'),
 });
 export type GenerateWeeklyContentOutput = z.infer<typeof GenerateWeeklyContentOutputSchema>;
 
@@ -51,6 +57,7 @@ const generateWeeklyContentPrompt = ai.definePrompt({
   - A short summary (summaryShort).
   - A longer devotional guide summary (summaryLong).
   - Five daily devotionals for Monday, Tuesday, Wednesday, Thursday, and Friday (devotionals).
+  - Reflection questions for four audiences: Individuals, Families, Small Groups, and Youth. Each audience should have its own group with 3-4 questions.
   `,
 });
 
@@ -71,4 +78,3 @@ const generateWeeklyContentFlow = ai.defineFlow(
     return content;
   }
 );
-

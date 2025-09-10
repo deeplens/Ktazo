@@ -4,7 +4,7 @@ import { WeeklyContent } from "@/lib/types";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "../ui/accordion";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
 import { Separator } from "../ui/separator";
-import { Headphones, Loader2, Sparkles } from "lucide-react";
+import { Headphones, Loader2, Sparkles, Users, User, MessageCircleQuestion } from "lucide-react";
 import { Button } from "../ui/button";
 
 interface WeeklyContentViewProps {
@@ -14,6 +14,17 @@ interface WeeklyContentViewProps {
 }
 
 export function WeeklyContentView({ content, onGenerateAudio, isGeneratingAudio }: WeeklyContentViewProps) {
+    
+    const getIconForAudience = (audience: string) => {
+        switch (audience) {
+            case 'Youth': return <User className="h-4 w-4" />;
+            case 'Families': return <Users className="h-4 w-4" />;
+            case 'Small Groups': return <Users className="h-4 w-4" />;
+            case 'Individuals': return <User className="h-4 w-4" />;
+            default: return <Users className="h-4 w-4" />;
+        }
+    };
+    
   return (
     <div className="space-y-6">
       <Card>
@@ -89,14 +100,20 @@ export function WeeklyContentView({ content, onGenerateAudio, isGeneratingAudio 
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Card>
-          <CardHeader>
-            <CardTitle>Reflection Questions</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground">
-              Generated questions for different groups...
-            </p>
-          </CardContent>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2"><MessageCircleQuestion /> Reflection Questions</CardTitle>
+              <CardDescription>Generated questions for different groups.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {content.reflectionQuestions.map((group) => (
+                <div key={group.audience}>
+                  <h3 className="font-semibold flex items-center gap-2 mb-2 text-sm">{getIconForAudience(group.audience)} {group.audience}</h3>
+                  <ul className="list-disc list-inside space-y-2 text-sm text-muted-foreground pl-2">
+                      {group.questions.map((q, i) => <li key={i}>{q}</li>)}
+                  </ul>
+                </div>
+              ))}
+            </CardContent>
         </Card>
         <Card>
           <CardHeader>

@@ -28,14 +28,19 @@ export interface Sermon {
   weeklyContentId?: string;
 }
 
+export interface ReflectionQuestionGroup {
+  audience: 'Individuals' | 'Families' | 'Small Groups' | 'Youth';
+  questions: string[];
+}
+
 export interface WeeklyContent {
   id: string;
   tenantId: string;
   sermonId: string;
-  themeImageUrl: string;
   summaryShort: string;
   summaryLong: string;
   devotionals: { day: string; content: string }[];
+  reflectionQuestions: ReflectionQuestionGroup[];
   mondayClipUrl?: string;
 }
 
