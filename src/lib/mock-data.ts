@@ -128,6 +128,19 @@ export const updateSermonTranscript = (sermonId: string, transcript: string, lan
     }
 };
 
+export const updateSermonStatus = (sermonId: string, status: Sermon['status']) => {
+    if (typeof window !== 'undefined') {
+        const sermons = getMockSermons();
+        const updatedSermons = sermons.map(s => {
+            if (s.id === sermonId) {
+                return { ...s, status, updatedAt: new Date().toISOString() };
+            }
+            return s;
+        });
+        sessionStorage.setItem(SERMON_STORAGE_KEY, JSON.stringify(updatedSermons));
+    }
+};
+
 
 export const mockWeeklyContent: WeeklyContent[] = [
     {
@@ -178,8 +191,45 @@ export const mockWeeklyContent: WeeklyContent[] = [
             },
         ],
         games: [
-            { type: 'Quiz', title: 'Psalm 23 Timed Quiz', audience: 'Youth', data: [] },
-            { type: 'Word Search', title: 'The Good Shepherd Word Search', audience: 'Adults', data: {words: []} },
+            {
+                "type": "Quiz",
+                "title": "Quiz on The Good Shepherd",
+                "audience": "Adults",
+                "data": [
+                    {
+                        "question": "In Psalm 23, what does the shepherd use to comfort the sheep?",
+                        "options": ["His voice", "His rod and staff", "His hands", "His song"],
+                        "correctAnswer": "His rod and staff"
+                    },
+                    {
+                        "question": "What does the psalmist say the Lord prepares for him in the presence of his enemies?",
+                        "options": ["A shield", "A hiding place", "A table", "A chariot"],
+                        "correctAnswer": "A table"
+                    },
+                    {
+                        "question": "According to the sermon, what does 'anointing my head with oil' signify?",
+                        "options": ["Healing and consecration", "A declaration of war", "A sign of wealth", "A common greeting"],
+                        "correctAnswer": "Healing and consecration"
+                    }
+                ]
+            },
+            {
+                "type": "Word Search",
+                "title": "Psalm 23 Word Hunt",
+                "audience": "Youth",
+                "data": {
+                    "words": ["SHEPHERD", "VALLEY", "COMFORT", "ANOINTS", "MERCY", "GOODNESS", "PASTURES", "TABLE"]
+                }
+            },
+            {
+                "type": "Fill in the Blank",
+                "title": "Complete the Verse",
+                "audience": "Adults",
+                "data": {
+                    "sentence": "Surely goodness and ______ shall follow me all the days of my life.",
+                    "blank": "mercy"
+                }
+            }
         ],
         mondayClipUrl: 'https://storage.googleapis.com/studioprod-55829.appspot.com/652932b172a5a544256c70c2/sermons/kE3z98a4aT6s1B2aY1E2/audio.mp3',
     },

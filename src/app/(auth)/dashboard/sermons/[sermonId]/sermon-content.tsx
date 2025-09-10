@@ -30,14 +30,12 @@ import { WeeklyContentView } from "@/components/sermons/weekly-content-view";
 import { useAuth } from "@/lib/auth.tsx";
 import { Sermon, WeeklyContent } from "@/lib/types";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { addSermon, deleteSermon, updateSermonTranscript } from "@/lib/mock-data";
+import { deleteSermon, updateSermonStatus, updateSermonTranscript } from "@/lib/mock-data";
 import { useToast } from "@/hooks/use-toast";
 import { translateTranscript } from "@/ai/flows/translate-transcript";
 import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
-import { translateSermonContent } from "@/ai/flows/translate-sermon-content";
-import { add } from "date-fns";
 import { cleanupTranscript } from "@/ai/flows/cleanup-transcript";
 
 interface SermonContentProps {
@@ -49,10 +47,11 @@ interface SermonContentProps {
     isGeneratingAudio: boolean;
 }
 
-export function SermonContent({ sermon, weeklyContent, onGenerateContent, onGenerateAudio, isGenerating, isGeneratingAudio }: SermonContentProps) {
+export function SermonContent({ sermon: initialSermon, weeklyContent, onGenerateContent, onGenerateAudio, isGenerating, isGeneratingAudio }: SermonContentProps) {
   const { user } = useAuth();
   const router = useRouter();
   const { toast } = useToast();
+  const [sermon, setSermon] = useState(initialSermon);
   const [isTranslating, setIsTranslating] = useState(false);
   const [isCleaning, setIsCleaning] = useState(false);
 
@@ -62,9 +61,10 @@ export function SermonContent({ sermon, weeklyContent, onGenerateContent, onGene
   const [activeTab, setActiveTab] = useState("original");
 
   useEffect(() => {
-    setOriginalTranscript(sermon.transcript);
-    setTranslatedTranscript(sermon.translatedTranscript || null);
-  }, [sermon]);
+    setSermon(initialSermon);
+    setOriginalTranscript(initialSermon.transcript);
+    setTranslatedTranscript(initialSermon.translatedTranscript || null);
+  }, [initialSermon]);
 
 
   if (!sermon) {
@@ -80,6 +80,15 @@ export function SermonContent({ sermon, weeklyContent, onGenerateContent, onGene
     router.push('/dashboard/sermons');
     router.refresh(); // To ensure the sermon list is updated
   }
+
+  const handleApprove = () => {
+    updateSermonStatus(sermon.id, 'APPROVED');
+    setSermon(prev => prev ? { ...prev, status: 'APPROVED' } : null);
+    toast({
+        title: "Sermon Approved",
+        description: `"${sermon.title}" has been approved and is ready for publication.`,
+    });
+  };
 
   const handleTranslate = async () => {
       if (!sermon) {
@@ -200,7 +209,7 @@ export function SermonContent({ sermon, weeklyContent, onGenerateContent, onGene
           {sermon.status.replace('_', ' ')}
         </Badge>
         <div className="hidden items-center gap-2 md:ml-auto md:flex">
-          {canApprove && sermon.status === 'READY_FOR_REVIEW' && <Button>Approve</Button>}
+          {canApprove && sermon.status === 'READY_FOR_REVIEW' && <Button onClick={handleApprove}>Approve</Button>}
           {canPublish && sermon.status === 'APPROVED' && <Button>Publish</Button>}
           {sermon.status === 'PUBLISHED' && <Button variant="outline" asChild><Link href={`/dashboard/weekly/${sermon.id}`}><Eye className="mr-2 h-4 w-4"/>View Published Page</Link></Button>}
           
@@ -325,7 +334,7 @@ export function SermonContent({ sermon, weeklyContent, onGenerateContent, onGene
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2"><UploadCloud /> Sermon Audio</CardTitle>
-              </CardHeader>
+              </Header>
               <CardContent>
                   <audio controls src={sermon.mp3Url} className="w-full">
                       Your browser does not support the audio element.
