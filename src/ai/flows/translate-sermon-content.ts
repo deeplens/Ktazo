@@ -54,7 +54,7 @@ const translatePrompt = ai.definePrompt({
   Transcript: {{{transcript}}}
   Short Summary: {{{summaryShort}}}
   Long Summary: {{{summaryLong}}}
-  Devotionals: {{{json devos=devotionals}}}
+  Devotionals: {{#each devotionals}}- Day: {{this.day}}, Content: {{{this.content}}}{{/each}}
   `,
   config: {
         safetySettings: [
