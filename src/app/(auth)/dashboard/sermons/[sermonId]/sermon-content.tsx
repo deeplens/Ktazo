@@ -85,6 +85,8 @@ export function SermonContent({ sermon, weeklyContent, onGenerateContent, onGene
             targetLanguage: 'Spanish'
         });
         setTranslatedTranscript(result.translatedTranscript);
+        // also save to mock data
+        updateSermonTranscript(sermon.id, result.translatedTranscript, 'es');
         toast({
             title: "Translation Complete",
             description: "The transcript has been translated to Spanish."
@@ -97,16 +99,31 @@ export function SermonContent({ sermon, weeklyContent, onGenerateContent, onGene
         setIsTranslating(false);
     }
   }
+  
+  const downloadTextFile = (content: string, filename: string) => {
+    const blob = new Blob([content], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
 
   const handleSaveOriginalTranscript = () => {
     updateSermonTranscript(sermon.id, originalTranscript, 'en');
-    toast({ title: "Success", description: "Original transcript has been saved." });
+    downloadTextFile(originalTranscript, `${sermon.title.toLowerCase().replace(/ /g, '-')}-original.txt`);
+    toast({ title: "Success", description: "Original transcript has been saved to your downloads." });
   };
 
   const handleSaveSpanishTranscript = () => {
     if (translatedTranscript) {
       updateSermonTranscript(sermon.id, translatedTranscript, 'es');
-      toast({ title: "Success", description: "Spanish transcript has been saved." });
+      downloadTextFile(translatedTranscript, `${sermon.title.toLowerCase().replace(/ /g, '-')}-spanish.txt`);
+      toast({ title: "Success", description: "Spanish transcript has been saved to your downloads." });
     }
   };
 
