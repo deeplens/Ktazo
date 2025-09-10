@@ -34,6 +34,7 @@ import { useToast } from "@/hooks/use-toast";
 import { translateTranscript } from "@/ai/flows/translate-transcript";
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { cn } from "@/lib/utils";
 
 interface SermonContentProps {
     sermon: Sermon | null;
@@ -143,9 +144,9 @@ export function SermonContent({ sermon, weeklyContent, onGenerateContent, onGene
             <CardContent>
                 <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
                     <div className="flex justify-between items-center mb-4">
-                        <TabsList className="mb-4">
-                            <TabsTrigger value="original">Original</TabsTrigger>
-                            <TabsTrigger value="spanish" disabled={!translatedTranscript}>Spanish</TabsTrigger>
+                        <TabsList className="bg-transparent p-0">
+                            <TabsTrigger value="original" className="data-[state=inactive]:bg-muted">Original</TabsTrigger>
+                            <TabsTrigger value="spanish" disabled={!translatedTranscript} className="data-[state=inactive]:bg-muted">Spanish</TabsTrigger>
                         </TabsList>
                         {canManage && !translatedTranscript && (
                              <Button onClick={handleTranslate} disabled={isTranslating} variant="outline" size="sm">
