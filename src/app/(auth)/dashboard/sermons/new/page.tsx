@@ -5,10 +5,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { UploadCloud, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { mockSermons } from "@/lib/mock-data";
+import { transcribeSermon } from "@/ai/flows/transcribe-sermon";
 
 export default function NewSermonPage() {
     const [title, setTitle] = useState('');
@@ -18,6 +18,17 @@ export default function NewSermonPage() {
     const [isLoading, setIsLoading] = useState(false);
     const router = useRouter();
     const { toast } = useToast();
+
+    const fileToDataURI = (file: File): Promise<string> => {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => {
+                resolve(reader.result as string);
+            };
+            reader.onerror = reject;
+            reader.readAsDataURL(file);
+        });
+    }
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -31,32 +42,43 @@ export default function NewSermonPage() {
         }
 
         setIsLoading(true);
-        // Simulate upload and processing delay
-        await new Promise(resolve => setTimeout(resolve, 2000));
         
-        // Add to mock data
-        const newSermon = {
-            id: `sermon-${mockSermons.length + 1}`,
-            tenantId: 'tenant-1',
-            title,
-            series,
-            date,
-            mp3Url: `path/to/${file.name}`,
-            transcript: '',
-            status: 'DRAFT' as const,
-            languages: ['en'],
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-        };
-        mockSermons.unshift(newSermon);
+        try {
+            const audioDataUri = await fileToDataURI(file);
+            
+            const transcriptionResult = await transcribeSermon({ mp3Url: audioDataUri });
 
-        setIsLoading(false);
-        toast({
-            title: "Sermon Uploaded",
-            description: `"${title}" is now in your drafts.`,
-        });
+            const newSermon = {
+                id: `sermon-${mockSermons.length + 1}`,
+                tenantId: 'tenant-1',
+                title,
+                series,
+                date,
+                mp3Url: `path/to/${file.name}`,
+                transcript: transcriptionResult.transcript,
+                status: 'READY_FOR_REVIEW' as const,
+                languages: ['en'],
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+            };
+            mockSermons.unshift(newSermon);
 
-        router.push('/dashboard/sermons');
+            toast({
+                title: "Transcription Complete",
+                description: `"${title}" has been transcribed and is ready for review.`,
+            });
+            router.push('/dashboard/sermons');
+
+        } catch (error) {
+            console.error("Transcription failed", error);
+            toast({
+                variant: 'destructive',
+                title: "Transcription Failed",
+                description: "There was an error processing your audio file. Please try again.",
+            });
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (
@@ -108,9 +130,15 @@ export default function NewSermonPage() {
                 </Card>
                 <CardFooter className="flex justify-end gap-2 mt-4 px-0">
                     <Button variant="outline" type="button" onClick={() => router.back()} disabled={isLoading}>Cancel</Button>
-                    <Button type="submit" disabled={isLoading}>
-                        {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                        Save and Upload
+                    <Button type="submit" disabled={isLoading || !file || !title}>
+                        {isLoading ? (
+                            <>
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                Transcribing...
+                            </>
+                        ) : (
+                            "Upload and Transcribe"
+                        )}
                     </Button>
                 </CardFooter>
             </form>
