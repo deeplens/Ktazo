@@ -189,4 +189,3 @@ function WeeklyPageContent({ sermon, weeklyContent }: { sermon: Sermon, weeklyCo
     </div>
   );
 }
-
