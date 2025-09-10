@@ -12,7 +12,7 @@ import {
   Loader2,
   MicVocal,
   Trash2,
-  Download
+  Wand2
 } from "lucide-react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
@@ -38,6 +38,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import { translateSermonContent } from "@/ai/flows/translate-sermon-content";
 import { add } from "date-fns";
+import { cleanupTranscript } from "@/ai/flows/cleanup-transcript";
 
 interface SermonContentProps {
     sermon: Sermon;
@@ -53,6 +54,7 @@ export function SermonContent({ sermon, weeklyContent, onGenerateContent, onGene
   const router = useRouter();
   const { toast } = useToast();
   const [isTranslating, setIsTranslating] = useState(false);
+  const [isCleaning, setIsCleaning] = useState(false);
 
   const [originalTranscript, setOriginalTranscript] = useState(sermon.transcript);
   const [translatedTranscript, setTranslatedTranscript] = useState<string | null>(sermon.translatedTranscript || null);
@@ -109,6 +111,26 @@ export function SermonContent({ sermon, weeklyContent, onGenerateContent, onGene
           setIsTranslating(false);
       }
   }
+
+  const handleCleanupTranscript = async () => {
+    if (!originalTranscript) return;
+    setIsCleaning(true);
+    try {
+        const result = await cleanupTranscript({ transcript: originalTranscript });
+        const cleaned = result.cleanedTranscript;
+        setOriginalTranscript(cleaned);
+        updateSermonTranscript(sermon.id, cleaned, 'en');
+        toast({
+            title: "Transcript Cleaned",
+            description: "The transcript has been formatted for readability.",
+        });
+    } catch (error) {
+        console.error("Cleanup failed", error);
+        toast({ variant: "destructive", title: "Cleanup Failed", description: "An error occurred while cleaning the transcript." });
+    } finally {
+        setIsCleaning(false);
+    }
+  }
   
   const downloadTextFile = (content: string, filename: string) => {
     const blob = new Blob([content], { type: 'text/plain' });
@@ -152,6 +174,7 @@ export function SermonContent({ sermon, weeklyContent, onGenerateContent, onGene
   const canPublish = canManage;
   const canDelete = canManage;
   const canTranslate = canManage && sermon.status !== 'DRAFT';
+  const canCleanup = canManage && sermon.status !== 'DRAFT' && activeTab === 'original';
 
   const generateButtonText = activeTab === 'spanish' ? "Generate Weekly Content in Spanish" : "Generate Weekly Content";
 
@@ -214,17 +237,25 @@ export function SermonContent({ sermon, weeklyContent, onGenerateContent, onGene
             </CardHeader>
             <CardContent>
                 <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                    <div className="flex justify-between items-center mb-4">
+                    <div className="flex justify-between items-center mb-4 gap-2">
                         <TabsList className="bg-transparent p-0">
                             <TabsTrigger value="original" className="data-[state=inactive]:bg-muted">Original</TabsTrigger>
                             <TabsTrigger value="spanish" disabled={!translatedTranscript} className="data-[state=inactive]:bg-muted">Spanish</TabsTrigger>
                         </TabsList>
-                        {canTranslate && (
-                            <Button onClick={handleTranslate} disabled={isTranslating} variant="outline" size="sm">
-                                {isTranslating ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Languages className="mr-2 h-4 w-4"/>}
-                                Translate to Spanish
-                            </Button>
-                        )}
+                        <div className="flex items-center gap-2">
+                            {canCleanup && (
+                                <Button onClick={handleCleanupTranscript} disabled={isCleaning} variant="outline" size="sm">
+                                    {isCleaning ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Wand2 className="mr-2 h-4 w-4"/>}
+                                    Cleanup
+                                </Button>
+                            )}
+                            {canTranslate && (
+                                <Button onClick={handleTranslate} disabled={isTranslating} variant="outline" size="sm">
+                                    {isTranslating ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Languages className="mr-2 h-4 w-4"/>}
+                                    Translate to Spanish
+                                </Button>
+                            )}
+                        </div>
                     </div>
                     <TabsContent value="original">
                         <Textarea
