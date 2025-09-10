@@ -131,13 +131,13 @@ const generateWeeklyContentFlow = ai.defineFlow(
                             {
                                 speaker: 'Speaker1',
                                 voiceConfig: {
-                                    prebuiltVoiceConfig: {voiceName: 'en-US-Standard-C'}, // Male
+                                    prebuiltVoiceConfig: {voiceName: 'Algenib'}, // Male
                                 },
                             },
                             {
                                 speaker: 'Speaker2',
                                 voiceConfig: {
-                                    prebuiltVoiceConfig: {voiceName: 'en-US-Standard-E'}, // Female
+                                    prebuiltVoiceConfig: {voiceName: 'Achernar'}, // Female
                                 },
                             },
                         ],
