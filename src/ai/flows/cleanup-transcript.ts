@@ -40,10 +40,12 @@ const cleanupPrompt = ai.definePrompt({
   - Ensure consistent spacing.
   - Fix any obvious formatting errors.
 
-  Raw Transcript:
-  {{{transcript}}}
-
   Return the result in a JSON object with the key "cleanedTranscript".
+  
+  Raw Transcript:
+  \`\`\`
+  {{{transcript}}}
+  \`\`\`
   `,
 });
 
