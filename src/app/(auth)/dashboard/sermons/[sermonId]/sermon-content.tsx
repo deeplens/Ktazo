@@ -136,6 +136,15 @@ export function SermonContent({
     });
   };
 
+  const handlePublish = () => {
+    updateSermonStatus(sermon.id, "PUBLISHED");
+    setSermon((prev) => (prev ? { ...prev, status: "PUBLISHED" } : prev));
+    toast({
+      title: "Sermon Published",
+      description: `"${sermon.title}" has been published and is now live.`,
+    });
+  };
+
   const handleTranslate = async () => {
     setIsTranslating(true);
     try {
@@ -276,7 +285,7 @@ export function SermonContent({
           {canApprove && sermon.status === "READY_FOR_REVIEW" && (
             <Button onClick={handleApprove}>Approve</Button>
           )}
-          {canPublish && sermon.status === "APPROVED" && <Button>Publish</Button>}
+          {canPublish && sermon.status === "APPROVED" && <Button onClick={handlePublish}>Publish</Button>}
           {sermon.status === "PUBLISHED" && (
             <Button variant="outline" asChild>
               <Link href={`/dashboard/weekly/${sermon.id}`}>
@@ -513,5 +522,7 @@ export function SermonContent({
     </div>
   );
 }
+
+    
 
     
