@@ -10,7 +10,7 @@ import { generateWeeklyContent } from "@/ai/flows/generate-weekly-content";
 import { useAuth } from "@/lib/auth";
 import { useToast } from "@/hooks/use-toast";
 
-export const maxDuration = 120; // 2 minutes
+export const maxDuration = 300; // 5 minutes
 
 export default function SermonDetailPage() {
   const params = useParams();
