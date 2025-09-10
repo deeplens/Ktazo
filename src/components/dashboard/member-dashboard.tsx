@@ -1,7 +1,7 @@
 
 'use client';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { getMockSermons, mockWeeklyContent } from "@/lib/mock-data";
+import { getMockSermons, getMockWeeklyContent } from "@/lib/mock-data";
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "../ui/button";
@@ -61,7 +61,7 @@ export function MemberDashboard() {
     );
   }
   
-  const weeklyContent = mockWeeklyContent.find(wc => wc.sermonId === publishedSermon.id);
+  const weeklyContent = getMockWeeklyContent().find(wc => wc.sermonId === publishedSermon.id);
   if (!weeklyContent) {
     return (
         <Alert variant="destructive">

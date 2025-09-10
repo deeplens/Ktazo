@@ -155,7 +155,7 @@ export const updateSermonDetails = (sermonId: string, details: Partial<Pick<Serm
 };
 
 
-export const mockWeeklyContent: WeeklyContent[] = [
+const initialWeeklyContent: WeeklyContent[] = [
     {
         id: 'wc-1',
         tenantId: 'tenant-1',
@@ -263,3 +263,39 @@ export const mockWeeklyContent: WeeklyContent[] = [
         games: [],
     }
 ];
+
+const WEEKLY_CONTENT_STORAGE_KEY = 'ktazo-weekly-content';
+
+export const getMockWeeklyContent = (): WeeklyContent[] => {
+    if (typeof window !== 'undefined') {
+        const stored = sessionStorage.getItem(WEEKLY_CONTENT_STORAGE_KEY);
+        if (stored) {
+            try {
+                return JSON.parse(stored);
+            } catch (e) {
+                sessionStorage.setItem(WEEKLY_CONTENT_STORAGE_KEY, JSON.stringify(initialWeeklyContent));
+                return initialWeeklyContent;
+            }
+        } else {
+             sessionStorage.setItem(WEEKLY_CONTENT_STORAGE_KEY, JSON.stringify(initialWeeklyContent));
+             return initialWeeklyContent;
+        }
+    }
+    return initialWeeklyContent;
+};
+
+export const saveWeeklyContent = (content: WeeklyContent) => {
+    if (typeof window !== 'undefined') {
+        const allContent = getMockWeeklyContent();
+        const index = allContent.findIndex(c => c.id === content.id);
+        if (index > -1) {
+            allContent[index] = content;
+        } else {
+            allContent.push(content);
+        }
+        sessionStorage.setItem(WEEKLY_CONTENT_STORAGE_KEY, JSON.stringify(allContent));
+    }
+};
+
+// For initial load, we still need this export for components that use it directly
+export const mockWeeklyContent = getMockWeeklyContent();

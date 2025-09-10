@@ -42,7 +42,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger
 } from "@/components/ui/alert-dialog";
-import { deleteSermon, updateSermonDetails, updateSermonStatus, updateSermonTranscript } from "@/lib/mock-data";
+import { deleteSermon, saveWeeklyContent, updateSermonDetails, updateSermonStatus, updateSermonTranscript } from "@/lib/mock-data";
 import { useToast } from "@/hooks/use-toast";
 import { translateTranscript } from "@/ai/flows/translate-transcript";
 import { useState, useEffect } from "react";
@@ -137,6 +137,9 @@ export function SermonContent({
   };
 
   const handlePublish = () => {
+    if (weeklyContent) {
+      saveWeeklyContent(weeklyContent);
+    }
     updateSermonStatus(sermon.id, "PUBLISHED");
     setSermon((prev) => (prev ? { ...prev, status: "PUBLISHED" } : prev));
     toast({

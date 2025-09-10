@@ -2,7 +2,7 @@
 'use client';
 import { notFound, useParams } from "next/navigation";
 import Image from "next/image";
-import { getMockSermons, mockWeeklyContent } from "@/lib/mock-data";
+import { getMockSermons, getMockWeeklyContent } from "@/lib/mock-data";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
@@ -29,7 +29,7 @@ export default function WeeklyPage() {
         setSermon(currentSermon);
 
         if (currentSermon) {
-            const content = mockWeeklyContent.find(wc => wc.sermonId === currentSermon.id);
+            const content = getMockWeeklyContent().find(wc => wc.sermonId === currentSermon.id);
             setWeeklyContent(content);
         }
     }

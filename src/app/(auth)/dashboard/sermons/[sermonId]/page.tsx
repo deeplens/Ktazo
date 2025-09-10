@@ -1,7 +1,7 @@
 
 'use client';
 import { notFound, useParams } from "next/navigation";
-import { getMockSermons, mockWeeklyContent } from "@/lib/mock-data";
+import { getMockSermons, getMockWeeklyContent } from "@/lib/mock-data";
 import { SermonContent } from "./sermon-content";
 import { useEffect, useState } from "react";
 import { Sermon, WeeklyContent } from "@/lib/types";
@@ -29,7 +29,7 @@ export default function SermonDetailPage() {
       setSermon(foundSermon);
       if (foundSermon) {
         // This is mock data lookup. In a real app, you'd fetch this.
-        const foundContent = mockWeeklyContent.find(wc => wc.sermonId === foundSermon.id);
+        const foundContent = getMockWeeklyContent().find(wc => wc.sermonId === foundSermon.id);
         setWeeklyContent(foundContent);
       }
     }
