@@ -160,6 +160,22 @@ export const mockWeeklyContent: WeeklyContent[] = [
                     'How can we, as a group, help each other stay on the "paths of righteousness"?',
                 ],
             },
+            {
+                audience: 'Families',
+                questions: [
+                  'How can our family "prepare a table" for someone in need this week?',
+                  'What does it mean for our "cup to overflow" with blessings as a family?',
+                  'In what ways can we "dwell in the house of the Lord" together every day?',
+                ],
+            },
+            {
+                audience: 'Youth',
+                questions: [
+                  'What does the "rod and staff" symbolize to you in terms of protection and guidance?',
+                  'How does knowing God is like a shepherd change how you view challenges at school or with friends?',
+                  'What does "anointing my head with oil" mean to you in today\'s world?',
+                ],
+            },
         ],
         mondayClipUrl: 'https://storage.googleapis.com/studioprod-55829.appspot.com/652932b172a5a544256c70c2/sermons/kE3z98a4aT6s1B2aY1E2/audio.mp3',
     },
@@ -183,8 +199,11 @@ export const mockWeeklyContent: WeeklyContent[] = [
 export const mockGames: Game[] = [
     { id: 'game-1', sermonId: 'sermon-1', type: 'quiz', title: 'Psalm 23 Timed Quiz', audience: 'Youth' },
     { id: 'game-2', sermonId: 'sermon-1', type: 'wordsearch', title: 'The Good Shepherd Word Search', audience: 'Adults' },
-    { id: 'game-3', sermonId: 'sermon-2', type: 'flashcards', title: 'Faith & Works Flashcards', audience: 'Youth' },
-    { id: 'game-4', sermonId: 'sermon-2', type: 'matching', title: 'Key Terms Matching', audience: 'Adults' },
+    { id: 'game-3', sermonId: 'sermon-1', type: 'matching', title: 'Shepherd\'s Tools Matching', audience: 'Youth' },
+    { id: 'game-4', sermonId: 'sermon-1', type: 'quiz', title: 'Verse Scramble', audience: 'Adults' },
+    { id: 'game-5', sermonId: 'sermon-2', type: 'flashcards', title: 'Faith & Works Flashcards', audience: 'Youth' },
+    { id: 'game-6', sermonId: 'sermon-2', type: 'matching', title: 'Key Terms Matching', audience: 'Adults' },
+    { id: 'game-7', sermonId: 'sermon-2', type: 'quiz', title: 'Action or Belief?', audience: 'Youth' },
 ];
 
 export const mockReflectionQuestions: ReflectionQuestionGroupType[] = [
