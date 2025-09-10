@@ -20,6 +20,7 @@ export default function NewSermonPage() {
     const [speaker, setSpeaker] = useState('');
     const [date, setDate] = useState('');
     const [audioFile, setAudioFile] = useState<File | null>(null);
+    const [audioDataUrl, setAudioDataUrl] = useState<string | null>(null);
     const [textFile, setTextFile] = useState<File | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [transcript, setTranscript] = useState('');
@@ -46,6 +47,16 @@ export default function NewSermonPage() {
         });
     };
 
+    const handleAudioFileChange = async (file: File | null) => {
+        setAudioFile(file);
+        if (file) {
+            const dataUrl = await fileToDataURI(file);
+            setAudioDataUrl(dataUrl);
+        } else {
+            setAudioDataUrl(null);
+        }
+    };
+
     const handleConfirmSermon = (finalTranscript: string, source: 'audio' | 'text') => {
          const newSermon = {
             id: `sermon-${Date.now()}`,
@@ -54,7 +65,7 @@ export default function NewSermonPage() {
             series,
             speaker,
             date,
-            mp3Url: source === 'audio' && audioFile ? `path/to/${audioFile.name}` : '',
+            mp3Url: source === 'audio' && audioDataUrl ? audioDataUrl : '',
             transcript: finalTranscript,
             status: 'READY_FOR_REVIEW' as const,
             languages: ['en'],
@@ -87,7 +98,7 @@ export default function NewSermonPage() {
         setIsLoading(true);
 
         if (uploadType === 'audio') {
-            if (!audioFile) {
+            if (!audioFile || !audioDataUrl) {
                  toast({
                     variant: 'destructive',
                     title: "Missing File",
@@ -97,8 +108,7 @@ export default function NewSermonPage() {
                 return;
             }
              try {
-                const audioDataUri = await fileToDataURI(audioFile);
-                const transcriptionResult = await transcribeSermon({ mp3Url: audioDataUri });
+                const transcriptionResult = await transcribeSermon({ mp3Url: audioDataUrl });
                 setTranscript(transcriptionResult.transcript);
                 setShowTranscriptDialog(true);
             } catch (error) {
@@ -207,7 +217,7 @@ export default function NewSermonPage() {
                                                 </p>
                                                 <p className="text-xs text-muted-foreground">MP3 audio file</p>
                                             </div>
-                                            <Input id="audio-file" type="file" className="hidden" accept=".mp3" onChange={(e) => setAudioFile(e.target.files?.[0] || null)} disabled={isLoading} />
+                                            <Input id="audio-file" type="file" className="hidden" accept=".mp3" onChange={(e) => handleAudioFileChange(e.target.files?.[0] || null)} disabled={isLoading} />
                                         </Label>
                                     </div> 
                                 </div>

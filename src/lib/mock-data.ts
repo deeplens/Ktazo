@@ -98,11 +98,7 @@ export const getMockSermons = (): Sermon[] => {
 export const addSermon = (sermon: Sermon) => {
     if (typeof window !== 'undefined') {
         const sermons = getMockSermons();
-        const newSermonWithAudio = {
-            ...sermon,
-            mp3Url: 'https://storage.googleapis.com/studioprod-55829.appspot.com/652932b172a5a544256c70c2/sermons/kE3z98a4aT6s1B2aY1E2/audio.mp3'
-        };
-        const updatedSermons = [newSermonWithAudio, ...sermons];
+        const updatedSermons = [sermon, ...sermons];
         sessionStorage.setItem(SERMON_STORAGE_KEY, JSON.stringify(updatedSermons));
     }
 }
