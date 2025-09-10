@@ -26,7 +26,7 @@ import { useAuth } from "@/lib/auth.tsx";
 import { Sermon, WeeklyContent } from "@/lib/types";
 
 interface SermonContentProps {
-    sermon: Sermon;
+    sermon: Sermon | null;
     weeklyContent?: WeeklyContent;
 }
 

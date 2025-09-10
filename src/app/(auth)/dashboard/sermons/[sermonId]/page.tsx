@@ -1,38 +1,36 @@
-import { notFound } from "next/navigation";
-import {
-  ChevronLeft,
-  UploadCloud,
-  FileText,
-  Sparkles,
-  Languages,
-  CheckCircle,
-  Eye
-} from "lucide-react";
-import Link from "next/link";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Textarea } from "@/components/ui/textarea";
+'use client';
+import { notFound, useParams } from "next/navigation";
 import { getMockSermons, mockWeeklyContent } from "@/lib/mock-data";
-import { Label } from "@/components/ui/label";
-import { WeeklyContentView } from "@/components/sermons/weekly-content-view";
 import { SermonContent } from "./sermon-content";
+import { useEffect, useState } from "react";
+import { Sermon, WeeklyContent } from "@/lib/types";
 
-// Note: This is now a server component to correctly handle params
-export default async function SermonDetailPage({ params }: { params: { sermonId: string } }) {
-  const sermon = getMockSermons().find(s => s.id === params.sermonId);
+export default function SermonDetailPage() {
+  const params = useParams();
+  const sermonId = params.sermonId as string;
+  
+  const [sermon, setSermon] = useState<Sermon | null | undefined>(undefined);
+  const [weeklyContent, setWeeklyContent] = useState<WeeklyContent | undefined>(undefined);
+
+  useEffect(() => {
+    if (sermonId) {
+      const foundSermon = getMockSermons().find(s => s.id === sermonId);
+      setSermon(foundSermon);
+      if (foundSermon) {
+        const foundContent = mockWeeklyContent.find(wc => wc.sermonId === foundSermon.id);
+        setWeeklyContent(foundContent);
+      }
+    }
+  }, [sermonId]);
+
+  if (sermon === undefined) {
+    // Loading state, can show a skeleton here if desired
+    return null;
+  }
 
   if (!sermon) {
     notFound();
   }
-
-  const weeklyContent = mockWeeklyContent.find(wc => wc.sermonId === sermon.id);
   
   return <SermonContent sermon={sermon} weeklyContent={weeklyContent} />;
 }
