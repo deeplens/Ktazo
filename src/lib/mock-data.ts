@@ -1,5 +1,5 @@
 
-import type { Sermon, User, WeeklyContent, Game, ReflectionQuestionGroup as ReflectionQuestionGroupType } from './types';
+import type { Sermon, User, WeeklyContent } from './types';
 
 export const mockUsers: User[] = [
   { id: 'user-master-1', tenantId: 'tenant-1', authId: 'auth-master-1', role: 'MASTER', name: 'Master User', email: 'master@ktazo.com', lastLoginAt: new Date().toISOString(), points: 0 },
@@ -177,6 +177,10 @@ export const mockWeeklyContent: WeeklyContent[] = [
                 ],
             },
         ],
+        games: [
+            { type: 'Quiz', title: 'Psalm 23 Timed Quiz', audience: 'Youth', data: [] },
+            { type: 'Word Search', title: 'The Good Shepherd Word Search', audience: 'Adults', data: {words: []} },
+        ],
         mondayClipUrl: 'https://storage.googleapis.com/studioprod-55829.appspot.com/652932b172a5a544256c70c2/sermons/kE3z98a4aT6s1B2aY1E2/audio.mp3',
     },
      {
@@ -193,60 +197,6 @@ export const mockWeeklyContent: WeeklyContent[] = [
             { day: 'Friday', content: 'Faith without works is dead. Pray for a faith that is alive and active.' },
         ],
         reflectionQuestions: [],
+        games: [],
     }
 ];
-
-export const mockGames: Game[] = [
-    { id: 'game-1', sermonId: 'sermon-1', type: 'quiz', title: 'Psalm 23 Timed Quiz', audience: 'Youth' },
-    { id: 'game-2', sermonId: 'sermon-1', type: 'wordsearch', title: 'The Good Shepherd Word Search', audience: 'Adults' },
-    { id: 'game-3', sermonId: 'sermon-1', type: 'matching', title: 'Shepherd\'s Tools Matching', audience: 'Youth' },
-    { id: 'game-4', sermonId: 'sermon-1', type: 'quiz', title: 'Verse Scramble', audience: 'Adults' },
-    { id: 'game-5', sermonId: 'sermon-2', type: 'flashcards', title: 'Faith & Works Flashcards', audience: 'Youth' },
-    { id: 'game-6', sermonId: 'sermon-2', type: 'matching', title: 'Key Terms Matching', audience: 'Adults' },
-    { id: 'game-7', sermonId: 'sermon-2', type: 'quiz', title: 'Action or Belief?', audience: 'Youth' },
-];
-
-export const mockReflectionQuestions: ReflectionQuestionGroupType[] = [
-    {
-        id: 'rq-1',
-        sermonId: 'sermon-1',
-        audience: 'Individuals',
-        questions: [
-            'In what areas of your life do you need to trust God as your shepherd right now?',
-            'How can you find "green pastures" and "still waters" for your soul this week?',
-            'Reflect on a "dark valley" experience. How did you see God\'s presence with you?',
-        ],
-    },
-    {
-        id: 'rq-2',
-        sermonId: 'sermon-1',
-        audience: 'Small Groups',
-        questions: [
-            'Share as a group about what "The Lord is my shepherd" means to each of you personally.',
-            'Discuss the difference between "wanting" and "needing" in the context of Psalm 23.',
-            'How can we, as a group, help each other stay on the "paths of righteousness"?',
-        ],
-    },
-    {
-        id: 'rq-3',
-        sermonId: 'sermon-2',
-        audience: 'Families',
-        questions: [
-            'What is one way our family can "show" our faith to our neighbors this week?',
-            'Talk about a story from the Bible where someone showed great faith through their actions.',
-            'How can we help each other when we find it hard to do the right thing?',
-        ],
-    },
-    {
-        id: 'rq-4',
-        sermonId: 'sermon-2',
-        audience: 'Youth',
-        questions: [
-            'What does "faith without works is dead" mean to you in your own life?',
-            'Can you think of a practical way to put your faith into action at school?',
-            'Who is a role model for you of someone who lives out their faith?',
-        ],
-    },
-];
-
-    

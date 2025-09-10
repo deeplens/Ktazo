@@ -57,6 +57,7 @@ export default function SermonDetailPage() {
             summaryLong: generated.summaryLong,
             devotionals: generated.devotionals.map((d, i) => ({ day: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'][i], content: d })),
             reflectionQuestions: generated.reflectionQuestions,
+            games: generated.games,
             mondayClipUrl: undefined, // Audio is generated separately now
         };
         

@@ -1,3 +1,4 @@
+
 export type UserRole = 'MASTER' | 'ADMIN' | 'PASTOR' | 'MEMBER';
 
 export interface User {
@@ -33,6 +34,19 @@ export interface ReflectionQuestionGroup {
   questions: string[];
 }
 
+export interface GameQuestion {
+    question: string;
+    options: string[];
+    correctAnswer: string;
+}
+
+export interface Game {
+    type: 'Quiz' | 'Word Search' | 'Fill in the Blank';
+    title: string;
+    audience: 'Youth' | 'Adults';
+    data: GameQuestion[] | { words: string[] } | { sentence: string, blank: string };
+}
+
 export interface WeeklyContent {
   id: string;
   tenantId: string;
@@ -41,20 +55,6 @@ export interface WeeklyContent {
   summaryLong: string;
   devotionals: { day: string; content: string }[];
   reflectionQuestions: ReflectionQuestionGroup[];
+  games: Game[];
   mondayClipUrl?: string;
-}
-
-export interface Game {
-    id: string;
-    sermonId: string;
-    type: 'quiz' | 'flashcards' | 'wordsearch' | 'matching';
-    title: string;
-    audience: 'Youth' | 'Adults';
-}
-
-export interface ReflectionQuestionGroup {
-    id: string;
-    sermonId: string;
-    audience: 'Youth' | 'Families' | 'Small Groups' | 'Individuals';
-    questions: string[];
 }

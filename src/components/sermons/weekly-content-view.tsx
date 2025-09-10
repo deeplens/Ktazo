@@ -1,12 +1,13 @@
 
 'use client';
 
-import { WeeklyContent } from "@/lib/types";
+import { Game, WeeklyContent } from "@/lib/types";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "../ui/accordion";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
 import { Separator } from "../ui/separator";
 import { Headphones, Loader2, Sparkles, Users, User, MessageCircleQuestion, Gamepad2 } from "lucide-react";
 import { Button } from "../ui/button";
+import { Badge } from "../ui/badge";
 
 interface WeeklyContentViewProps {
   content: WeeklyContent;
@@ -98,21 +99,33 @@ export function WeeklyContentView({ content, onGenerateAudio, isGeneratingAudio 
           </Accordion>
         </CardContent>
       </Card>
-      
+
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2"><Gamepad2 /> Interactive Games</CardTitle>
            <CardDescription>
-            Configurations for generated games based on the sermon.
+            AI-generated games based on the sermon content.
           </CardDescription>
         </CardHeader>
-        <CardContent>
-          <p className="text-sm text-muted-foreground">
-            Game configurations will be displayed here once generated...
-          </p>
+        <CardContent className="space-y-4">
+          {content.games && content.games.length > 0 ? (
+            content.games.map((game, index) => (
+                <div key={index} className="p-4 border rounded-lg">
+                    <div className="flex justify-between items-center">
+                        <h4 className="font-semibold">{game.title}</h4>
+                        <Badge variant="secondary">{game.audience}</Badge>
+                    </div>
+                    <p className="text-sm text-muted-foreground mt-1">Game Type: {game.type}</p>
+                </div>
+            ))
+          ) : (
+            <p className="text-sm text-muted-foreground">
+                No games have been generated for this content yet.
+            </p>
+          )}
         </CardContent>
       </Card>
-
+      
       <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2"><MessageCircleQuestion /> Reflection Questions</CardTitle>

@@ -2,14 +2,14 @@
 'use client';
 import { notFound } from "next/navigation";
 import Image from "next/image";
-import { getMockSermons, mockWeeklyContent, mockGames } from "@/lib/mock-data";
+import { getMockSermons, mockWeeklyContent } from "@/lib/mock-data";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { Gamepad2, Headphones, MessageCircleQuestion, Users, User, HeartHand, MessageSquare, MicVocal } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Sermon, WeeklyContent } from "@/lib/types";
+import { Sermon, WeeklyContent, Game } from "@/lib/types";
 import { useEffect, useState } from "react";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -34,8 +34,7 @@ export default function WeeklyPage({ params }: { params: { weekId: string } }) {
     return <div>Loading...</div>; // Or a skeleton loader
   }
 
-  if (!sermon || !sermon.weeklyContentId || !weeklyContent) {
-    // This is mock, let's create a placeholder if it doesn't exist
+  if (!sermon || !weeklyContent) {
      const placeholderContent: WeeklyContent = {
         id: 'wc-placeholder',
         tenantId: 'tenant-1',
@@ -44,6 +43,7 @@ export default function WeeklyPage({ params }: { params: { weekId: string } }) {
         summaryLong: 'Devotional guide not available.',
         devotionals: [],
         reflectionQuestions: [],
+        games: [],
     };
     return <WeeklyPageContent sermon={sermon || {} as Sermon} weeklyContent={placeholderContent} />;
   }
@@ -53,7 +53,6 @@ export default function WeeklyPage({ params }: { params: { weekId: string } }) {
 
 
 function WeeklyPageContent({ sermon, weeklyContent }: { sermon: Sermon, weeklyContent: WeeklyContent }) {
-  const games = mockGames.filter(g => g.sermonId === sermon.id);
 
   const getIconForAudience = (audience: string) => {
     switch (audience) {
@@ -145,8 +144,8 @@ function WeeklyPageContent({ sermon, weeklyContent }: { sermon: Sermon, weeklyCo
               <CardDescription>Engage with the sermon in a fun new way.</CardDescription>
           </CardHeader>
           <CardContent className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {games.map(game => (
-                  <Dialog key={game.id}>
+              {weeklyContent.games?.map((game: Game, index: number) => (
+                  <Dialog key={index}>
                       <DialogTrigger asChild>
                           <Card className="hover:bg-accent/50 cursor-pointer transition-colors">
                               <CardHeader>
