@@ -20,6 +20,7 @@ export interface Sermon {
   date: string;
   mp3Url: string;
   transcript: string;
+  translatedTranscript?: string;
   status: 'DRAFT' | 'READY_FOR_REVIEW' | 'APPROVED' | 'PUBLISHED';
   languages: string[];
   createdAt: string;

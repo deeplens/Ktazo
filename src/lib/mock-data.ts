@@ -110,6 +110,23 @@ export const deleteSermon = (sermonId: string) => {
     }
 };
 
+export const updateSermonTranscript = (sermonId: string, transcript: string, language: 'en' | 'es') => {
+    if (typeof window !== 'undefined') {
+        const sermons = getMockSermons();
+        const updatedSermons = sermons.map(s => {
+            if (s.id === sermonId) {
+                if (language === 'en') {
+                    return { ...s, transcript, updatedAt: new Date().toISOString() };
+                } else {
+                    return { ...s, translatedTranscript: transcript, updatedAt: new Date().toISOString() };
+                }
+            }
+            return s;
+        });
+        sessionStorage.setItem(SERMON_STORAGE_KEY, JSON.stringify(updatedSermons));
+    }
+};
+
 
 export const mockWeeklyContent: WeeklyContent[] = [
     {

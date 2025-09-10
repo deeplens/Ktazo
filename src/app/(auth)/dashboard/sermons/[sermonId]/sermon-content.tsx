@@ -29,15 +29,15 @@ import { WeeklyContentView } from "@/components/sermons/weekly-content-view";
 import { useAuth } from "@/lib/auth.tsx";
 import { Sermon, WeeklyContent } from "@/lib/types";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { addSermon, deleteSermon } from "@/lib/mock-data";
+import { addSermon, deleteSermon, updateSermonTranscript } from "@/lib/mock-data";
 import { useToast } from "@/hooks/use-toast";
 import { translateTranscript } from "@/ai/flows/translate-transcript";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 
 interface SermonContentProps {
-    sermon: Sermon | null;
+    sermon: Sermon;
     weeklyContent?: WeeklyContent;
     onGenerateContent: (transcript: string, language?: string) => Promise<void>;
     onGenerateAudio: () => Promise<void>;
@@ -50,8 +50,17 @@ export function SermonContent({ sermon, weeklyContent, onGenerateContent, onGene
   const router = useRouter();
   const { toast } = useToast();
   const [isTranslating, setIsTranslating] = useState(false);
-  const [translatedTranscript, setTranslatedTranscript] = useState<string | null>(null);
+
+  const [originalTranscript, setOriginalTranscript] = useState(sermon.transcript);
+  const [translatedTranscript, setTranslatedTranscript] = useState<string | null>(sermon.translatedTranscript || null);
+
   const [activeTab, setActiveTab] = useState("original");
+
+  useEffect(() => {
+    setOriginalTranscript(sermon.transcript);
+    setTranslatedTranscript(sermon.translatedTranscript || null);
+  }, [sermon]);
+
 
   if (!sermon) {
     notFound();
@@ -72,7 +81,7 @@ export function SermonContent({ sermon, weeklyContent, onGenerateContent, onGene
     setIsTranslating(true);
     try {
         const result = await translateTranscript({
-            transcript: sermon.transcript,
+            transcript: originalTranscript,
             targetLanguage: 'Spanish'
         });
         setTranslatedTranscript(result.translatedTranscript);
@@ -89,9 +98,22 @@ export function SermonContent({ sermon, weeklyContent, onGenerateContent, onGene
     }
   }
 
+  const handleSaveOriginalTranscript = () => {
+    updateSermonTranscript(sermon.id, originalTranscript, 'en');
+    toast({ title: "Success", description: "Original transcript has been saved." });
+  };
+
+  const handleSaveSpanishTranscript = () => {
+    if (translatedTranscript) {
+      updateSermonTranscript(sermon.id, translatedTranscript, 'es');
+      toast({ title: "Success", description: "Spanish transcript has been saved." });
+    }
+  };
+
+
   const handleGenerate = () => {
     if (activeTab === 'original') {
-        onGenerateContent(sermon.transcript);
+        onGenerateContent(originalTranscript);
     } else if (activeTab === 'spanish' && translatedTranscript) {
         onGenerateContent(translatedTranscript, 'Spanish');
     }
@@ -158,11 +180,12 @@ export function SermonContent({ sermon, weeklyContent, onGenerateContent, onGene
                     <TabsContent value="original">
                         <Textarea
                             id="description"
-                            defaultValue={sermon.transcript}
+                            value={originalTranscript}
+                            onChange={(e) => setOriginalTranscript(e.target.value)}
                             className="min-h-96"
                             disabled={!canManage}
                         />
-                         {canManage && <Button className="mt-4">Save Transcript</Button>}
+                         {canManage && <Button className="mt-4" onClick={handleSaveOriginalTranscript}>Save Transcript</Button>}
                     </TabsContent>
                     <TabsContent value="spanish">
                          <Textarea
@@ -172,7 +195,7 @@ export function SermonContent({ sermon, weeklyContent, onGenerateContent, onGene
                             disabled={!canManage}
                             onChange={(e) => setTranslatedTranscript(e.target.value)}
                         />
-                         {canManage && <Button className="mt-4">Save Spanish Transcript</Button>}
+                         {canManage && <Button className="mt-4" onClick={handleSaveSpanishTranscript}>Save Spanish Transcript</Button>}
                     </TabsContent>
                 </Tabs>
             </CardContent>
