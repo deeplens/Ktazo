@@ -1,3 +1,4 @@
+
 'use client';
 import { notFound, useParams } from "next/navigation";
 import { getMockSermons, mockWeeklyContent } from "@/lib/mock-data";
@@ -7,6 +8,8 @@ import { Sermon, WeeklyContent } from "@/lib/types";
 import { generateWeeklyContent } from "@/ai/flows/generate-weekly-content";
 import { useAuth } from "@/lib/auth";
 import { useToast } from "@/hooks/use-toast";
+
+export const maxDuration = 120; // 2 minutes
 
 export default function SermonDetailPage() {
   const params = useParams();
@@ -65,7 +68,7 @@ export default function SermonDetailPage() {
         toast({
             variant: "destructive",
             title: "Generation Failed",
-            description: "There was an error generating the weekly content.",
+            description: "An unexpected error occurred while generating content. The AI may be busy. Please try again in a moment.",
         });
     } finally {
         setIsGenerating(false);
