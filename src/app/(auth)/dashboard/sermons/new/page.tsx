@@ -67,6 +67,7 @@ export default function NewSermonPage() {
         });
         
         if(showTranscriptDialog) setShowTranscriptDialog(false);
+        setIsLoading(false);
         router.push('/dashboard/sermons');
     }
 
@@ -106,7 +107,9 @@ export default function NewSermonPage() {
                     description: "There was an error processing your audio file. Please try again.",
                 });
             } finally {
-                setIsLoading(false);
+                if (!showTranscriptDialog) {
+                    setIsLoading(false);
+                }
             }
         } else { // Text tab
             if (!textFile) {
@@ -253,7 +256,10 @@ export default function NewSermonPage() {
                         <pre className="text-sm whitespace-pre-wrap">{transcript}</pre>
                     </ScrollArea>
                     <AlertDialogFooter>
-                        <Button variant="outline" onClick={() => setShowTranscriptDialog(false)}>Cancel</Button>
+                        <Button variant="outline" onClick={() => {
+                            setShowTranscriptDialog(false);
+                            setIsLoading(false);
+                        }}>Cancel</Button>
                         <AlertDialogAction onClick={() => handleConfirmSermon(transcript, 'audio')}>Confirm and Add Sermon</AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>
@@ -261,3 +267,5 @@ export default function NewSermonPage() {
         </div>
     );
 }
+
+    
