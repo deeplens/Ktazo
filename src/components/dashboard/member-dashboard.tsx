@@ -1,10 +1,11 @@
+
 'use client';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { getMockSermons, mockWeeklyContent } from "@/lib/mock-data";
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "../ui/button";
-import { ArrowRight, Gamepad2, MessageSquare, PenSquare } from "lucide-react";
+import { ArrowRight, Gamepad2, MessageSquare, PenSquare, Info } from "lucide-react";
 import { Badge } from "../ui/badge";
 import {
   Sheet,
@@ -17,19 +18,61 @@ import {
 import { ChatbotPanel } from "../chatbot/chatbot-panel";
 import { useEffect, useState } from "react";
 import { Sermon } from "@/lib/types";
+import { Skeleton } from "../ui/skeleton";
+import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
 
 export function MemberDashboard() {
-  const [publishedSermon, setPublishedSermon] = useState<Sermon | undefined>(undefined);
+  const [publishedSermon, setPublishedSermon] = useState<Sermon | null | undefined>(undefined);
 
   useEffect(() => {
     const sermons = getMockSermons();
-    setPublishedSermon(sermons.find(s => s.status === 'PUBLISHED'));
+    const foundSermon = sermons.find(s => s.status === 'PUBLISHED');
+    setPublishedSermon(foundSermon || null); // Set to null if not found
   }, []);
 
-  if (!publishedSermon) return <p>No weekly content published yet.</p>;
+  if (publishedSermon === undefined) {
+    // Loading state
+    return (
+        <div className="grid gap-6">
+            <Card>
+                <CardHeader>
+                    <Skeleton className="h-6 w-1/4 mb-2" />
+                    <Skeleton className="h-8 w-3/4" />
+                </CardHeader>
+                <CardContent>
+                    <Skeleton className="w-full aspect-[16/9] rounded-lg mb-4" />
+                    <Skeleton className="h-5 w-full" />
+                    <Skeleton className="h-5 w-5/6 mt-2" />
+                </CardContent>
+            </Card>
+        </div>
+    );
+  }
+
+  if (publishedSermon === null) {
+    return (
+        <Alert>
+            <Info className="h-4 w-4" />
+            <AlertTitle>No Weekly Content Available</AlertTitle>
+            <AlertDescription>
+                There is no content published for this week yet. Please check back later.
+            </AlertDescription>
+        </Alert>
+    );
+  }
   
   const weeklyContent = mockWeeklyContent.find(wc => wc.sermonId === publishedSermon.id);
-  if (!weeklyContent) return <p>Content not found for this week's sermon.</p>;
+  if (!weeklyContent) {
+    return (
+        <Alert variant="destructive">
+            <Info className="h-4 w-4" />
+            <AlertTitle>Content Error</AlertTitle>
+            <AlertDescription>
+                Weekly content for &quot;{publishedSermon.title}&quot; could not be loaded. Please contact an administrator.
+            </AlertDescription>
+        </Alert>
+    );
+  }
 
   return (
     <div className="grid gap-6">
