@@ -56,6 +56,7 @@ const SermonTable = ({sermons, onDelete}: {sermons: Sermon[], onDelete: (sermonI
             <TableRow>
                 <TableHead>Title</TableHead>
                 <TableHead>Speaker</TableHead>
+                <TableHead className="hidden md:table-cell">Series</TableHead>
                 <TableHead className="hidden md:table-cell">Date</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>
@@ -72,6 +73,7 @@ const SermonTable = ({sermons, onDelete}: {sermons: Sermon[], onDelete: (sermonI
                         </Link>
                     </TableCell>
                     <TableCell className="text-muted-foreground">{sermon.speaker}</TableCell>
+                    <TableCell className="hidden md:table-cell text-muted-foreground">{sermon.series}</TableCell>
                     <TableCell className="hidden md:table-cell text-muted-foreground">{sermon.date}</TableCell>
                     <TableCell>
                         <Badge 
