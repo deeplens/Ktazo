@@ -36,6 +36,8 @@ import { translateTranscript } from "@/ai/flows/translate-transcript";
 import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
+import { translateSermonContent } from "@/ai/flows/translate-sermon-content";
+import { add } from "date-fns";
 
 interface SermonContentProps {
     sermon: Sermon;
@@ -78,27 +80,46 @@ export function SermonContent({ sermon, weeklyContent, onGenerateContent, onGene
   }
 
   const handleTranslate = async () => {
-    if (!sermon) return;
-    setIsTranslating(true);
-    try {
-        const result = await translateTranscript({
-            transcript: originalTranscript,
-            targetLanguage: 'Spanish'
-        });
-        setTranslatedTranscript(result.translatedTranscript);
-        // also save to mock data
-        updateSermonTranscript(sermon.id, result.translatedTranscript, 'es');
-        toast({
-            title: "Translation Complete",
-            description: "The transcript has been translated to Spanish."
-        });
-        setActiveTab("spanish");
-    } catch (error) {
-        console.error("Translation failed", error);
-        toast({ variant: "destructive", title: "Translation Failed", description: "An error occurred during transcript translation." });
-    } finally {
-        setIsTranslating(false);
-    }
+      if (!sermon || !weeklyContent) {
+          toast({ variant: "destructive", title: "Content Missing", description: "Cannot translate without weekly content." });
+          return;
+      };
+      setIsTranslating(true);
+      try {
+          const result = await translateSermonContent({
+              targetLanguage: 'Spanish',
+              title: sermon.title,
+              transcript: sermon.transcript,
+              summaryShort: weeklyContent.summaryShort,
+              summaryLong: weeklyContent.summaryLong,
+              devotionals: weeklyContent.devotionals
+          });
+          
+          const newSermon: Sermon = {
+            ...sermon,
+            id: `sermon-${Date.now()}`,
+            title: result.title,
+            transcript: result.transcript,
+            status: 'DRAFT',
+            languages: [...sermon.languages, 'es'],
+            weeklyContentId: undefined, // It's a new draft
+          };
+
+          addSermon(newSermon);
+
+          toast({
+              title: "Sermon Duplicated & Translated",
+              description: `A new draft "${result.title}" has been created in Spanish.`,
+          });
+
+          router.push(`/dashboard/sermons/${newSermon.id}`);
+
+      } catch (error) {
+          console.error("Translation failed", error);
+          toast({ variant: "destructive", title: "Translation Failed", description: "An error occurred during translation." });
+      } finally {
+          setIsTranslating(false);
+      }
   }
   
   const downloadTextFile = (content: string, filename: string) => {
@@ -142,6 +163,7 @@ export function SermonContent({ sermon, weeklyContent, onGenerateContent, onGene
   const canApprove = canManage;
   const canPublish = canManage;
   const canDelete = canManage;
+  const canTranslate = canManage && sermon.status !== 'DRAFT';
 
   const generateButtonText = activeTab === 'spanish' ? "Generate Weekly Content in Spanish" : "Generate Weekly Content";
 
@@ -167,6 +189,12 @@ export function SermonContent({ sermon, weeklyContent, onGenerateContent, onGene
           {sermon.status.replace('_', ' ')}
         </Badge>
         <div className="hidden items-center gap-2 md:ml-auto md:flex">
+          {canTranslate && (
+             <Button onClick={handleTranslate} disabled={isTranslating} variant="outline" size="sm">
+                {isTranslating ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Languages className="mr-2 h-4 w-4"/>}
+                Translate to Spanish
+             </Button>
+          )}
           {canApprove && sermon.status === 'READY_FOR_REVIEW' && <Button>Approve</Button>}
           {canPublish && sermon.status === 'APPROVED' && <Button>Publish</Button>}
           {sermon.status === 'PUBLISHED' && <Button variant="outline" asChild><Link href={`/dashboard/weekly/${sermon.id}`}><Eye className="mr-2 h-4 w-4"/>View Published Page</Link></Button>}
@@ -208,12 +236,6 @@ export function SermonContent({ sermon, weeklyContent, onGenerateContent, onGene
                             <TabsTrigger value="original" className="data-[state=inactive]:bg-muted">Original</TabsTrigger>
                             <TabsTrigger value="spanish" disabled={!translatedTranscript} className="data-[state=inactive]:bg-muted">Spanish</TabsTrigger>
                         </TabsList>
-                        {canManage && !translatedTranscript && (
-                             <Button onClick={handleTranslate} disabled={isTranslating} variant="outline" size="sm">
-                                {isTranslating ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Languages className="mr-2 h-4 w-4"/>}
-                                Translate to Spanish
-                             </Button>
-                        )}
                     </div>
                     <TabsContent value="original">
                         <Textarea
@@ -303,3 +325,5 @@ export function SermonContent({ sermon, weeklyContent, onGenerateContent, onGene
     </div>
   );
 }
+
+    

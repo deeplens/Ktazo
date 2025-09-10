@@ -1,3 +1,4 @@
+
 import type { Sermon, User, WeeklyContent, Game, ReflectionQuestionGroup } from './types';
 
 export const mockUsers: User[] = [
@@ -17,7 +18,7 @@ const initialSermons: Sermon[] = [
     series: 'Psalms',
     speaker: 'Guest Speaker',
     date: '2024-05-12',
-    mp3Url: 'path/to/sermon1.mp3',
+    mp3Url: 'https://storage.googleapis.com/studioprod-55829.appspot.com/652932b172a5a544256c70c2/sermons/kE3z98a4aT6s1B2aY1E2/audio.mp3',
     transcript: 'This is the full transcript for The Good Shepherd sermon... It is a long text that can be edited.',
     status: 'PUBLISHED',
     languages: ['en', 'es'],
@@ -32,7 +33,7 @@ const initialSermons: Sermon[] = [
     series: 'James',
     speaker: 'Pastor John',
     date: '2024-05-05',
-    mp3Url: 'path/to/sermon2.mp3',
+    mp3Url: 'https://storage.googleapis.com/studioprod-55829.appspot.com/652932b172a5a544256c70c2/sermons/kE3z98a4aT6s1B2aY1E2/audio.mp3',
     transcript: 'The book of James talks about faith and works...',
     status: 'APPROVED',
     languages: ['en'],
@@ -47,7 +48,7 @@ const initialSermons: Sermon[] = [
     series: 'Parables of Jesus',
     speaker: 'Pastor Jane',
     date: '2024-04-28',
-    mp3Url: 'path/to/sermon3.mp3',
+    mp3Url: 'https://storage.googleapis.com/studioprod-55829.appspot.com/652932b172a5a544256c70c2/sermons/kE3z98a4aT6s1B2aY1E2/audio.mp3',
     transcript: '...',
     status: 'READY_FOR_REVIEW',
     languages: ['en'],
@@ -61,7 +62,7 @@ const initialSermons: Sermon[] = [
     series: 'Genesis',
     speaker: 'Pastor John',
     date: '2024-04-21',
-    mp3Url: 'path/to/sermon4.mp3',
+    mp3Url: 'https://storage.googleapis.com/studioprod-55829.appspot.com/652932b172a5a544256c70c2/sermons/kE3z98a4aT6s1B2aY1E2/audio.mp3',
     transcript: '',
     status: 'DRAFT',
     languages: ['en'],
@@ -97,7 +98,11 @@ export const getMockSermons = (): Sermon[] => {
 export const addSermon = (sermon: Sermon) => {
     if (typeof window !== 'undefined') {
         const sermons = getMockSermons();
-        const updatedSermons = [sermon, ...sermons];
+        const newSermonWithAudio = {
+            ...sermon,
+            mp3Url: 'https://storage.googleapis.com/studioprod-55829.appspot.com/652932b172a5a544256c70c2/sermons/kE3z98a4aT6s1B2aY1E2/audio.mp3'
+        };
+        const updatedSermons = [newSermonWithAudio, ...sermons];
         sessionStorage.setItem(SERMON_STORAGE_KEY, JSON.stringify(updatedSermons));
     }
 }
@@ -143,7 +148,7 @@ export const mockWeeklyContent: WeeklyContent[] = [
             { day: 'Thursday', content: 'Even though I walk through the valley of the shadow of death, I will fear no evil. How does God\'s presence comfort you in fearful times?' },
             { day: 'Friday', content: 'Surely goodness and mercy shall follow me all the days of my life. Meditate on God\'s persistent goodness.' },
         ],
-        mondayClipUrl: '/path/to/monday_clip.mp3',
+        mondayClipUrl: 'https://storage.googleapis.com/studioprod-55829.appspot.com/652932b172a5a544256c70c2/sermons/kE3z98a4aT6s1B2aY1E2/audio.mp3',
     },
      {
         id: 'wc-2',
@@ -211,3 +216,5 @@ export const mockReflectionQuestions: ReflectionQuestionGroup[] = [
         ],
     },
 ];
+
+    
