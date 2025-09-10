@@ -1,6 +1,6 @@
 
 'use client';
-import { notFound } from "next/navigation";
+import { notFound, useParams } from "next/navigation";
 import Image from "next/image";
 import { getMockSermons, mockWeeklyContent } from "@/lib/mock-data";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,28 +15,33 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { GamePlayer } from "@/components/games/game-player";
 
-export default function WeeklyPage({ params }: { params: { weekId: string } }) {
+export default function WeeklyPage() {
+  const params = useParams();
+  const weekId = params.weekId as string;
+
   const [sermon, setSermon] = useState<Sermon | undefined>(undefined);
   const [weeklyContent, setWeeklyContent] = useState<WeeklyContent | undefined | null>(undefined);
 
   useEffect(() => {
-    const sermons = getMockSermons();
-    const currentSermon = sermons.find(s => s.id === params.weekId);
-    setSermon(currentSermon);
+    if (weekId) {
+        const sermons = getMockSermons();
+        const currentSermon = sermons.find(s => s.id === weekId);
+        setSermon(currentSermon);
 
-    if (currentSermon) {
-        const content = mockWeeklyContent.find(wc => wc.sermonId === currentSermon.id);
-        setWeeklyContent(content);
+        if (currentSermon) {
+            const content = mockWeeklyContent.find(wc => wc.sermonId === currentSermon.id);
+            setWeeklyContent(content);
+        }
     }
 
-  }, [params.weekId]);
+  }, [weekId]);
 
   if (sermon === undefined || weeklyContent === undefined) {
     return <div>Loading...</div>; // Or a skeleton loader
   }
 
   if (!sermon || !weeklyContent) {
-     const placeholderSermon = getMockSermons().find(s => s.id === params.weekId);
+     const placeholderSermon = getMockSermons().find(s => s.id === weekId);
      const placeholderContent: WeeklyContent = {
         id: 'wc-placeholder',
         tenantId: 'tenant-1',
@@ -179,8 +184,8 @@ function WeeklyPageContent({ sermon, weeklyContent }: { sermon: Sermon, weeklyCo
 
       <Card id="reflection-questions">
           <CardHeader>
-          <CardTitle className="font-headline flex items-center gap-2"><MessageCircleQuestion /> Reflection Questions</CardTitle>
-          <CardDescription>Ponder these questions on your own, or discuss them with your family, friends, or small group.</CardDescription>
+            <CardTitle className="font-headline flex items-center gap-2"><MessageCircleQuestion /> Reflection Questions</CardTitle>
+            <CardDescription>Ponder these questions on your own, or discuss them with your family, friends, or small group.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
               {weeklyContent.reflectionQuestions.map((group, groupIndex) => (
