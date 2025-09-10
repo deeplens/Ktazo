@@ -1,3 +1,4 @@
+
 'use client';
 import { PlusCircle, File, MoreHorizontal } from "lucide-react";
 import Link from "next/link";
@@ -65,7 +66,11 @@ const SermonTable = ({sermons, onDelete}: {sermons: Sermon[], onDelete: (sermonI
             <TableBody>
             {sermons.map(sermon => (
                 <TableRow key={sermon.id}>
-                    <TableCell className="font-medium">{sermon.title}</TableCell>
+                    <TableCell className="font-medium">
+                        <Link href={`/dashboard/sermons/${sermon.id}`} className="hover:underline">
+                            {sermon.title}
+                        </Link>
+                    </TableCell>
                     <TableCell className="text-muted-foreground">{sermon.speaker}</TableCell>
                     <TableCell className="hidden md:table-cell text-muted-foreground">{sermon.date}</TableCell>
                     <TableCell>
