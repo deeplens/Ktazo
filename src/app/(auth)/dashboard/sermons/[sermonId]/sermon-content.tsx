@@ -100,6 +100,7 @@ export function SermonContent({ sermon, weeklyContent, onGenerateContent, onGene
               title: "Transcript Translated",
               description: `The sermon transcript has been translated to Spanish. You can now view it in the 'Spanish' tab.`,
           });
+          setActiveTab('spanish');
 
       } catch (error) {
           console.error("Translation failed", error);
@@ -180,13 +181,6 @@ export function SermonContent({ sermon, weeklyContent, onGenerateContent, onGene
           {canPublish && sermon.status === 'APPROVED' && <Button>Publish</Button>}
           {sermon.status === 'PUBLISHED' && <Button variant="outline" asChild><Link href={`/dashboard/weekly/${sermon.id}`}><Eye className="mr-2 h-4 w-4"/>View Published Page</Link></Button>}
           
-          {canTranslate && (
-             <Button onClick={handleTranslate} disabled={isTranslating} variant="outline" size="sm">
-                {isTranslating ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Languages className="mr-2 h-4 w-4"/>}
-                Translate to Spanish
-             </Button>
-          )}
-
           {canDelete && (
               <AlertDialog>
                   <AlertDialogTrigger asChild>
@@ -225,6 +219,12 @@ export function SermonContent({ sermon, weeklyContent, onGenerateContent, onGene
                             <TabsTrigger value="original" className="data-[state=inactive]:bg-muted">Original</TabsTrigger>
                             <TabsTrigger value="spanish" disabled={!translatedTranscript} className="data-[state=inactive]:bg-muted">Spanish</TabsTrigger>
                         </TabsList>
+                        {canTranslate && (
+                            <Button onClick={handleTranslate} disabled={isTranslating} variant="outline" size="sm">
+                                {isTranslating ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Languages className="mr-2 h-4 w-4"/>}
+                                Translate to Spanish
+                            </Button>
+                        )}
                     </div>
                     <TabsContent value="original">
                         <Textarea
@@ -300,7 +300,6 @@ export function SermonContent({ sermon, weeklyContent, onGenerateContent, onGene
                 </audio>
             </CardContent>
           </Card>
-
         </div>
       </div>
     </div>
