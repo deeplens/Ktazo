@@ -6,7 +6,7 @@ import { getMockSermons, mockWeeklyContent } from "@/lib/mock-data";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
-import { Gamepad2, Headphones, MessageCircleQuestion, Users, User, HeartHand, MessageSquare, MicVocal } from "lucide-react";
+import { Gamepad2, Headphones, MessageCircleQuestion, Users, User, HeartHandshake, MessageSquare, MicVocal } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Sermon, WeeklyContent, Game } from "@/lib/types";
@@ -132,7 +132,7 @@ function WeeklyPageContent({ sermon, weeklyContent }: { sermon: Sermon, weeklyCo
         <div className="space-y-8">
             <Card>
                 <CardHeader>
-                    <CardTitle className="font-headline flex items-center gap-2"><HeartHand /> Feedback</CardTitle>
+                    <CardTitle className="font-headline flex items-center gap-2"><HeartHandshake /> Feedback</CardTitle>
                     <CardDescription>Share your thoughts on this week's content.</CardDescription>
                 </CardHeader>
                 <CardContent>
