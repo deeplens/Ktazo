@@ -290,16 +290,18 @@ export function SermonContent({ sermon, weeklyContent, onGenerateContent, onGene
           </Card>
         </div>
         <div className="grid auto-rows-max items-start gap-4 lg:gap-8">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2"><UploadCloud /> Sermon Audio</CardTitle>
-            </CardHeader>
-            <CardContent>
-                <audio controls src={sermon.mp3Url} className="w-full">
-                    Your browser does not support the audio element.
-                </audio>
-            </CardContent>
-          </Card>
+          {sermon.mp3Url && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2"><UploadCloud /> Sermon Audio</CardTitle>
+              </CardHeader>
+              <CardContent>
+                  <audio controls src={sermon.mp3Url} className="w-full">
+                      Your browser does not support the audio element.
+                  </audio>
+              </CardContent>
+            </Card>
+          )}
         </div>
       </div>
     </div>
