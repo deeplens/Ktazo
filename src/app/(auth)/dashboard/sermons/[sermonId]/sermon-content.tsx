@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useRouter } from "next/navigation";
@@ -11,7 +12,8 @@ import {
   Loader2,
   Trash2,
   Wand2,
-  Mic
+  Mic,
+  FilePenLine
 } from "lucide-react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
@@ -22,6 +24,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
+  CardFooter
 } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { WeeklyContentView } from "@/components/sermons/weekly-content-view";
@@ -38,12 +41,14 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger
 } from "@/components/ui/alert-dialog";
-import { deleteSermon, updateSermonStatus, updateSermonTranscript } from "@/lib/mock-data";
+import { deleteSermon, updateSermonDetails, updateSermonStatus, updateSermonTranscript } from "@/lib/mock-data";
 import { useToast } from "@/hooks/use-toast";
 import { translateTranscript } from "@/ai/flows/translate-transcript";
 import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cleanupTranscript } from "@/ai/flows/cleanup-transcript";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 interface SermonContentProps {
   sermon: Sermon;
@@ -67,6 +72,12 @@ export function SermonContent({
   const { toast } = useToast();
 
   const [sermon, setSermon] = useState(initialSermon);
+  const [sermonDetails, setSermonDetails] = useState({
+      title: initialSermon.title,
+      speaker: initialSermon.speaker,
+      series: initialSermon.series,
+      date: initialSermon.date,
+  });
   const [isTranslating, setIsTranslating] = useState(false);
   const [isCleaning, setIsCleaning] = useState(false);
 
@@ -81,9 +92,29 @@ export function SermonContent({
 
   useEffect(() => {
     setSermon(initialSermon);
+    setSermonDetails({
+        title: initialSermon.title,
+        speaker: initialSermon.speaker,
+        series: initialSermon.series,
+        date: initialSermon.date,
+    });
     setOriginalTranscript(initialSermon.transcript);
     setTranslatedTranscript(initialSermon.translatedTranscript || null);
   }, [initialSermon]);
+
+  const handleDetailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { id, value } = e.target;
+    setSermonDetails(prev => ({...prev, [id]: value}));
+  };
+
+  const handleSaveDetails = () => {
+    updateSermonDetails(sermon.id, sermonDetails);
+    setSermon(prev => prev ? { ...prev, ...sermonDetails } : prev);
+    toast({
+        title: "Details Saved",
+        description: "The sermon details have been updated."
+    });
+  };
 
   const handleDelete = () => {
     deleteSermon(sermon.id);
@@ -229,10 +260,10 @@ export function SermonContent({
 
         <div className="flex-1 shrink-0">
           <h1 className="whitespace-nowrap text-xl font-semibold tracking-tight sm:grow-0 font-headline">
-            {sermon.title}
+            {sermonDetails.title}
           </h1>
           <p className="text-sm text-muted-foreground flex items-center gap-2 mt-1">
-            <Mic className="h-4 w-4" /> {sermon.speaker}
+            <Mic className="h-4 w-4" /> {sermonDetails.speaker}
           </p>
         </div>
 
@@ -284,6 +315,38 @@ export function SermonContent({
 
       <div className="grid gap-4 md:grid-cols-[1fr_250px] lg:grid-cols-3 lg:gap-8">
         <div className="grid auto-rows-max items-start gap-4 lg:col-span-2 lg:gap-8">
+         {canManage && (
+             <Card>
+                <CardHeader>
+                    <CardTitle className="flex items-center gap-2"><FilePenLine /> Sermon Details</CardTitle>
+                    <CardDescription>Edit the core details of the sermon.</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                    <div className="space-y-2">
+                        <Label htmlFor="title">Sermon Title</Label>
+                        <Input id="title" value={sermonDetails.title} onChange={handleDetailChange} />
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="speaker">Speaker</Label>
+                        <Input id="speaker" value={sermonDetails.speaker} onChange={handleDetailChange} />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                            <Label htmlFor="series">Series</Label>
+                            <Input id="series" value={sermonDetails.series} onChange={handleDetailChange} />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="date">Date</Label>
+                            <Input id="date" type="date" value={sermonDetails.date} onChange={handleDetailChange} />
+                        </div>
+                    </div>
+                </CardContent>
+                <CardFooter>
+                    <Button onClick={handleSaveDetails}>Save Details</Button>
+                </CardFooter>
+             </Card>
+         )}
+
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">

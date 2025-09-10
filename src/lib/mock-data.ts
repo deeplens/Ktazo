@@ -141,6 +141,19 @@ export const updateSermonStatus = (sermonId: string, status: Sermon['status']) =
     }
 };
 
+export const updateSermonDetails = (sermonId: string, details: Partial<Pick<Sermon, 'title' | 'speaker' | 'series' | 'date'>>) => {
+    if (typeof window !== 'undefined') {
+        const sermons = getMockSermons();
+        const updatedSermons = sermons.map(s => {
+            if (s.id === sermonId) {
+                return { ...s, ...details, updatedAt: new Date().toISOString() };
+            }
+            return s;
+        });
+        sessionStorage.setItem(SERMON_STORAGE_KEY, JSON.stringify(updatedSermons));
+    }
+};
+
 
 export const mockWeeklyContent: WeeklyContent[] = [
     {
