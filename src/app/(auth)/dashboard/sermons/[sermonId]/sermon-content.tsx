@@ -143,7 +143,7 @@ export function SermonContent({ sermon, weeklyContent, onGenerateContent, onGene
             <CardContent>
                 <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
                     <div className="flex justify-between items-center mb-4">
-                        <TabsList>
+                        <TabsList className="mb-4">
                             <TabsTrigger value="original">Original</TabsTrigger>
                             <TabsTrigger value="spanish" disabled={!translatedTranscript}>Spanish</TabsTrigger>
                         </TabsList>
