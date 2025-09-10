@@ -281,17 +281,6 @@ export function SermonContent({ sermon, weeklyContent, onGenerateContent, onGene
         <div className="grid auto-rows-max items-start gap-4 lg:gap-8">
           <Card>
             <CardHeader>
-              <CardTitle>Sermon Status</CardTitle>
-            </CardHeader>
-            <CardContent className="grid gap-3">
-                <div className="grid gap-1.5">
-                  <p className="text-sm text-muted-foreground">{sermon.status.replace('_', ' ')}</p>
-                </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
               <CardTitle className="flex items-center gap-2"><UploadCloud /> Sermon Audio</CardTitle>
             </CardHeader>
             <CardContent>
