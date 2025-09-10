@@ -45,7 +45,7 @@ export default function SettingsPage() {
                         <Label htmlFor="church-voice">Church Voice & Identity</Label>
                         <Textarea 
                             id="church-voice"
-                            placeholder="Describe your church's doctrine, emphasis, and identity. For example: 'We are a conservative Baptist congregation ministering to mainly blue-collar former Catholics...'"
+                            placeholder="Describe your church's doctrine, emphasis, and identity. For example: 'We are a conservative Baptist congregation ministering to mainly blue-collar families with little bible knowledge...'"
                             rows={5}
                         />
                     </div>
