@@ -64,9 +64,9 @@ function WeeklyPageContent({ sermon, weeklyContent }: { sermon: Sermon, weeklyCo
   };
 
   return (
-    <div className="container mx-auto py-8 px-4">
+    <div className="container mx-auto py-8 px-4 space-y-8">
       {weeklyContent.id !== 'wc-placeholder' && (
-      <div className="relative w-full h-64 md:h-96 rounded-2xl overflow-hidden mb-8 shadow-lg">
+      <div className="relative w-full h-64 md:h-96 rounded-2xl overflow-hidden shadow-lg">
         <Image 
           src={`https://picsum.photos/seed/${sermon.id}/1200/800`}
           alt={`Theme for ${sermon.title}`} 
@@ -123,56 +123,6 @@ function WeeklyPageContent({ sermon, weeklyContent }: { sermon: Sermon, weeklyCo
         </div>
 
         <div className="space-y-8">
-            <Card id="games">
-                <CardHeader>
-                    <CardTitle className="font-headline flex items-center gap-2"><Gamepad2 /> Interactive Games</CardTitle>
-                    <CardDescription>Engage with the sermon in a fun new way.</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                    {games.map(game => (
-                        <Dialog key={game.id}>
-                            <DialogTrigger asChild>
-                                <Card className="hover:bg-accent/50 cursor-pointer transition-colors">
-                                    <CardHeader>
-                                        <CardTitle className="text-lg">{game.title}</CardTitle>
-                                        <Badge variant="secondary" className="w-fit">{game.audience}</Badge>
-                                    </CardHeader>
-                                </Card>
-                            </DialogTrigger>
-                            <DialogContent>
-                                <DialogHeader>
-                                <DialogTitle>{game.title}</DialogTitle>
-                                <DialogDescription>
-                                    This is a placeholder for the '{game.type}' game.
-                                </DialogDescription>
-                                </DialogHeader>
-                                <div className="py-8 text-center">
-                                    <p>Game content would be loaded here.</p>
-                                    <Button className="mt-4">Start Game</Button>
-                                </div>
-                            </DialogContent>
-                        </Dialog>
-                    ))}
-                </CardContent>
-            </Card>
-
-            <Card id="reflection-questions">
-                <CardHeader>
-                <CardTitle className="font-headline flex items-center gap-2"><MessageCircleQuestion /> Reflection Questions</CardTitle>
-                <CardDescription>Ponder these questions on your own, or discuss them with your family, friends, or small group.</CardDescription>
-                </CardHeader>
-                <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {weeklyContent.reflectionQuestions.map(group => (
-                        <div key={group.audience} className="p-4 bg-background rounded-lg border">
-                            <h3 className="font-semibold flex items-center gap-2 mb-2">{getIconForAudience(group.audience)} {group.audience}</h3>
-                            <ul className="list-disc list-inside space-y-2 text-sm text-muted-foreground">
-                                {group.questions.map((q, i) => <li key={i}>{q}</li>)}
-                            </ul>
-                        </div>
-                    ))}
-                </CardContent>
-            </Card>
-
             <Card>
                 <CardHeader>
                     <CardTitle className="font-headline flex items-center gap-2"><HeartHand /> Feedback</CardTitle>
@@ -186,6 +136,57 @@ function WeeklyPageContent({ sermon, weeklyContent }: { sermon: Sermon, weeklyCo
             </Card>
         </div>
       </div>
+
+      <Card id="games">
+          <CardHeader>
+              <CardTitle className="font-headline flex items-center gap-2"><Gamepad2 /> Interactive Games</CardTitle>
+              <CardDescription>Engage with the sermon in a fun new way.</CardDescription>
+          </CardHeader>
+          <CardContent className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {games.map(game => (
+                  <Dialog key={game.id}>
+                      <DialogTrigger asChild>
+                          <Card className="hover:bg-accent/50 cursor-pointer transition-colors">
+                              <CardHeader>
+                                  <CardTitle className="text-lg">{game.title}</CardTitle>
+                                  <Badge variant="secondary" className="w-fit">{game.audience}</Badge>
+                              </CardHeader>
+                          </Card>
+                      </DialogTrigger>
+                      <DialogContent>
+                          <DialogHeader>
+                          <DialogTitle>{game.title}</DialogTitle>
+                          <DialogDescription>
+                              This is a placeholder for the '{game.type}' game.
+                          </DialogDescription>
+                          </DialogHeader>
+                          <div className="py-8 text-center">
+                              <p>Game content would be loaded here.</p>
+                              <Button className="mt-4">Start Game</Button>
+                          </div>
+                      </DialogContent>
+                  </Dialog>
+              ))}
+          </CardContent>
+      </Card>
+
+      <Card id="reflection-questions">
+          <CardHeader>
+          <CardTitle className="font-headline flex items-center gap-2"><MessageCircleQuestion /> Reflection Questions</CardTitle>
+          <CardDescription>Ponder these questions on your own, or discuss them with your family, friends, or small group.</CardDescription>
+          </CardHeader>
+          <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {weeklyContent.reflectionQuestions.map(group => (
+                  <div key={group.audience} className="p-4 bg-background rounded-lg border">
+                      <h3 className="font-semibold flex items-center gap-2 mb-2">{getIconForAudience(group.audience)} {group.audience}</h3>
+                      <ul className="list-disc list-inside space-y-2 text-sm text-muted-foreground">
+                          {group.questions.map((q, i) => <li key={i}>{q}</li>)}
+                      </ul>
+                  </div>
+              ))}
+          </CardContent>
+      </Card>
     </div>
   );
 }
+
