@@ -29,7 +29,6 @@ const GenerateWeeklyContentOutputSchema = z.object({
   reflectionQuestionsSmallGroups: z.array(z.string()).describe('Reflection questions for small groups.'),
   reflectionQuestionsIndividuals: z.array(z.string()).describe('Reflection questions for individuals.'),
   gameConfiguration: z.string().describe('Configuration for interactive games (youth: timed quiz, flashcards; adults: word search, matching).'),
-  themedImageUrl: z.string().describe('A themed image URL for the week (Google \"Nano Banana\" image gen placeholder).'),
 });
 export type GenerateWeeklyContentOutput = z.infer<typeof GenerateWeeklyContentOutputSchema>;
 
@@ -62,7 +61,6 @@ const generateWeeklyContentPrompt = ai.definePrompt({
   - Reflection questions for small groups (reflectionQuestionsSmallGroups).
   - Reflection questions for individuals (reflectionQuestionsIndividuals).
   - Configuration for interactive games (youth: timed quiz, flashcards; adults: word search, matching) (gameConfiguration).
-  - A themed image URL for the week (Google \"Nano Banana\" image gen placeholder) (themedImageUrl).
   `,
 });
 

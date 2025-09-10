@@ -53,7 +53,7 @@ export default function SermonDetailPage() {
             id: `wc-${Date.now()}`,
             sermonId: sermon.id,
             tenantId: user.tenantId,
-            themeImageUrl: generated.themedImageUrl,
+            themeImageUrl: 'https://picsum.photos/seed/ktazo-generated/1200/800', // Placeholder
             summaryShort: generated.summaryShort,
             summaryLong: generated.summaryLong,
             devotionals: generated.devotionals.map((d, i) => ({ day: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'][i], content: d })),
