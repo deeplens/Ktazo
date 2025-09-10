@@ -98,11 +98,13 @@ export default function SermonsPage() {
                 Export
                 </span>
             </Button>
-            <Button size="sm" className="h-8 gap-1">
+            <Button size="sm" className="h-8 gap-1" asChild>
+              <Link href="/dashboard/sermons/new">
                 <PlusCircle className="h-3.5 w-3.5" />
                 <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
                 Upload Sermon
                 </span>
+              </Link>
             </Button>
             </div>
         </div>
