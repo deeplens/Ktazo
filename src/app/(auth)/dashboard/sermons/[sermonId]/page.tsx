@@ -1,4 +1,5 @@
 
+
 'use client';
 import { notFound, useParams } from "next/navigation";
 import { getMockSermons, mockWeeklyContent } from "@/lib/mock-data";
@@ -68,7 +69,7 @@ export default function SermonDetailPage() {
         toast({
             variant: "destructive",
             title: "Generation Failed",
-            description: "An unexpected error occurred while generating content. The AI may be busy. Please try again in a moment.",
+            description: "An unexpected error occurred while generating content. The AI may be busy or the request may have timed out. Please try again in a moment.",
         });
     } finally {
         setIsGenerating(false);
