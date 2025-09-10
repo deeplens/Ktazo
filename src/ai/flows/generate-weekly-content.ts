@@ -1,3 +1,4 @@
+
 'use server';
 
 /**
@@ -129,49 +130,55 @@ const generateWeeklyContentFlow = ai.defineFlow(
     console.log('[[DEBUG]] Podcast script generated (first 50 chars):', podcastScript.substring(0,50));
 
     let mondayClipUrl = '';
+    let mondayDevotionalText = 'Listen to the Monday podcast clip for today\'s devotional.';
 
     if (podcastScript) {
-        console.log('[[DEBUG]] Starting TTS generation.');
-        const {media} = await ai.generate({
-            model: googleAI.model('gemini-2.5-flash-preview-tts'),
-            config: {
-                responseModalities: ['AUDIO'],
-                speechConfig: {
-                    multiSpeakerVoiceConfig: {
-                        speakerVoiceConfigs: [
-                            {
-                                speaker: 'Speaker1',
-                                voiceConfig: {
-                                    prebuiltVoiceConfig: {voiceName: 'Algenib'}, // Male
+        try {
+            console.log('[[DEBUG]] Starting TTS generation.');
+            const {media} = await ai.generate({
+                model: googleAI.model('gemini-2.5-flash-preview-tts'),
+                config: {
+                    responseModalities: ['AUDIO'],
+                    speechConfig: {
+                        multiSpeakerVoiceConfig: {
+                            speakerVoiceConfigs: [
+                                {
+                                    speaker: 'Speaker1',
+                                    voiceConfig: {
+                                        prebuiltVoiceConfig: {voiceName: 'Algenib'}, // Male
+                                    },
                                 },
-                            },
-                            {
-                                speaker: 'Speaker2',
-                                voiceConfig: {
-                                    prebuiltVoiceConfig: {voiceName: 'Achernar'}, // Female
+                                {
+                                    speaker: 'Speaker2',
+                                    voiceConfig: {
+                                        prebuiltVoiceConfig: {voiceName: 'Achernar'}, // Female
+                                    },
                                 },
-                            },
-                        ],
+                            ],
+                        },
                     },
                 },
-            },
-            prompt: podcastScript,
-        });
-        console.log('[[DEBUG]] Completed TTS generation.');
+                prompt: podcastScript,
+            });
+            console.log('[[DEBUG]] Completed TTS generation.');
 
-        if (media) {
-            console.log('[[DEBUG]] Converting audio to WAV.');
-            const audioBuffer = Buffer.from(
-                media.url.substring(media.url.indexOf(',') + 1), 'base64'
-            );
-            const wavBase64 = await toWav(audioBuffer);
-            mondayClipUrl = 'data:audio/wav;base64,' + wavBase64;
-            console.log('[[DEBUG]] Completed WAV conversion.');
+            if (media) {
+                console.log('[[DEBUG]] Converting audio to WAV.');
+                const audioBuffer = Buffer.from(
+                    media.url.substring(media.url.indexOf(',') + 1), 'base64'
+                );
+                const wavBase64 = await toWav(audioBuffer);
+                mondayClipUrl = 'data:audio/wav;base64,' + wavBase64;
+                console.log('[[DEBUG]] Completed WAV conversion.');
+            }
+        } catch(error) {
+            console.error('[[ERROR]] Failed to generate Monday podcast clip:', error);
+            mondayDevotionalText = 'Podcast not available.';
+            mondayClipUrl = '';
         }
     }
     
-    // Add a placeholder for Monday devotional text
-    content.devotionals.unshift('Listen to the Monday podcast clip for today\'s devotional.');
+    content.devotionals.unshift(mondayDevotionalText);
     
     console.log('[[DEBUG]] Finishing generateWeeklyContentFlow.');
     return {
