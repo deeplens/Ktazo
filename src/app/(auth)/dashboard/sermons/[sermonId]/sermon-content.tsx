@@ -80,39 +80,26 @@ export function SermonContent({ sermon, weeklyContent, onGenerateContent, onGene
   }
 
   const handleTranslate = async () => {
-      if (!sermon || !weeklyContent) {
-          toast({ variant: "destructive", title: "Content Missing", description: "Cannot translate without weekly content." });
+      if (!sermon) {
+          toast({ variant: "destructive", title: "Sermon not found." });
           return;
       };
       setIsTranslating(true);
       try {
-          const result = await translateSermonContent({
+          // Using the new, simpler flow for just transcript translation
+          const result = await translateTranscript({
               targetLanguage: 'Spanish',
-              title: sermon.title,
-              transcript: sermon.transcript,
-              summaryShort: weeklyContent.summaryShort,
-              summaryLong: weeklyContent.summaryLong,
-              devotionals: weeklyContent.devotionals
+              transcript: originalTranscript
           });
           
-          const newSermon: Sermon = {
-            ...sermon,
-            id: `sermon-${Date.now()}`,
-            title: result.title,
-            transcript: result.transcript,
-            status: 'DRAFT',
-            languages: [...sermon.languages, 'es'],
-            weeklyContentId: undefined, // It's a new draft
-          };
-
-          addSermon(newSermon);
+          setTranslatedTranscript(result.translatedTranscript);
+          // Also save it to our mock data so it persists on refresh
+          updateSermonTranscript(sermon.id, result.translatedTranscript, 'es');
 
           toast({
-              title: "Sermon Duplicated & Translated",
-              description: `A new draft "${result.title}" has been created in Spanish.`,
+              title: "Transcript Translated",
+              description: `The sermon transcript has been translated to Spanish. You can now view it in the 'Spanish' tab.`,
           });
-
-          router.push(`/dashboard/sermons/${newSermon.id}`);
 
       } catch (error) {
           console.error("Translation failed", error);
@@ -189,15 +176,17 @@ export function SermonContent({ sermon, weeklyContent, onGenerateContent, onGene
           {sermon.status.replace('_', ' ')}
         </Badge>
         <div className="hidden items-center gap-2 md:ml-auto md:flex">
+          {canApprove && sermon.status === 'READY_FOR_REVIEW' && <Button>Approve</Button>}
+          {canPublish && sermon.status === 'APPROVED' && <Button>Publish</Button>}
+          {sermon.status === 'PUBLISHED' && <Button variant="outline" asChild><Link href={`/dashboard/weekly/${sermon.id}`}><Eye className="mr-2 h-4 w-4"/>View Published Page</Link></Button>}
+          
           {canTranslate && (
              <Button onClick={handleTranslate} disabled={isTranslating} variant="outline" size="sm">
                 {isTranslating ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Languages className="mr-2 h-4 w-4"/>}
                 Translate to Spanish
              </Button>
           )}
-          {canApprove && sermon.status === 'READY_FOR_REVIEW' && <Button>Approve</Button>}
-          {canPublish && sermon.status === 'APPROVED' && <Button>Publish</Button>}
-          {sermon.status === 'PUBLISHED' && <Button variant="outline" asChild><Link href={`/dashboard/weekly/${sermon.id}`}><Eye className="mr-2 h-4 w-4"/>View Published Page</Link></Button>}
+
           {canDelete && (
               <AlertDialog>
                   <AlertDialogTrigger asChild>
@@ -317,5 +306,3 @@ export function SermonContent({ sermon, weeklyContent, onGenerateContent, onGene
     </div>
   );
 }
-
-    
