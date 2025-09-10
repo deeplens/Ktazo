@@ -42,6 +42,8 @@ const cleanupPrompt = ai.definePrompt({
 
   Raw Transcript:
   {{{transcript}}}
+
+  Return the result in a JSON object with the key "cleanedTranscript".
   `,
 });
 
