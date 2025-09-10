@@ -110,17 +110,21 @@ const generateWeeklyContentFlow = ai.defineFlow(
     outputSchema: GenerateWeeklyContentOutputSchema,
   },
   async input => {
+    console.log('[[DEBUG]] Starting generateWeeklyContentFlow');
     const [contentResponse, podcastScriptResponse] = await Promise.all([
         generateWeeklyContentPrompt(input),
         podcastScriptPrompt({sermonTranscript: input.sermonTranscript}),
     ]);
     
+    console.log('[[DEBUG]] Completed initial content and script generation.');
     const content = contentResponse.output!;
     const podcastScript = podcastScriptResponse.output?.script || '';
+    console.log('[[DEBUG]] Podcast script generated (first 50 chars):', podcastScript.substring(0,50));
 
     let mondayClipUrl = '';
 
     if (podcastScript) {
+        console.log('[[DEBUG]] Starting TTS generation.');
         const {media} = await ai.generate({
             model: googleAI.model('gemini-2.5-flash-preview-tts'),
             config: {
@@ -146,19 +150,23 @@ const generateWeeklyContentFlow = ai.defineFlow(
             },
             prompt: podcastScript,
         });
+        console.log('[[DEBUG]] Completed TTS generation.');
 
         if (media) {
+            console.log('[[DEBUG]] Converting audio to WAV.');
             const audioBuffer = Buffer.from(
                 media.url.substring(media.url.indexOf(',') + 1), 'base64'
             );
             const wavBase64 = await toWav(audioBuffer);
             mondayClipUrl = 'data:audio/wav;base64,' + wavBase64;
+            console.log('[[DEBUG]] Completed WAV conversion.');
         }
     }
     
     // Add a placeholder for Monday devotional text
     content.devotionals.unshift('Listen to the Monday podcast clip for today\'s devotional.');
-
+    
+    console.log('[[DEBUG]] Finishing generateWeeklyContentFlow.');
     return {
         ...content,
         mondayClipUrl,
