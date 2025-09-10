@@ -4,24 +4,70 @@ import { getMockSermons, mockWeeklyContent } from "@/lib/mock-data";
 import { SermonContent } from "./sermon-content";
 import { useEffect, useState } from "react";
 import { Sermon, WeeklyContent } from "@/lib/types";
+import { generateWeeklyContent } from "@/ai/flows/generate-weekly-content";
+import { useAuth } from "@/lib/auth";
+import { useToast } from "@/hooks/use-toast";
 
 export default function SermonDetailPage() {
   const params = useParams();
   const sermonId = params.sermonId as string;
+  const { user } = useAuth();
+  const { toast } = useToast();
   
   const [sermon, setSermon] = useState<Sermon | null | undefined>(undefined);
   const [weeklyContent, setWeeklyContent] = useState<WeeklyContent | undefined>(undefined);
+  const [isGenerating, setIsGenerating] = useState(false);
 
   useEffect(() => {
     if (sermonId) {
       const foundSermon = getMockSermons().find(s => s.id === sermonId);
       setSermon(foundSermon);
       if (foundSermon) {
+        // This is mock data lookup. In a real app, you'd fetch this.
         const foundContent = mockWeeklyContent.find(wc => wc.sermonId === foundSermon.id);
         setWeeklyContent(foundContent);
       }
     }
   }, [sermonId]);
+
+  const handleGenerateContent = async () => {
+    if (!sermon || !user) return;
+    setIsGenerating(true);
+    try {
+        // In a real app, you would save this to a DB and associate it with the sermon
+        const generated = await generateWeeklyContent({ sermonId: sermon.id, tenantId: user.tenantId });
+        
+        // For this mock implementation, we'll just create it in memory
+        const newContent: WeeklyContent = {
+            id: `wc-${Date.now()}`,
+            sermonId: sermon.id,
+            tenantId: user.tenantId,
+            themeImageUrl: generated.themedImageUrl,
+            summaryShort: generated.summaryShort,
+            summaryLong: generated.summaryLong,
+            devotionals: generated.devotionals.map((d, i) => ({ day: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'][i], content: d })),
+            mondayClipUrl: generated.mondayClipUrl,
+        };
+        
+        setWeeklyContent(newContent);
+
+        toast({
+            title: "Content Generated",
+            description: "Weekly content has been successfully generated.",
+        });
+
+    } catch (error) {
+        console.error("Content generation failed", error);
+        toast({
+            variant: "destructive",
+            title: "Generation Failed",
+            description: "There was an error generating the weekly content.",
+        });
+    } finally {
+        setIsGenerating(false);
+    }
+  };
+
 
   if (sermon === undefined) {
     // Loading state, can show a skeleton here if desired
@@ -32,5 +78,10 @@ export default function SermonDetailPage() {
     notFound();
   }
   
-  return <SermonContent sermon={sermon} weeklyContent={weeklyContent} />;
+  return <SermonContent 
+            sermon={sermon} 
+            weeklyContent={weeklyContent} 
+            onGenerateContent={handleGenerateContent}
+            isGenerating={isGenerating}
+         />;
 }

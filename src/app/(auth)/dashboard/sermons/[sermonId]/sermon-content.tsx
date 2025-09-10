@@ -7,7 +7,8 @@ import {
   Sparkles,
   Languages,
   CheckCircle,
-  Eye
+  Eye,
+  Loader2
 } from "lucide-react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
@@ -28,9 +29,11 @@ import { Sermon, WeeklyContent } from "@/lib/types";
 interface SermonContentProps {
     sermon: Sermon | null;
     weeklyContent?: WeeklyContent;
+    onGenerateContent: () => Promise<void>;
+    isGenerating: boolean;
 }
 
-export function SermonContent({ sermon, weeklyContent }: SermonContentProps) {
+export function SermonContent({ sermon, weeklyContent, onGenerateContent, isGenerating }: SermonContentProps) {
   const { user } = useAuth();
   
   if (!sermon) {
@@ -100,9 +103,21 @@ export function SermonContent({ sermon, weeklyContent }: SermonContentProps) {
                 ) : (
                     <div className="flex flex-col items-center justify-center text-center p-8 border-2 border-dashed rounded-lg">
                         <p className="mb-4 text-muted-foreground">No content has been generated for this sermon yet.</p>
-                        <Button disabled={sermon.status === 'DRAFT'}>
-                            <Sparkles className="mr-2 h-4 w-4" />
-                            Generate Weekly Content
+                        <Button 
+                          onClick={onGenerateContent} 
+                          disabled={sermon.status === 'DRAFT' || isGenerating}
+                        >
+                            {isGenerating ? (
+                                <>
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    Generating...
+                                </>
+                            ) : (
+                                <>
+                                    <Sparkles className="mr-2 h-4 w-4" />
+                                    Generate Weekly Content
+                                </>
+                            )}
                         </Button>
                          {sermon.status === 'DRAFT' && <p className="text-xs mt-2 text-muted-foreground">Transcription must be complete.</p>}
                     </div>
