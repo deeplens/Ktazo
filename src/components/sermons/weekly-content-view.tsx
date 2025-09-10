@@ -104,7 +104,7 @@ export function WeeklyContentView({ content, onGenerateAudio, isGeneratingAudio 
         <CardHeader>
           <CardTitle className="flex items-center gap-2"><Gamepad2 /> Interactive Games</CardTitle>
            <CardDescription>
-            AI-generated games based on the sermon content.
+            Preview of AI-generated games based on the sermon content. These will be interactive for members.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">

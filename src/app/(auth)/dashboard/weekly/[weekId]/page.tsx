@@ -154,13 +154,13 @@ function WeeklyPageContent({ sermon, weeklyContent }: { sermon: Sermon, weeklyCo
                   <Dialog key={index}>
                       <DialogTrigger asChild>
                           <Card className="hover:bg-accent/50 cursor-pointer transition-colors flex flex-col h-full">
-                              <CardHeader>
+                              <CardHeader className="flex-grow">
                                   <CardTitle className="text-lg">{game.title}</CardTitle>
-                                  <Badge variant="secondary" className="w-fit">{game.audience}</Badge>
+                                  <CardDescription>Game Type: {game.type}</CardDescription>
                               </CardHeader>
-                              <CardContent className="flex-grow">
-                                <p className="text-sm text-muted-foreground">An interactive '{game.type}' game.</p>
-                              </CardContent>
+                              <CardFooter>
+                                <Badge variant="secondary" className="w-fit">{game.audience}</Badge>
+                              </CardFooter>
                           </Card>
                       </DialogTrigger>
                       <DialogContent className="max-w-2xl">
