@@ -173,14 +173,14 @@ const initialWeeklyContent: WeeklyContent[] = [
         id: 'wc-1',
         tenantId: 'tenant-1',
         sermonId: 'sermon-1',
-        summaryShort: 'A brief look at Psalm 23, highlighting God\\'s role as our provider and protector.',
-        summaryLong: 'This week\\'s devotional guide explores the deep comfort and assurance found in Psalm 23. We delve into the metaphor of the shepherd and his sheep, understanding how God leads us, provides for our needs, restores our souls, and walks with us through life\\'s darkest valleys. It\\'s a message of profound trust and unwavering divine care.',
+        summaryShort: "A brief look at Psalm 23, highlighting God's role as our provider and protector.",
+        summaryLong: "This week's devotional guide explores the deep comfort and assurance found in Psalm 23. We delve into the metaphor of the shepherd and his sheep, understanding how God leads us, provides for our needs, restores our souls, and walks with us through life's darkest valleys. It's a message of profound trust and unwavering divine care.",
         devotionals: [
-            { day: 'Monday', content: 'Podcast clip about resting in God\\'s care.' },
+            { day: 'Monday', content: "Podcast clip about resting in God's care." },
             { day: 'Tuesday', content: 'Reflection on "The Lord is my shepherd, I shall not want." What does it mean to be content in His provision?' },
             { day: 'Wednesday', content: 'He makes me lie down in green pastures. Where are the "green pastures" in your life where you can find rest?' },
-            { day: 'Thursday', content: 'Even though I walk through the valley of the shadow of death, I will fear no evil. How does God\\'s presence comfort you in fearful times?' },
-            { day: 'Friday', content: 'Surely goodness and mercy shall follow me all the days of my life. Meditate on God\\'s persistent goodness.' },
+            { day: 'Thursday', content: "Even though I walk through the valley of the shadow of death, I will fear no evil. How does God's presence comfort you in fearful times?" },
+            { day: 'Friday', content: "Surely goodness and mercy shall follow me all the days of my life. Meditate on God's persistent goodness." },
         ],
         reflectionQuestions: [
             {
@@ -188,7 +188,7 @@ const initialWeeklyContent: WeeklyContent[] = [
                 questions: [
                     'In what areas of your life do you need to trust God as your shepherd right now?',
                     'How can you find "green pastures" and "still waters" for your soul this week?',
-                    'Reflect on a "dark valley" experience. How did you see God\\'s presence with you?',
+                    "Reflect on a 'dark valley' experience. How did you see God's presence with you?",
                 ],
             },
             {
@@ -202,7 +202,7 @@ const initialWeeklyContent: WeeklyContent[] = [
             {
                 audience: 'Families',
                 questions: [
-                  'How can our family "prepare a table" for someone in need this week?',
+                  "How can our family 'prepare a table' for someone in need this week?",
                   'What does it mean for our "cup to overflow" with blessings as a family?',
                   'In what ways can we "dwell in the house of the Lord" together every day?',
                 ],
@@ -211,8 +211,8 @@ const initialWeeklyContent: WeeklyContent[] = [
                 audience: 'Youth',
                 questions: [
                   'What does the "rod and staff" symbolize to you in terms of protection and guidance?',
-                  'How does knowing God is like a shepherd change how you view challenges at school or with friends?',
-                  'What does "anointing my head with oil" mean to you in today\\'s world?',
+                  "How does knowing God is like a shepherd change how you view challenges at school or with friends?",
+                  "What does 'anointing my head with oil' mean to you in today's world?",
                 ],
             },
         ],
