@@ -15,10 +15,11 @@ function ChurchIcon(props: React.SVGProps<SVGSVGElement>) {
       strokeLinecap="round"
       strokeLinejoin="round"
     >
-      <path d="M18 7.35a1.5 1.5 0 0 0-3 0V11h-3V7.35a1.5 1.5 0 0 0-3 0V11H6V7.35a1.5 1.5 0 0 0-3 0V21h18V7.35z" />
-      <path d="M12 2v2.35" />
-      <path d="M10.5 4.35h3" />
-      <path d="M12 15.5c-1.55 0-2.8 1.4-2.8 3 0 1.55 1.25 2.8 2.8 2.8s2.8-1.25 2.8-2.8c0-1.6-1.25-3-2.8-3z" />
+      <path d="m18 7 4 2v11a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9l4-2" />
+      <path d="M14 22v-4a2 2 0 0 0-2-2a2 2 0 0 0-2 2v4" />
+      <path d="M18 22V5l-6-3-6 3v17" />
+      <path d="M12 7v5" />
+      <path d="M10 9h4" />
     </svg>
   );
 }
