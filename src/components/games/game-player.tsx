@@ -124,7 +124,7 @@ export function GamePlayer({ game }: GamePlayerProps) {
         case "Matching":
             return <MatchingGame items={game.data as MatchingGameItem[]} />;
         case "Fill in the Blank":
-             return <FillInTheBlankGame data={game.data as FillInTheBlankItem} />;
+             return <FillInTheBlankGame data={game.data as FillInTheBlankItem[]} />;
         case "Word Guess":
              return <WordGuessGame data={game.data as WordGuessItem} />;
         case "Wordle":

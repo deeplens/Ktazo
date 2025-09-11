@@ -76,7 +76,7 @@ export interface Game {
     type: 'Quiz' | 'Word Search' | 'Fill in the Blank' | 'Matching' | 'Word Guess' | 'Wordle' | 'Jeopardy';
     title: string;
     audience: 'Youth' | 'Adults';
-    data: GameQuestion[] | { words: string[] } | FillInTheBlankItem | MatchingGameItem[] | WordGuessItem | WordleItem | JeopardyCategory[];
+    data: GameQuestion[] | { words: string[] } | FillInTheBlankItem[] | MatchingGameItem[] | WordGuessItem | WordleItem | JeopardyCategory[];
 }
 
 export interface WeeklyContent {
