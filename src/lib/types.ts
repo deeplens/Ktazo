@@ -40,11 +40,17 @@ export interface GameQuestion {
     correctAnswer: string;
 }
 
+export interface MatchingGameItem {
+    id: number;
+    term: string;
+    definition: string;
+}
+
 export interface Game {
-    type: 'Quiz' | 'Word Search' | 'Fill in the Blank';
+    type: 'Quiz' | 'Word Search' | 'Fill in the Blank' | 'Matching';
     title: string;
     audience: 'Youth' | 'Adults';
-    data: GameQuestion[] | { words: string[] } | { sentence: string, blank: string };
+    data: GameQuestion[] | { words: string[] } | { sentence: string, blank: string } | MatchingGameItem[];
 }
 
 export interface WeeklyContent {

@@ -31,14 +31,21 @@ const GameQuestionSchema = z.object({
     correctAnswer: z.string(),
 });
 
+const MatchingGameItemSchema = z.object({
+    id: z.number(),
+    term: z.string().describe('A key term or concept from the sermon.'),
+    definition: z.string().describe('The definition or a related concept to the term.'),
+});
+
 const GameSchema = z.object({
-    type: z.enum(['Quiz', 'Word Search', 'Fill in the Blank']),
+    type: z.enum(['Quiz', 'Word Search', 'Fill in the Blank', 'Matching']),
     title: z.string(),
     audience: z.enum(['Youth', 'Adults']),
     data: z.union([
         z.array(GameQuestionSchema),
         z.object({ words: z.array(z.string()) }),
         z.object({ sentence: z.string(), blank: z.string() }),
+        z.array(MatchingGameItemSchema).describe('An array of 4-6 pairs for a matching game.'),
     ]),
 });
 
@@ -47,7 +54,7 @@ const GenerateWeeklyContentOutputSchema = z.object({
   summaryLong: z.string().describe('A longer devotional guide summary of the sermon.'),
   devotionals: z.array(z.string()).describe('An array of five daily devotionals (Mon-Fri).'),
   reflectionQuestions: z.array(ReflectionQuestionGroupSchema).describe('An array of reflection question groups for different audiences.'),
-  games: z.array(GameSchema).describe('An array of 2-3 interactive games based on the sermon, like quizzes or word searches.'),
+  games: z.array(GameSchema).describe('An array of 3-4 interactive games based on the sermon. Include a mix of types like Quiz, Word Search, Fill in the Blank, or Matching. For Matching games, provide 4-6 pairs of terms and definitions.'),
 });
 export type GenerateWeeklyContentOutput = z.infer<typeof GenerateWeeklyContentOutputSchema>;
 
@@ -76,7 +83,7 @@ const generateWeeklyContentPrompt = ai.definePrompt({
   - A longer devotional guide summary (summaryLong).
   - Five daily devotionals for Monday, Tuesday, Wednesday, Thursday, and Friday (devotionals).
   - Reflection questions for four audiences: Individuals, Families, Small Groups, and Youth. Each audience should have its own group with 3-4 questions.
-  - An array of 3-4 interactive games based on the sermon's content. Include a mix of game types like 'Quiz', 'Word Search', or 'Fill in the Blank', each targeted at either 'Youth' or 'Adults'. For Quizzes, provide 3-4 questions with 4 multiple-choice options each.
+  - An array of 3-4 interactive games based on the sermon's content. Include a mix of game types like 'Quiz', 'Word Search', 'Fill in the Blank', or 'Matching', each targeted at either 'Youth' or 'Adults'. For Quizzes, provide 3-4 questions with 4 multiple-choice options each. For Matching games, provide 4-6 pairs of terms and definitions.
   `,
 });
 

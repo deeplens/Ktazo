@@ -1,7 +1,7 @@
 
 'use client';
 
-import { Game, GameQuestion } from "@/lib/types";
+import { Game, GameQuestion, MatchingGameItem } from "@/lib/types";
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../ui/card";
 import { Button } from "../ui/button";
@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 import { CheckCircle, XCircle, ArrowRight } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
 import { WordSearchGame } from "./word-search";
+import { MatchingGame } from "./matching-game";
 
 interface GamePlayerProps {
     game: Game;
@@ -126,6 +127,8 @@ export function GamePlayer({ game }: GamePlayerProps) {
             return <QuizGame data={game.data as GameQuestion[]} />;
         case "Word Search":
              return <WordSearchGame words={(game.data as { words: string[] }).words} />;
+        case "Matching":
+            return <MatchingGame items={game.data as MatchingGameItem[]} />;
         case "Fill in the Blank":
              return <FillInTheBlankGame data={game.data as { sentence: string, blank: string }} />;
         default:

@@ -248,13 +248,15 @@ const initialWeeklyContent: WeeklyContent[] = [
                 }
             },
             {
-                "type": "Fill in the Blank",
-                "title": "Complete the Verse",
+                "type": "Matching",
+                "title": "Key Concepts",
                 "audience": "Adults",
-                "data": {
-                    "sentence": "Surely goodness and ______ shall follow me all the days of my life.",
-                    "blank": "mercy"
-                }
+                "data": [
+                    { "id": 1, "term": "Green Pastures", "definition": "A place of rest and provision." },
+                    { "id": 2, "term": "Still Waters", "definition": "A source of peace and refreshment." },
+                    { "id": 3, "term": "Rod and Staff", "definition": "Symbols of protection and guidance." },
+                    { "id": 4, "term": "Valley of Shadow", "definition": "A representation of life's darkest trials." }
+                ]
             }
         ],
         mondayClipUrl: 'https://storage.googleapis.com/studioprod-55829.appspot.com/652932b172a5a544256c70c2/sermons/kE3z98a4aT6s1B2aY1E2/audio.mp3',
