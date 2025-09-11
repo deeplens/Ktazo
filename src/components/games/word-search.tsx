@@ -157,7 +157,7 @@ export function WordSearchGame({ words }: WordSearchGameProps) {
     const allWordsFound = foundWords.length === words.length;
 
     return (
-        <div className="flex flex-col md:flex-row gap-8 items-start" onMouseUp={handleMouseUp} onMouseLeave={handleMouseUp}>
+        <div className="flex flex-col md:flex-row gap-8 items-start justify-center" onMouseUp={handleMouseUp} onMouseLeave={handleMouseUp}>
             <div className="flex-shrink-0 grid grid-cols-12 gap-1 bg-card p-2 rounded-lg shadow-inner select-none">
                 {grid.map((row, rowIndex) =>
                     row.map((cell, colIndex) => (
@@ -175,7 +175,7 @@ export function WordSearchGame({ words }: WordSearchGameProps) {
                     ))
                 )}
             </div>
-            <div className="w-full md:w-64">
+            <div className="w-full md:w-52">
                 <h3 className="font-bold text-xl mb-4">Find These Words:</h3>
                 {allWordsFound ? (
                      <div className="text-center p-4 bg-green-100 dark:bg-green-900 rounded-lg">
@@ -202,4 +202,3 @@ export function WordSearchGame({ words }: WordSearchGameProps) {
         </div>
     );
 }
-

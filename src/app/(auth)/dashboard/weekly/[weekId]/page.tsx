@@ -168,7 +168,7 @@ function WeeklyPageContent({ sermon, weeklyContent }: { sermon: Sermon, weeklyCo
                               </CardFooter>
                           </Card>
                       </DialogTrigger>
-                      <DialogContent className="max-w-2xl">
+                      <DialogContent className="max-w-4xl">
                           <DialogHeader>
                           <DialogTitle>{game.title}</DialogTitle>
                           <DialogDescription>
