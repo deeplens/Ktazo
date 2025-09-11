@@ -3,11 +3,11 @@
 
 import { useState, useEffect } from 'react';
 import { WordleItem } from '@/lib/types';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
 import { Alert, AlertDescription, AlertTitle } from '../ui/alert';
-import { CheckCircle, XCircle } from 'lucide-react';
+import { CheckCircle, XCircle, HelpCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion';
 
 interface WordleGameProps {
   data: WordleItem;
@@ -125,6 +125,39 @@ export function WordleGame({ data }: WordleGameProps) {
 
   return (
     <div className="flex flex-col items-center gap-4">
+       <Accordion type="single" collapsible className="w-full max-w-sm">
+        <AccordionItem value="item-1">
+            <AccordionTrigger>
+                <div className="flex items-center gap-2">
+                    <HelpCircle className="h-5 w-5" />
+                    <span className="font-semibold">How to Play</span>
+                </div>
+            </AccordionTrigger>
+            <AccordionContent className="text-sm text-muted-foreground">
+                <ul className="space-y-2 list-disc pl-5">
+                    <li>Guess the 5-letter word in 6 tries.</li>
+                    <li>Each guess must be a valid 5-letter word.</li>
+                    <li>The color of the tiles will change to show how close your guess was to the word.</li>
+                </ul>
+                <div className="mt-4 space-y-3 pt-4 border-t">
+                    <p className="font-semibold">Examples</p>
+                    <div className="flex items-center gap-2">
+                         <div className="w-8 h-8 flex items-center justify-center text-lg font-bold uppercase bg-green-500 text-white border-green-500 rounded">W</div>
+                         <p>The letter <span className="font-bold">W</span> is in the word and in the correct spot.</p>
+                    </div>
+                     <div className="flex items-center gap-2">
+                         <div className="w-8 h-8 flex items-center justify-center text-lg font-bold uppercase bg-yellow-500 text-white border-yellow-500 rounded">O</div>
+                         <p>The letter <span className="font-bold">O</span> is in the word but in the wrong spot.</p>
+                    </div>
+                     <div className="flex items-center gap-2">
+                         <div className="w-8 h-8 flex items-center justify-center text-lg font-bold uppercase bg-muted-foreground text-white border-muted-foreground rounded">R</div>
+                         <p>The letter <span className="font-bold">R</span> is not in the word in any spot.</p>
+                    </div>
+                </div>
+            </AccordionContent>
+        </AccordionItem>
+      </Accordion>
+
       <div className="grid grid-rows-6 gap-1.5">
         {guesses.map((guess, rowIndex) => (
           <div key={rowIndex} className="grid grid-cols-5 gap-1.5">
