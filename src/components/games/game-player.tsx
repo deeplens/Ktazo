@@ -12,6 +12,7 @@ import { WordSearchGame } from "./word-search";
 import { MatchingGame } from "./matching-game";
 import { FillInTheBlankGame } from "./fill-in-the-blank";
 import { WordGuessGame } from "./word-guess";
+import { WordleGame } from "./wordle-game";
 
 interface GamePlayerProps {
     game: Game;
@@ -123,7 +124,7 @@ export function GamePlayer({ game }: GamePlayerProps) {
         case "Word Guess":
              return <WordGuessGame data={game.data as WordGuessItem} />;
         case "Wordle":
-             return <p>Wordle Game - Not Yet Implemented</p>
+             return <WordleGame data={game.data as WordleItem} />;
         default:
             return <p>Unknown game type</p>;
     }
