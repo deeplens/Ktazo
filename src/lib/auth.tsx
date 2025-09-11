@@ -1,3 +1,4 @@
+
 'use client';
 
 import { createContext, useContext, useState, ReactNode, useMemo, useEffect } from 'react';
@@ -11,6 +12,7 @@ interface AuthContextType {
   login: (email: string) => boolean;
   logout: () => void;
   switchRole: (role: UserRole) => void;
+  updateUser: (userData: Partial<User>) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -59,7 +61,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }
 
-  const value = useMemo(() => ({ user, loading, login, logout, switchRole }), [user, loading]);
+  const updateUser = (userData: Partial<User>) => {
+    if (user) {
+      const updatedUser = { ...user, ...userData };
+      setUser(updatedUser);
+      sessionStorage.setItem('ktazo-user', JSON.stringify(updatedUser));
+      
+      // Also update the master list in mock-data (for demo purposes)
+      const userIndex = mockUsers.findIndex(u => u.id === user.id);
+      if (userIndex > -1) {
+          mockUsers[userIndex] = updatedUser;
+      }
+    }
+  };
+
+  const value = useMemo(() => ({ user, loading, login, logout, switchRole, updateUser }), [user, loading]);
 
   return (
     <AuthContext.Provider value={value}>

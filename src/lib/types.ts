@@ -8,6 +8,7 @@ export interface User {
   role: UserRole;
   name: string;
   email: string;
+  photoUrl?: string;
   lastLoginAt: string;
   points: number;
 }

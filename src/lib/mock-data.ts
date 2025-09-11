@@ -24,7 +24,8 @@ const initialSermons: Sermon[] = [
     languages: ['en', 'es'],
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
-    weeklyContentId: 'wc-1'
+    weeklyContentId: 'wc-1',
+    artworkUrl: 'https://picsum.photos/seed/sermon1/1200/800'
   },
   {
     id: 'sermon-2',
@@ -271,45 +272,44 @@ const initialWeeklyContent: WeeklyContent[] = [
                 }
             },
             {
-                "type": "Matching",
-                "title": "Key Concepts",
-                "audience": "Adults",
-                "data": [
-                    { "id": 1, "term": "Green Pastures", "definition": "A place of rest and provision." },
-                    { "id": 2, "term": "Still Waters", "definition": "A source of peace and refreshment." },
-                    { "id": 3, "term": "Rod and Staff", "definition": "Symbols of protection and guidance." },
-                    { "id": 4, "term": "Valley of Shadow", "definition": "A representation of life's darkest trials." }
-                ]
+                type: 'Fill in the Blank',
+                title: 'Complete the Verse',
+                audience: 'Adults',
+                data: [
+                    { sentence: 'The Lord is my ___...', blank: 'shepherd' },
+                    { sentence: 'He makes me lie down in green ___...', blank: 'pastures' },
+                    { sentence: 'He leads me beside still ___...', blank: 'waters' },
+                    { sentence: 'I will fear no ___, for you are with me.', blank: 'evil' },
+                ],
             },
             {
-                "type": "Word Guess",
-                "title": "Guess the Key Word",
-                "audience": "Youth",
-                "data": [
-                    {
-                        "word": "RIGHTEOUSNESS",
-                        "hint": "The quality of being morally right or justifiable."
-                    },
-                    {
-                        "word": "SHEPHERD",
-                        "hint": "One who tends and herds sheep."
-                    },
-                    {
-                        "word": "COMFORT",
-                        "hint": "A state of physical ease and freedom from pain or constraint."
-                    },
-                    {
-                        "word": "FOREVER",
-                        "hint": "For all future time; for always."
-                    }
-                ]
+                type: 'Matching',
+                title: 'Key Concepts',
+                audience: 'Adults',
+                data: [
+                    { id: 1, term: 'Green Pastures', definition: 'A place of rest and provision.' },
+                    { id: 2, term: 'Still Waters', definition: 'A source of peace and refreshment.' },
+                    { id: 3, term: 'Rod and Staff', definition: 'Symbols of protection and guidance.' },
+                    { id: 4, term: 'Valley of Shadow', definition: 'A representation of life\'s darkest trials.' },
+                ],
             },
             {
-                "type": "Wordle",
-                "title": "Sermon Wordle",
-                "audience": "Adults",
-                "data": {
-                    "word": "GRACE"
+                type: 'Word Guess',
+                title: 'Guess the Key Word',
+                audience: 'Youth',
+                data: [
+                    { word: 'RIGHTEOUSNESS', hint: 'The quality of being morally right or justifiable.' },
+                    { word: 'SHEPHERD', hint: 'One who tends and herds sheep.' },
+                    { word: 'COMFORT', hint: 'A state of physical ease and freedom from pain or constraint.' },
+                    { word: 'FOREVER', hint: 'For all future time; for always.' },
+                ],
+            },
+            {
+                type: 'Wordle',
+                title: 'Sermon Wordle',
+                audience: 'Adults',
+                data: {
+                    word: 'GRACE'
                 }
             }
         ],

@@ -1,7 +1,8 @@
+
 'use client';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, BookOpen, Users, Settings, HelpCircle, UserRole as UserRoleIcon } from 'lucide-react';
+import { Home, BookOpen, Users, Settings, HelpCircle, User as UserIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { UserRole } from '@/lib/types';
 
@@ -14,6 +15,7 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   { href: '/dashboard', label: 'Home', icon: Home, roles: ['MASTER', 'ADMIN', 'PASTOR', 'MEMBER'] },
+  { href: '/dashboard/profile', label: 'Profile', icon: UserIcon, roles: ['MASTER', 'ADMIN', 'PASTOR', 'MEMBER'] },
   { href: '/dashboard/sermons', label: 'Sermons', icon: BookOpen, roles: ['MASTER', 'ADMIN', 'PASTOR'] },
   { href: '/dashboard/weekly', label: 'This Week', icon: BookOpen, roles: ['MEMBER'] },
   { href: '/dashboard/admin/members', label: 'Members', icon: Users, roles: ['MASTER', 'ADMIN'] },
@@ -33,7 +35,7 @@ export function MainNav({ role }: { role: UserRole }) {
           href={href}
           className={cn(
             'flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary',
-            { 'bg-accent text-primary': pathname === href }
+            { 'bg-accent text-primary': pathname.startsWith(href) && (href !== '/dashboard' || pathname === '/dashboard') }
           )}
         >
           <Icon className="h-4 w-4" />
