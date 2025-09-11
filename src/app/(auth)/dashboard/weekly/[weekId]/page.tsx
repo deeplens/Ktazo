@@ -92,12 +92,14 @@ function WeeklyPageContent({ sermon, weeklyContent }: { sermon: Sermon, weeklyCo
     return <div>No content available for this week.</div>
   }
 
+  const heroImage = sermon.artworkUrl || `https://picsum.photos/seed/${sermon.id}/1200/800`;
+
   return (
     <div className="container mx-auto py-8 px-4 space-y-8">
       {weeklyContent.id !== 'wc-placeholder' && (
       <div className="relative w-full h-64 md:h-96 rounded-2xl overflow-hidden shadow-lg">
         <Image 
-          src={`https://picsum.photos/seed/${sermon.id}/1200/800`}
+          src={heroImage}
           alt={`Theme for ${sermon.title}`} 
           fill 
           className="object-cover"
@@ -235,5 +237,3 @@ function WeeklyPageContent({ sermon, weeklyContent }: { sermon: Sermon, weeklyCo
     </div>
   );
 }
-
-    

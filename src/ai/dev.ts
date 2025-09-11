@@ -10,3 +10,4 @@ import './flows/translate-sermon-content';
 import './flows/generate-monday-clip';
 import './flows/translate-transcript';
 import './flows/cleanup-transcript';
+import './flows/generate-sermon-artwork';

@@ -3,6 +3,7 @@
 'use client';
 
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import {
   ChevronLeft,
   UploadCloud,
@@ -14,7 +15,10 @@ import {
   Trash2,
   Wand2,
   Mic,
-  FilePenLine
+  FilePenLine,
+  Palette,
+  Upload,
+  Bot
 } from "lucide-react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
@@ -42,7 +46,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger
 } from "@/components/ui/alert-dialog";
-import { deleteSermon, saveWeeklyContent, updateSermonDetails, updateSermonStatus, updateSermonTranscript } from "@/lib/mock-data";
+import { deleteSermon, saveWeeklyContent, updateSermonArtwork, updateSermonDetails, updateSermonStatus, updateSermonTranscript } from "@/lib/mock-data";
 import { useToast } from "@/hooks/use-toast";
 import { translateTranscript } from "@/ai/flows/translate-transcript";
 import { useState, useEffect } from "react";
@@ -50,6 +54,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cleanupTranscript } from "@/ai/flows/cleanup-transcript";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { generateSermonArtwork } from "@/ai/flows/generate-sermon-artwork";
 
 interface SermonContentProps {
   sermon: Sermon;
@@ -81,6 +86,10 @@ export function SermonContent({
   });
   const [isTranslating, setIsTranslating] = useState(false);
   const [isCleaning, setIsCleaning] = useState(false);
+  const [isGeneratingArtwork, setIsGeneratingArtwork] = useState(false);
+  const [artworkPrompt, setArtworkPrompt] = useState("");
+  const [uploadedArtwork, setUploadedArtwork] = useState<File | null>(null);
+  const [artworkPreview, setArtworkPreview] = useState<string | null>(initialSermon.artworkUrl || null);
 
   const [originalTranscript, setOriginalTranscript] = useState(
     initialSermon.transcript
@@ -101,7 +110,59 @@ export function SermonContent({
     });
     setOriginalTranscript(initialSermon.transcript);
     setTranslatedTranscript(initialSermon.translatedTranscript || null);
+    setArtworkPreview(initialSermon.artworkUrl || null);
   }, [initialSermon]);
+
+  const fileToDataURI = (file: File): Promise<string> => {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result as string);
+            reader.onerror = reject;
+            reader.readAsDataURL(file);
+        });
+    }
+
+  const handleArtworkFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+        setUploadedArtwork(file);
+        const previewUrl = await fileToDataURI(file);
+        setArtworkPreview(previewUrl);
+    }
+  }
+
+  const handleSaveArtwork = () => {
+    if (!artworkPreview) return;
+    updateSermonArtwork(sermon.id, artworkPreview);
+    setSermon(prev => prev ? { ...prev, artworkUrl: artworkPreview } : prev);
+    toast({
+        title: "Artwork Saved",
+        description: "The sermon artwork has been updated."
+    });
+  }
+
+  const handleGenerateArtwork = async () => {
+    if (!artworkPrompt) return;
+    setIsGeneratingArtwork(true);
+    try {
+        const result = await generateSermonArtwork({ prompt: artworkPrompt });
+        setArtworkPreview(result.artworkUrl);
+        toast({
+            title: "Artwork Generated",
+            description: "A new artwork has been generated. Don't forget to save."
+        });
+    } catch (error) {
+        console.error("Artwork generation failed", error);
+        toast({
+            variant: "destructive",
+            title: "Generation Failed",
+            description: "An error occurred while generating artwork.",
+        });
+    } finally {
+        setIsGeneratingArtwork(false);
+    }
+  }
+
 
   const handleDetailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target;
@@ -359,6 +420,50 @@ export function SermonContent({
                 </CardFooter>
              </Card>
          )}
+
+        {canManage && (
+            <Card>
+                <CardHeader>
+                    <CardTitle className="flex items-center gap-2"><Palette /> Sermon Artwork</CardTitle>
+                    <CardDescription>Upload custom artwork or generate one using AI.</CardDescription>
+                </CardHeader>
+                <CardContent className="grid gap-4 md:grid-cols-2">
+                    <div className="flex flex-col items-center gap-4">
+                        <div className="w-full aspect-video rounded-md bg-muted overflow-hidden relative flex items-center justify-center">
+                            {artworkPreview ? (
+                                <Image src={artworkPreview} alt="Sermon artwork preview" layout="fill" objectFit="cover" />
+                            ) : (
+                                <Palette className="w-12 h-12 text-muted-foreground" />
+                            )}
+                        </div>
+                        <Button onClick={handleSaveArtwork} className="w-full" disabled={!artworkPreview}>Save Artwork</Button>
+                    </div>
+                    <Tabs defaultValue="upload" className="w-full">
+                        <TabsList className="grid w-full grid-cols-2">
+                            <TabsTrigger value="upload"><Upload className="mr-2 h-4 w-4"/>Upload</TabsTrigger>
+                            <TabsTrigger value="generate"><Bot className="mr-2 h-4 w-4"/>Generate</TabsTrigger>
+                        </TabsList>
+                        <TabsContent value="upload" className="mt-4">
+                             <div className="space-y-2">
+                                <Label htmlFor="artwork-file">Upload a JPEG</Label>
+                                <Input id="artwork-file" type="file" accept=".jpg, .jpeg" onChange={handleArtworkFileChange} />
+                             </div>
+                        </TabsContent>
+                        <TabsContent value="generate" className="mt-4">
+                            <div className="space-y-2">
+                                <Label htmlFor="artwork-prompt">Artwork Prompt</Label>
+                                <Textarea id="artwork-prompt" placeholder="e.g., A stained glass window depicting a shepherd..." value={artworkPrompt} onChange={(e) => setArtworkPrompt(e.target.value)} />
+                            </div>
+                            <Button onClick={handleGenerateArtwork} disabled={isGeneratingArtwork || !artworkPrompt} className="mt-2 w-full">
+                                {isGeneratingArtwork ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Sparkles className="mr-2 h-4 w-4"/>}
+                                Generate
+                            </Button>
+                        </TabsContent>
+                    </Tabs>
+                </CardContent>
+            </Card>
+        )}
+
 
           <Card>
             <CardHeader>

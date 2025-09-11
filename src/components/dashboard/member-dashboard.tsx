@@ -74,6 +74,8 @@ export function MemberDashboard() {
     );
   }
 
+  const heroImage = publishedSermon.artworkUrl || `https://picsum.photos/seed/${publishedSermon.id}/1200/800`;
+
   return (
     <div className="grid gap-6">
       <Card>
@@ -92,7 +94,7 @@ export function MemberDashboard() {
           <CardContent>
             <div className="relative aspect-[16/9] w-full rounded-lg overflow-hidden mb-4">
                 <Image 
-                    src={`https://picsum.photos/seed/${publishedSermon.id}/1200/800`} 
+                    src={heroImage} 
                     alt={`Theme image for ${publishedSermon.title}`} 
                     fill
                     className="object-cover"

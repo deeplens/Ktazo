@@ -19,7 +19,7 @@ const initialSermons: Sermon[] = [
     speaker: 'Guest Speaker',
     date: '2024-05-12',
     mp3Url: 'https://storage.googleapis.com/studioprod-55829.appspot.com/652932b172a5a544256c70c2/sermons/kE3z98a4aT6s1B2aY1E2/audio.mp3',
-    transcript: 'This is the full transcript for The Good Shepherd sermon... It is a long text that can be edited.',
+    transcript: "This is the full transcript for The Good Shepherd sermon... It is a long text that can be edited.",
     status: 'PUBLISHED',
     languages: ['en', 'es'],
     createdAt: new Date().toISOString(),
@@ -154,6 +154,19 @@ export const updateSermonDetails = (sermonId: string, details: Partial<Pick<Serm
     }
 };
 
+export const updateSermonArtwork = (sermonId: string, artworkUrl: string) => {
+    if (typeof window !== 'undefined') {
+        const sermons = getMockSermons();
+        const updatedSermons = sermons.map(s => {
+            if (s.id === sermonId) {
+                return { ...s, artworkUrl, updatedAt: new Date().toISOString() };
+            }
+            return s;
+        });
+        sessionStorage.setItem(SERMON_STORAGE_KEY, JSON.stringify(updatedSermons));
+    }
+};
+
 export const updateSermonWeeklyContentId = (sermonId: string, weeklyContentId: string) => {
     if (typeof window !== 'undefined') {
         const sermons = getMockSermons();
@@ -170,47 +183,47 @@ export const updateSermonWeeklyContentId = (sermonId: string, weeklyContentId: s
 
 const initialWeeklyContent: WeeklyContent[] = [
     {
-        id: 'wc-1',
-        tenantId: 'tenant-1',
-        sermonId: 'sermon-1',
+        id: "wc-1",
+        tenantId: "tenant-1",
+        sermonId: "sermon-1",
         summaryShort: "A brief look at Psalm 23, highlighting God's role as our provider and protector.",
         summaryLong: "This week's devotional guide explores the deep comfort and assurance found in Psalm 23. We delve into the metaphor of the shepherd and his sheep, understanding how God leads us, provides for our needs, restores our souls, and walks with us through life's darkest valleys. It's a message of profound trust and unwavering divine care.",
         devotionals: [
-            { day: 'Monday', content: "Podcast clip about resting in God's care." },
-            { day: 'Tuesday', content: 'Reflection on "The Lord is my shepherd, I shall not want." What does it mean to be content in His provision?' },
-            { day: 'Wednesday', content: 'He makes me lie down in green pastures. Where are the "green pastures" in your life where you can find rest?' },
-            { day: 'Thursday', content: "Even though I walk through the valley of the shadow of death, I will fear no evil. How does God's presence comfort you in fearful times?" },
-            { day: 'Friday', content: "Surely goodness and mercy shall follow me all the days of my life. Meditate on God's persistent goodness." },
+            { day: "Monday", content: "Podcast clip about resting in God's care." },
+            { day: "Tuesday", content: "Reflection on 'The Lord is my shepherd, I shall not want.' What does it mean to be content in His provision?" },
+            { day: "Wednesday", content: "He makes me lie down in green pastures. Where are the 'green pastures' in your life where you can find rest?" },
+            { day: "Thursday", content: "Even though I walk through the valley of the shadow of death, I will fear no evil. How does God's presence comfort you in fearful times?" },
+            { day: "Friday", content: "Surely goodness and mercy shall follow me all the days of my life. Meditate on God's persistent goodness." },
         ],
         reflectionQuestions: [
             {
-                audience: 'Individuals',
+                audience: "Individuals",
                 questions: [
-                    'In what areas of your life do you need to trust God as your shepherd right now?',
-                    'How can you find "green pastures" and "still waters" for your soul this week?',
+                    "In what areas of your life do you need to trust God as your shepherd right now?",
+                    "How can you find 'green pastures' and 'still waters' for your soul this week?",
                     "Reflect on a 'dark valley' experience. How did you see God's presence with you?",
                 ],
             },
             {
-                audience: 'Small Groups',
+                audience: "Small Groups",
                 questions: [
-                    'Share as a group about what "The Lord is my shepherd" means to each of you personally.',
-                    'Discuss the difference between "wanting" and "needing" in the context of Psalm 23.',
-                    'How can we, as a group, help each other stay on the "paths of righteousness"?',
+                    "Share as a group about what 'The Lord is my shepherd' means to each of you personally.",
+                    "Discuss the difference between 'wanting' and 'needing' in the context of Psalm 23.",
+                    "How can we, as a group, help each other stay on the 'paths of righteousness'?",
                 ],
             },
             {
-                audience: 'Families',
+                audience: "Families",
                 questions: [
                   "How can our family 'prepare a table' for someone in need this week?",
-                  'What does it mean for our "cup to overflow" with blessings as a family?',
-                  'In what ways can we "dwell in the house of the Lord" together every day?',
+                  "What does it mean for our 'cup to overflow' with blessings as a family?",
+                  "In what ways can we 'dwell in the house of the Lord' together every day?",
                 ],
             },
             {
-                audience: 'Youth',
+                audience: "Youth",
                 questions: [
-                  'What does the "rod and staff" symbolize to you in terms of protection and guidance?',
+                  "What does the 'rod and staff' symbolize to you in terms of protection and guidance?",
                   "How does knowing God is like a shepherd change how you view challenges at school or with friends?",
                   "What does 'anointing my head with oil' mean to you in today's world?",
                 ],
