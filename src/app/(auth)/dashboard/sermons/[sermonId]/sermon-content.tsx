@@ -525,7 +525,3 @@ export function SermonContent({
     </div>
   );
 }
-
-    
-
-    
