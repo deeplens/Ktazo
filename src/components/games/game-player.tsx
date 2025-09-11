@@ -1,7 +1,7 @@
 
 'use client';
 
-import { Game, GameQuestion, MatchingGameItem } from "@/lib/types";
+import { Game, GameQuestion, MatchingGameItem, FillInTheBlankItem } from "@/lib/types";
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../ui/card";
 import { Button } from "../ui/button";
@@ -10,6 +10,7 @@ import { CheckCircle, XCircle, ArrowRight } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
 import { WordSearchGame } from "./word-search";
 import { MatchingGame } from "./matching-game";
+import { FillInTheBlankGame } from "./fill-in-the-blank";
 
 interface GamePlayerProps {
     game: Game;
@@ -108,18 +109,6 @@ const QuizGame = ({ data }: { data: GameQuestion[] }) => {
     )
 }
 
-const FillInTheBlankGame = ({ data }: { data: { sentence: string, blank: string } }) => {
-    return (
-        <Alert>
-            <AlertTitle>Game Not Yet Implemented</AlertTitle>
-            <AlertDescription>
-                The Fill in the Blank game is still under construction. Please check back later!
-            </AlertDescription>
-        </Alert>
-    )
-}
-
-
 export function GamePlayer({ game }: GamePlayerProps) {
     switch (game.type) {
         case "Quiz":
@@ -130,7 +119,7 @@ export function GamePlayer({ game }: GamePlayerProps) {
         case "Matching":
             return <MatchingGame items={game.data as MatchingGameItem[]} />;
         case "Fill in the Blank":
-             return <FillInTheBlankGame data={game.data as { sentence: string, blank: string }} />;
+             return <FillInTheBlankGame data={game.data as FillInTheBlankItem} />;
         default:
             return <p>Unknown game type</p>;
     }

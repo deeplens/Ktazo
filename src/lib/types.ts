@@ -46,11 +46,16 @@ export interface MatchingGameItem {
     definition: string;
 }
 
+export interface FillInTheBlankItem {
+    sentence: string;
+    blank: string;
+}
+
 export interface Game {
     type: 'Quiz' | 'Word Search' | 'Fill in the Blank' | 'Matching';
     title: string;
     audience: 'Youth' | 'Adults';
-    data: GameQuestion[] | { words: string[] } | { sentence: string, blank: string } | MatchingGameItem[];
+    data: GameQuestion[] | { words: string[] } | FillInTheBlankItem | MatchingGameItem[];
 }
 
 export interface WeeklyContent {
