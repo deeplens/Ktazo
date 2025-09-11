@@ -1,3 +1,4 @@
+
 'use client';
 import {
   SidebarProvider,
@@ -16,7 +17,7 @@ import { Button } from '@/components/ui/button';
 import { PlusCircle, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 
-function SermonSeedIcon(props: React.SVGProps<SVGSVGElement>) {
+function OpenBibleIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg
       {...props}
@@ -30,12 +31,11 @@ function SermonSeedIcon(props: React.SVGProps<SVGSVGElement>) {
       strokeLinecap="round"
       strokeLinejoin="round"
     >
-      <path d="M12 22v-8" />
-      <path d="M6 14h12" />
-      <path d="M12 14a6 6 0 0 0 6-6V6a6 6 0 0 0-12 0v2a6 6 0 0 0 6 6Z" />
-      <circle cx="8" cy="7" r="1" fill="currentColor" />
-      <circle cx="16"cy="7" r="1" fill="currentColor" />
-      <circle cx="12" cy="3" r="1" fill="currentColor" />
+      <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
+      <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
+      <path d="M13 3v2" />
+      <path d="M15 5v2" />
+      <path d="M17 3v2" />
     </svg>
   );
 }
@@ -65,7 +65,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <Sidebar>
         <SidebarHeader className="p-4">
           <div className="flex items-center gap-2">
-            <SermonSeedIcon className="size-6 text-primary" />
+            <OpenBibleIcon className="size-6 text-primary" />
             <h1 className="text-xl font-semibold font-headline">Ktazo Weekly</h1>
           </div>
         </SidebarHeader>

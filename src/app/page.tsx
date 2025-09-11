@@ -2,7 +2,7 @@
 import { LoginForm } from '@/components/auth/login-form';
 import Image from 'next/image';
 
-function SermonSeedIcon(props: React.SVGProps<SVGSVGElement>) {
+function OpenBibleIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg
       {...props}
@@ -16,12 +16,11 @@ function SermonSeedIcon(props: React.SVGProps<SVGSVGElement>) {
       strokeLinecap="round"
       strokeLinejoin="round"
     >
-      <path d="M12 22v-8" />
-      <path d="M6 14h12" />
-      <path d="M12 14a6 6 0 0 0 6-6V6a6 6 0 0 0-12 0v2a6 6 0 0 0 6 6Z" />
-      <circle cx="8" cy="7" r="1" fill="currentColor" />
-      <circle cx="16" cy="7" r="1" fill="currentColor" />
-      <circle cx="12" cy="3" r="1" fill="currentColor" />
+      <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
+      <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
+      <path d="M13 3v2" />
+      <path d="M15 5v2" />
+      <path d="M17 3v2" />
     </svg>
   );
 }
@@ -34,7 +33,7 @@ export default function Home() {
           <div className="grid gap-2 text-center">
             <div>
                 <h1 className="text-3xl font-bold font-headline flex items-center justify-center gap-2">
-                <SermonSeedIcon className="h-8 w-8 text-primary" />
+                <OpenBibleIcon className="h-8 w-8 text-primary" />
                 Ktazo Weekly
                 </h1>
                 <p className="text-balance text-muted-foreground text-sm">Learning beyond the pulpit</p>
