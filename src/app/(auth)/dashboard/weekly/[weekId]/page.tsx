@@ -14,6 +14,7 @@ import { useEffect, useState } from "react";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { GamePlayer } from "@/components/games/game-player";
+import { useToast } from "@/hooks/use-toast";
 
 export default function WeeklyPage() {
   const params = useParams();
@@ -60,6 +61,22 @@ export default function WeeklyPage() {
 
 
 function WeeklyPageContent({ sermon, weeklyContent }: { sermon: Sermon, weeklyContent: WeeklyContent }) {
+  const { toast } = useToast();
+  const [answers, setAnswers] = useState<Record<string, string>>({});
+
+  const handleAnswerChange = (questionId: string, value: string) => {
+    setAnswers(prev => ({ ...prev, [questionId]: value }));
+  };
+
+  const handleSaveAnswers = () => {
+    // In a real app, this would save to a database.
+    // For now, we'll just show a confirmation toast.
+    console.log("Saving answers:", answers);
+    toast({
+      title: "Answers Saved",
+      description: "Your reflections have been saved.",
+    });
+  };
 
   const getIconForAudience = (audience: string) => {
     switch (audience) {
@@ -192,20 +209,31 @@ function WeeklyPageContent({ sermon, weeklyContent }: { sermon: Sermon, weeklyCo
                   <div key={group.audience}>
                       <h3 className="font-semibold flex items-center gap-2 mb-4 text-lg border-b pb-2">{getIconForAudience(group.audience)} {group.audience}</h3>
                       <div className="space-y-6">
-                          {group.questions.map((q, i) => (
-                            <div key={i} className="grid w-full gap-2">
-                                <Label htmlFor={`question-${groupIndex}-${i}`} className="text-base">{q}</Label>
-                                <Textarea placeholder="Type your answer here..." id={`question-${groupIndex}-${i}`} rows={4}/>
-                            </div>
-                          ))}
+                          {group.questions.map((q, i) => {
+                            const questionId = `q-${groupIndex}-${i}`;
+                            return (
+                                <div key={i} className="grid w-full gap-2">
+                                    <Label htmlFor={questionId} className="text-base">{q}</Label>
+                                    <Textarea 
+                                        placeholder="Type your answer here..." 
+                                        id={questionId} 
+                                        rows={4}
+                                        value={answers[questionId] || ''}
+                                        onChange={(e) => handleAnswerChange(questionId, e.target.value)}
+                                    />
+                                </div>
+                            )
+                          })}
                       </div>
                   </div>
               ))}
           </CardContent>
           <CardFooter>
-              <Button>Save Answers</Button>
+              <Button onClick={handleSaveAnswers}>Save Answers</Button>
           </CardFooter>
       </Card>
     </div>
   );
 }
+
+    
