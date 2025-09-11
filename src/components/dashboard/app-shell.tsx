@@ -16,7 +16,7 @@ import { Button } from '@/components/ui/button';
 import { PlusCircle, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 
-function CrossIcon(props: React.SVGProps<SVGSVGElement>) {
+function ChurchIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg
       {...props}
@@ -30,9 +30,10 @@ function CrossIcon(props: React.SVGProps<SVGSVGElement>) {
       strokeLinecap="round"
       strokeLinejoin="round"
     >
-      <path d="M11 18a7 7 0 1 1 4.59-13.41" />
-      <path d="M18 11.01V21" />
-      <path d="M21 18h-6" />
+      <path d="M18 7.35a1.5 1.5 0 0 0-3 0V11h-3V7.35a1.5 1.5 0 0 0-3 0V11H6V7.35a1.5 1.5 0 0 0-3 0V21h18V7.35z" />
+      <path d="M12 2v2.35" />
+      <path d="M10.5 4.35h3" />
+      <path d="M12 15.5c-1.55 0-2.8 1.4-2.8 3 0 1.55 1.25 2.8 2.8 2.8s2.8-1.25 2.8-2.8c0-1.6-1.25-3-2.8-3z" />
     </svg>
   );
 }
@@ -62,7 +63,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <Sidebar>
         <SidebarHeader className="p-4">
           <div className="flex items-center gap-2">
-            <CrossIcon className="size-6 text-primary" />
+            <ChurchIcon className="size-6 text-primary" />
             <h1 className="text-xl font-semibold font-headline">Ktazo Weekly</h1>
           </div>
         </SidebarHeader>
