@@ -62,8 +62,13 @@ const JeopardyCategorySchema = z.object({
     questions: z.array(JeopardyQuestionSchema).describe('An array of 3 questions for this category, in increasing order of difficulty/points.'),
 });
 
+const VerseScrambleItemSchema = z.object({
+    verse: z.string().describe('The full text of a key bible verse from the sermon.'),
+    reference: z.string().describe('The bible reference for the verse (e.g., "John 3:16").'),
+});
+
 const GameSchema = z.object({
-    type: z.enum(['Quiz', 'Word Search', 'Fill in the Blank', 'Matching', 'Word Guess', 'Wordle', 'Jeopardy']),
+    type: z.enum(['Quiz', 'Word Search', 'Fill in the Blank', 'Matching', 'Word Guess', 'Wordle', 'Jeopardy', 'Verse Scramble']),
     title: z.string(),
     audience: z.enum(['Youth', 'Adults']),
     data: z.union([
@@ -74,6 +79,7 @@ const GameSchema = z.object({
         z.array(WordGuessItemSchema).describe('An array of 4 key words from the sermon, each with a hint.'),
         WordleItemSchema,
         z.array(JeopardyCategorySchema).describe('An array of 2-3 categories for a Jeopardy game. Each category should have 3 questions.'),
+        VerseScrambleItemSchema.describe('A key bible verse from the sermon to be used in a word scramble game.'),
     ]),
 });
 
@@ -82,7 +88,7 @@ const GenerateWeeklyContentOutputSchema = z.object({
   summaryLong: z.string().describe('A longer devotional guide summary of the sermon.'),
   devotionals: z.array(z.string()).describe('An array of five daily devotionals (Mon-Fri).'),
   reflectionQuestions: z.array(ReflectionQuestionGroupSchema).describe('An array of reflection question groups for different audiences.'),
-  games: z.array(GameSchema).describe('An array of 3-5 interactive games based on the sermon. Include a mix of types like Quiz, Word Search, Fill in the Blank, Matching, Word Guess, Wordle, or Jeopardy. For Quizzes, provide 3-4 questions with 4 multiple-choice options each. For Matching games, provide 4-6 pairs of terms and definitions. For Fill in the Blank, provide four key sentences with an important word missing. For Word Guess, provide four key words from the sermon, each with its own hint. For Wordle, provide a single, relevant 5-letter word from the sermon. For Jeopardy, create 2-3 categories with 3 questions each, with point values of 100, 200, and 300.'),
+  games: z.array(GameSchema).describe('An array of 3-5 interactive games based on the sermon. Include a mix of types like Quiz, Word Search, Fill in the Blank, Matching, Word Guess, Wordle, or Jeopardy. For Quizzes, provide 3-4 questions with 4 multiple-choice options each. For Matching games, provide 4-6 pairs of terms and definitions. For Fill in the Blank, provide four key sentences with an important word missing. For Word Guess, provide four key words from the sermon, each with its own hint. For Wordle, provide a single, relevant 5-letter word from the sermon. For Jeopardy, create 2-3 categories with 3 questions each, with point values of 100, 200, and 300. For Verse Scramble, select one key Bible verse from the sermon.'),
 });
 export type GenerateWeeklyContentOutput = z.infer<typeof GenerateWeeklyContentOutputSchema>;
 
@@ -111,7 +117,7 @@ const generateWeeklyContentPrompt = ai.definePrompt({
   - A longer devotional guide summary (summaryLong).
   - Five daily devotionals for Monday, Tuesday, Wednesday, Thursday, and Friday (devotionals).
   - Reflection questions for four audiences: Individuals, Families, Small Groups, and Youth. Each audience should have its own group with 3-4 questions.
-  - An array of 3-5 interactive games based on the sermon's content. Include a mix of game types like 'Quiz', 'Word Search', 'Fill in the Blank', 'Matching', 'Word Guess', 'Wordle', or 'Jeopardy'. For Quizzes, provide 3-4 questions with 4 multiple-choice options each. For Matching games, provide 4-6 pairs of terms and definitions. For Fill in the Blank, provide four key sentences with an important word missing. For Word Guess, provide four key words from the sermon, each with a hint for it. For Wordle, provide one significant 5-letter word from the sermon. For Jeopardy, create 2-3 categories, each with 3 questions having point values of 100, 200, and 300.
+  - An array of 3-5 interactive games based on the sermon's content. Include a mix of game types like 'Quiz', 'Word Search', 'Fill in the Blank', 'Matching', 'Word Guess', 'Wordle', 'Jeopardy', or 'Verse Scramble'. For Quizzes, provide 3-4 questions with 4 multiple-choice options each. For Matching games, provide 4-6 pairs of terms and definitions. For Fill in the Blank, provide four key sentences with an important word missing. For Word Guess, provide four key words from the sermon, each with a hint for it. For Wordle, provide one significant 5-letter word from the sermon. For Jeopardy, create 2-3 categories, each with 3 questions having point values of 100, 200, and 300. For Verse Scramble, select one key Bible verse from the sermon and provide its text and reference.
   `,
 });
 

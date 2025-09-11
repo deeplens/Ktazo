@@ -1,7 +1,7 @@
 
 'use client';
 
-import { Game, GameQuestion, MatchingGameItem, FillInTheBlankItem, WordGuessItem, WordleItem, JeopardyCategory } from "@/lib/types";
+import { Game, GameQuestion, MatchingGameItem, FillInTheBlankItem, WordGuessItem, WordleItem, JeopardyCategory, VerseScrambleItem } from "@/lib/types";
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../ui/card";
 import { Button } from "../ui/button";
@@ -13,6 +13,7 @@ import { MatchingGame } from "./matching-game";
 import { FillInTheBlankGame } from "./fill-in-the-blank";
 import { WordGuessGame } from "./word-guess";
 import { WordleGame } from "./wordle-game";
+import { VerseScrambleGame } from "./verse-scramble";
 
 interface GamePlayerProps {
     game: Game;
@@ -131,6 +132,8 @@ export function GamePlayer({ game }: GamePlayerProps) {
              return <WordleGame data={game.data as WordleItem} />;
         case "Jeopardy":
             return <JeopardyGame data={game.data as JeopardyCategory[]} />;
+        case "Verse Scramble":
+            return <VerseScrambleGame data={game.data as VerseScrambleItem} />;
         default:
             return <p>Unknown game type</p>;
     }

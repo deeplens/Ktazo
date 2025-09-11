@@ -231,6 +231,15 @@ const initialWeeklyContent: WeeklyContent[] = [
         ],
         games: [
             {
+                "type": "Verse Scramble",
+                "title": "Unscramble Psalm 23:1",
+                "audience": "Adults",
+                "data": {
+                    "verse": "The Lord is my shepherd; I shall not want.",
+                    "reference": "Psalm 23:1"
+                }
+            },
+            {
                 "type": "Jeopardy",
                 "title": "Psalm 23 Jeopardy",
                 "audience": "Adults",
