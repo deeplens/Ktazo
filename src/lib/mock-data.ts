@@ -218,24 +218,25 @@ const initialWeeklyContent: WeeklyContent[] = [
         ],
         games: [
             {
-                "type": "Quiz",
-                "title": "Quiz on The Good Shepherd",
+                "type": "Jeopardy",
+                "title": "Psalm 23 Jeopardy",
                 "audience": "Adults",
                 "data": [
                     {
-                        "question": "In Psalm 23, what does the shepherd use to comfort the sheep?",
-                        "options": ["His voice", "His rod and staff", "His hands", "His song"],
-                        "correctAnswer": "His rod and staff"
+                        "title": "Key Figures",
+                        "questions": [
+                            { "question": "He is described as 'my shepherd'.", "answer": "The Lord", "points": 100 },
+                            { "question": "I will fear no evil, for you are with me; your rod and your ____, they comfort me.", "answer": "Staff", "points": 200 },
+                            { "question": "The psalmist declares that he will dwell in the house of the Lord for this long.", "answer": "Forever", "points": 300 }
+                        ]
                     },
                     {
-                        "question": "What does the psalmist say the Lord prepares for him in the presence of his enemies?",
-                        "options": ["A shield", "A hiding place", "A table", "A chariot"],
-                        "correctAnswer": "A table"
-                    },
-                    {
-                        "question": "According to the sermon, what does 'anointing my head with oil' signify?",
-                        "options": ["Healing and consecration", "A declaration of war", "A sign of wealth", "A common greeting"],
-                        "correctAnswer": "Healing and consecration"
+                        "title": "Places & Things",
+                        "questions": [
+                            { "question": "He makes me lie down in these.", "answer": "Green pastures", "points": 100 },
+                            { "question": "He leads me beside these.", "answer": "Still waters", "points": 200 },
+                            { "question": "This is prepared for the psalmist in the presence of his enemies.", "answer": "A table", "points": 300 }
+                        ]
                     }
                 ]
             },

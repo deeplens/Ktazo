@@ -13,7 +13,7 @@ export interface User {
 }
 
 export interface Sermon {
-  id: string;
+  id:string;
   tenantId: string;
   title: string;
   series: string;
@@ -60,11 +60,22 @@ export interface WordleItem {
     word: string;
 }
 
+export interface JeopardyQuestion {
+    question: string;
+    answer: string;
+    points: number;
+}
+
+export interface JeopardyCategory {
+    title: string;
+    questions: JeopardyQuestion[];
+}
+
 export interface Game {
-    type: 'Quiz' | 'Word Search' | 'Fill in the Blank' | 'Matching' | 'Word Guess' | 'Wordle';
+    type: 'Quiz' | 'Word Search' | 'Fill in the Blank' | 'Matching' | 'Word Guess' | 'Wordle' | 'Jeopardy';
     title: string;
     audience: 'Youth' | 'Adults';
-    data: GameQuestion[] | { words: string[] } | FillInTheBlankItem | MatchingGameItem[] | WordGuessItem | WordleItem;
+    data: GameQuestion[] | { words: string[] } | FillInTheBlankItem | MatchingGameItem[] | WordGuessItem | WordleItem | JeopardyCategory[];
 }
 
 export interface WeeklyContent {
