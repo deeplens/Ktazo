@@ -16,7 +16,8 @@ export default function ProfilePage() {
   const { user, updateUser, loading } = useAuth();
   const { toast } = useToast();
 
-  const [name, setName] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
   const [photoUrl, setPhotoUrl] = useState<string | undefined>(undefined);
   const [newPhotoFile, setNewPhotoFile] = useState<File | null>(null);
@@ -25,7 +26,9 @@ export default function ProfilePage() {
 
   useEffect(() => {
     if (user) {
-      setName(user.name);
+      const nameParts = user.name.split(' ');
+      setFirstName(nameParts[0] || '');
+      setLastName(nameParts.slice(1).join(' ') || '');
       setEmail(user.email);
       setPhotoUrl(user.photoUrl);
       setPhotoPreview(user.photoUrl || null);
@@ -61,7 +64,7 @@ export default function ProfilePage() {
     }
 
     const updatedUserData = {
-      name,
+      name: `${firstName} ${lastName}`.trim(),
       photoUrl: updatedPhotoUrl,
     };
 
@@ -119,7 +122,7 @@ export default function ProfilePage() {
             <AvatarFallback>{user.name?.charAt(0) || 'U'}</AvatarFallback>
           </Avatar>
           <div>
-            <h2 className="text-2xl font-semibold">{name}</h2>
+            <h2 className="text-2xl font-semibold">{`${firstName} ${lastName}`}</h2>
             <p className="text-muted-foreground">{email}</p>
           </div>
         </CardContent>
@@ -131,9 +134,15 @@ export default function ProfilePage() {
           <CardDescription>Update your name. Email cannot be changed.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="name">Full Name</Label>
-            <Input id="name" value={name} onChange={(e) => setName(e.target.value)} />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-2">
+                <Label htmlFor="firstName">First Name</Label>
+                <Input id="firstName" value={firstName} onChange={(e) => setFirstName(e.target.value)} />
+            </div>
+            <div className="space-y-2">
+                <Label htmlFor="lastName">Last Name</Label>
+                <Input id="lastName" value={lastName} onChange={(e) => setLastName(e.target.value)} />
+            </div>
           </div>
            <div className="space-y-2">
             <Label htmlFor="email-display">Email</Label>
