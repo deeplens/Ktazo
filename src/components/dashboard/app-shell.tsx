@@ -16,7 +16,7 @@ import { Button } from '@/components/ui/button';
 import { PlusCircle, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 
-function ChurchIcon(props: React.SVGProps<SVGSVGElement>) {
+function SermonSeedIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg
       {...props}
@@ -30,11 +30,12 @@ function ChurchIcon(props: React.SVGProps<SVGSVGElement>) {
       strokeLinecap="round"
       strokeLinejoin="round"
     >
-      <path d="m18 7 4 2v11a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9l4-2" />
-      <path d="M14 22v-4a2 2 0 0 0-2-2a2 2 0 0 0-2 2v4" />
-      <path d="M18 22V5l-6-3-6 3v17" />
-      <path d="M12 7v5" />
-      <path d="M10 9h4" />
+      <path d="M12 22v-8" />
+      <path d="M6 14h12" />
+      <path d="M12 14a6 6 0 0 0 6-6V6a6 6 0 0 0-12 0v2a6 6 0 0 0 6 6Z" />
+      <circle cx="8" cy="7" r="1" fill="currentColor" />
+      <circle cx="16"cy="7" r="1" fill="currentColor" />
+      <circle cx="12" cy="3" r="1" fill="currentColor" />
     </svg>
   );
 }
@@ -64,7 +65,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <Sidebar>
         <SidebarHeader className="p-4">
           <div className="flex items-center gap-2">
-            <ChurchIcon className="size-6 text-primary" />
+            <SermonSeedIcon className="size-6 text-primary" />
             <h1 className="text-xl font-semibold font-headline">Ktazo Weekly</h1>
           </div>
         </SidebarHeader>

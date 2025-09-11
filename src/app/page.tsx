@@ -1,7 +1,7 @@
 import { LoginForm } from '@/components/auth/login-form';
 import Image from 'next/image';
 
-function ChurchIcon(props: React.SVGProps<SVGSVGElement>) {
+function SermonSeedIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg
       {...props}
@@ -15,11 +15,12 @@ function ChurchIcon(props: React.SVGProps<SVGSVGElement>) {
       strokeLinecap="round"
       strokeLinejoin="round"
     >
-      <path d="m18 7 4 2v11a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9l4-2" />
-      <path d="M14 22v-4a2 2 0 0 0-2-2a2 2 0 0 0-2 2v4" />
-      <path d="M18 22V5l-6-3-6 3v17" />
-      <path d="M12 7v5" />
-      <path d="M10 9h4" />
+      <path d="M12 22v-8" />
+      <path d="M6 14h12" />
+      <path d="M12 14a6 6 0 0 0 6-6V6a6 6 0 0 0-12 0v2a6 6 0 0 0 6 6Z" />
+      <circle cx="8" cy="7" r="1" fill="currentColor" />
+      <circle cx="16" cy="7" r="1" fill="currentColor" />
+      <circle cx="12" cy="3" r="1" fill="currentColor" />
     </svg>
   );
 }
@@ -31,7 +32,7 @@ export default function Home() {
         <div className="mx-auto grid w-[350px] gap-6">
           <div className="grid gap-2 text-center">
             <h1 className="text-3xl font-bold font-headline flex items-center justify-center gap-2">
-              <ChurchIcon className="h-8 w-8 text-primary" />
+              <SermonSeedIcon className="h-8 w-8 text-primary" />
               Ktazo Weekly
             </h1>
             <p className="text-balance text-muted-foreground">
