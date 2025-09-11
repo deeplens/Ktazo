@@ -1,3 +1,4 @@
+
 import { LoginForm } from '@/components/auth/login-form';
 import Image from 'next/image';
 
@@ -31,11 +32,14 @@ export default function Home() {
       <div className="flex items-center justify-center py-12">
         <div className="mx-auto grid w-[350px] gap-6">
           <div className="grid gap-2 text-center">
-            <h1 className="text-3xl font-bold font-headline flex items-center justify-center gap-2">
-              <SermonSeedIcon className="h-8 w-8 text-primary" />
-              Ktazo Weekly
-            </h1>
-            <p className="text-balance text-muted-foreground">
+            <div>
+                <h1 className="text-3xl font-bold font-headline flex items-center justify-center gap-2">
+                <SermonSeedIcon className="h-8 w-8 text-primary" />
+                Ktazo Weekly
+                </h1>
+                <p className="text-balance text-muted-foreground text-sm">Learning beyond the pulpit</p>
+            </div>
+            <p className="text-balance text-muted-foreground pt-4">
               Sign in to your congregation's account
             </p>
           </div>
