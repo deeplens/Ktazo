@@ -13,6 +13,7 @@ import { MatchingGame } from "./matching-game";
 import { FillInTheBlankGame } from "./fill-in-the-blank";
 import { WordGuessGame } from "./word-guess";
 import { WordleGame } from "./wordle-game";
+import { JeopardyGame } from "./jeopardy-game";
 import { VerseScrambleGame } from "./verse-scramble";
 
 interface GamePlayerProps {
@@ -111,10 +112,6 @@ const QuizGame = ({ data }: { data: GameQuestion[] }) => {
         </div>
     )
 }
-
-const JeopardyGame = ({ data }: { data: JeopardyCategory[] }) => {
-    return <p>Jeopardy Game - Not Yet Implemented</p>;
-};
 
 export function GamePlayer({ game }: GamePlayerProps) {
     switch (game.type) {
