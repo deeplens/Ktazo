@@ -276,10 +276,24 @@ const initialWeeklyContent: WeeklyContent[] = [
                 "type": "Word Guess",
                 "title": "Guess the Key Word",
                 "audience": "Youth",
-                "data": {
-                    "word": "RIGHTEOUSNESS",
-                    "hint": "The quality of being morally right or justifiable. The Lord leads us in paths of it."
-                }
+                "data": [
+                    {
+                        "word": "RIGHTEOUSNESS",
+                        "hint": "The quality of being morally right or justifiable."
+                    },
+                    {
+                        "word": "SHEPHERD",
+                        "hint": "One who tends and herds sheep."
+                    },
+                    {
+                        "word": "COMFORT",
+                        "hint": "A state of physical ease and freedom from pain or constraint."
+                    },
+                    {
+                        "word": "FOREVER",
+                        "hint": "For all future time; for always."
+                    }
+                ]
             },
             {
                 "type": "Wordle",

@@ -126,7 +126,7 @@ export function GamePlayer({ game }: GamePlayerProps) {
         case "Fill in the Blank":
              return <FillInTheBlankGame data={game.data as FillInTheBlankItem[]} />;
         case "Word Guess":
-             return <WordGuessGame data={game.data as WordGuessItem} />;
+             return <WordGuessGame data={game.data as WordGuessItem[]} />;
         case "Wordle":
              return <WordleGame data={game.data as WordleItem} />;
         case "Jeopardy":
