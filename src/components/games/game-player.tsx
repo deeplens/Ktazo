@@ -1,7 +1,7 @@
 
 'use client';
 
-import { Game, GameQuestion, MatchingGameItem, FillInTheBlankItem, WordGuessItem } from "@/lib/types";
+import { Game, GameQuestion, MatchingGameItem, FillInTheBlankItem, WordGuessItem, WordleItem } from "@/lib/types";
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../ui/card";
 import { Button } from "../ui/button";
@@ -122,6 +122,8 @@ export function GamePlayer({ game }: GamePlayerProps) {
              return <FillInTheBlankGame data={game.data as FillInTheBlankItem} />;
         case "Word Guess":
              return <WordGuessGame data={game.data as WordGuessItem} />;
+        case "Wordle":
+             return <p>Wordle Game - Not Yet Implemented</p>
         default:
             return <p>Unknown game type</p>;
     }

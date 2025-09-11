@@ -56,11 +56,15 @@ export interface WordGuessItem {
     hint: string;
 }
 
+export interface WordleItem {
+    word: string;
+}
+
 export interface Game {
-    type: 'Quiz' | 'Word Search' | 'Fill in the Blank' | 'Matching' | 'Word Guess';
+    type: 'Quiz' | 'Word Search' | 'Fill in the Blank' | 'Matching' | 'Word Guess' | 'Wordle';
     title: string;
     audience: 'Youth' | 'Adults';
-    data: GameQuestion[] | { words: string[] } | FillInTheBlankItem | MatchingGameItem[] | WordGuessItem;
+    data: GameQuestion[] | { words: string[] } | FillInTheBlankItem | MatchingGameItem[] | WordGuessItem | WordleItem;
 }
 
 export interface WeeklyContent {

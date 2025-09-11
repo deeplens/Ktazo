@@ -266,6 +266,14 @@ const initialWeeklyContent: WeeklyContent[] = [
                     "word": "RIGHTEOUSNESS",
                     "hint": "The quality of being morally right or justifiable. The Lord leads us in paths of it."
                 }
+            },
+            {
+                "type": "Wordle",
+                "title": "Sermon Wordle",
+                "audience": "Adults",
+                "data": {
+                    "word": "GRACE"
+                }
             }
         ],
         mondayClipUrl: 'https://storage.googleapis.com/studioprod-55829.appspot.com/652932b172a5a544256c70c2/sermons/kE3z98a4aT6s1B2aY1E2/audio.mp3',
