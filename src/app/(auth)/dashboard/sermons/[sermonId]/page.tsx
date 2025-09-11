@@ -1,7 +1,7 @@
 
 'use client';
 import { notFound, useParams } from "next/navigation";
-import { getMockSermons, getMockWeeklyContent } from "@/lib/mock-data";
+import { getMockSermons, getMockWeeklyContent, updateSermonWeeklyContentId } from "@/lib/mock-data";
 import { SermonContent } from "./sermon-content";
 import { useEffect, useState } from "react";
 import { Sermon, WeeklyContent } from "@/lib/types";
@@ -27,10 +27,12 @@ export default function SermonDetailPage() {
     if (sermonId) {
       const foundSermon = getMockSermons().find(s => s.id === sermonId);
       setSermon(foundSermon);
-      if (foundSermon) {
+      if (foundSermon && foundSermon.weeklyContentId) {
         // This is mock data lookup. In a real app, you'd fetch this.
-        const foundContent = getMockWeeklyContent().find(wc => wc.sermonId === foundSermon.id);
+        const foundContent = getMockWeeklyContent().find(wc => wc.id === foundSermon.weeklyContentId);
         setWeeklyContent(foundContent);
+      } else {
+        setWeeklyContent(undefined);
       }
     }
   }, [sermonId]);
@@ -62,6 +64,11 @@ export default function SermonDetailPage() {
         };
         
         setWeeklyContent(newContent);
+        // Link the new content to the sermon
+        updateSermonWeeklyContentId(sermon.id, newContent.id);
+        const updatedSermon = getMockSermons().find(s => s.id === sermon.id);
+        if(updatedSermon) setSermon(updatedSermon);
+
 
         toast({
             title: "Content Generated",

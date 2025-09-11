@@ -154,6 +154,19 @@ export const updateSermonDetails = (sermonId: string, details: Partial<Pick<Serm
     }
 };
 
+export const updateSermonWeeklyContentId = (sermonId: string, weeklyContentId: string) => {
+    if (typeof window !== 'undefined') {
+        const sermons = getMockSermons();
+        const updatedSermons = sermons.map(s => {
+            if (s.id === sermonId) {
+                return { ...s, weeklyContentId, updatedAt: new Date().toISOString() };
+            }
+            return s;
+        });
+        sessionStorage.setItem(SERMON_STORAGE_KEY, JSON.stringify(updatedSermons));
+    }
+};
+
 
 const initialWeeklyContent: WeeklyContent[] = [
     {
