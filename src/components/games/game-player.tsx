@@ -8,6 +8,7 @@ import { Button } from "../ui/button";
 import { cn } from "@/lib/utils";
 import { CheckCircle, XCircle, ArrowRight } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
+import { WordSearchGame } from "./word-search";
 
 interface GamePlayerProps {
     game: Game;
@@ -106,17 +107,6 @@ const QuizGame = ({ data }: { data: GameQuestion[] }) => {
     )
 }
 
-const WordSearchGame = ({ data }: { data: { words: string[] } }) => {
-    return (
-         <Alert>
-            <AlertTitle>Game Not Yet Implemented</AlertTitle>
-            <AlertDescription>
-                The Word Search game is still under construction. Please check back later!
-            </AlertDescription>
-        </Alert>
-    )
-}
-
 const FillInTheBlankGame = ({ data }: { data: { sentence: string, blank: string } }) => {
     return (
         <Alert>
@@ -135,7 +125,7 @@ export function GamePlayer({ game }: GamePlayerProps) {
             // Type assertion because TS doesn't know the correlation between game.type and game.data shape
             return <QuizGame data={game.data as GameQuestion[]} />;
         case "Word Search":
-             return <WordSearchGame data={game.data as { words: string[] }} />;
+             return <WordSearchGame words={(game.data as { words: string[] }).words} />;
         case "Fill in the Blank":
              return <FillInTheBlankGame data={game.data as { sentence: string, blank: string }} />;
         default:
