@@ -1,7 +1,7 @@
 
 'use client';
 
-import { Game, GameQuestion, MatchingGameItem, FillInTheBlankItem } from "@/lib/types";
+import { Game, GameQuestion, MatchingGameItem, FillInTheBlankItem, WordGuessItem } from "@/lib/types";
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../ui/card";
 import { Button } from "../ui/button";
@@ -11,6 +11,7 @@ import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
 import { WordSearchGame } from "./word-search";
 import { MatchingGame } from "./matching-game";
 import { FillInTheBlankGame } from "./fill-in-the-blank";
+import { WordGuessGame } from "./word-guess";
 
 interface GamePlayerProps {
     game: Game;
@@ -112,7 +113,6 @@ const QuizGame = ({ data }: { data: GameQuestion[] }) => {
 export function GamePlayer({ game }: GamePlayerProps) {
     switch (game.type) {
         case "Quiz":
-            // Type assertion because TS doesn't know the correlation between game.type and game.data shape
             return <QuizGame data={game.data as GameQuestion[]} />;
         case "Word Search":
              return <WordSearchGame words={(game.data as { words: string[] }).words} />;
@@ -120,6 +120,8 @@ export function GamePlayer({ game }: GamePlayerProps) {
             return <MatchingGame items={game.data as MatchingGameItem[]} />;
         case "Fill in the Blank":
              return <FillInTheBlankGame data={game.data as FillInTheBlankItem} />;
+        case "Word Guess":
+             return <WordGuessGame data={game.data as WordGuessItem} />;
         default:
             return <p>Unknown game type</p>;
     }

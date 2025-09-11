@@ -51,11 +51,16 @@ export interface FillInTheBlankItem {
     blank: string;
 }
 
+export interface WordGuessItem {
+    word: string;
+    hint: string;
+}
+
 export interface Game {
-    type: 'Quiz' | 'Word Search' | 'Fill in the Blank' | 'Matching';
+    type: 'Quiz' | 'Word Search' | 'Fill in the Blank' | 'Matching' | 'Word Guess';
     title: string;
     audience: 'Youth' | 'Adults';
-    data: GameQuestion[] | { words: string[] } | FillInTheBlankItem | MatchingGameItem[];
+    data: GameQuestion[] | { words: string[] } | FillInTheBlankItem | MatchingGameItem[] | WordGuessItem;
 }
 
 export interface WeeklyContent {

@@ -257,6 +257,15 @@ const initialWeeklyContent: WeeklyContent[] = [
                     { "id": 3, "term": "Rod and Staff", "definition": "Symbols of protection and guidance." },
                     { "id": 4, "term": "Valley of Shadow", "definition": "A representation of life's darkest trials." }
                 ]
+            },
+            {
+                "type": "Word Guess",
+                "title": "Guess the Key Word",
+                "audience": "Youth",
+                "data": {
+                    "word": "RIGHTEOUSNESS",
+                    "hint": "The quality of being morally right or justifiable. The Lord leads us in paths of it."
+                }
             }
         ],
         mondayClipUrl: 'https://storage.googleapis.com/studioprod-55829.appspot.com/652932b172a5a544256c70c2/sermons/kE3z98a4aT6s1B2aY1E2/audio.mp3',
