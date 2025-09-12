@@ -1,4 +1,5 @@
 
+      
 'use client';
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -147,14 +148,13 @@ export default function NewSermonPage() {
             }
             try {
                 const textContent = await fileToText(textFile);
+                setTranscript(textContent);
                 if (!title) {
                     setLoadingMessage('Suggesting title...');
                     const titleResult = await suggestSermonTitle({ transcript: textContent });
                     setTitle(titleResult.suggestedTitle);
-                     // Since this is async, we'll just proceed and the title will be set.
-                     // A more complex implementation might wait here.
                 }
-                handleConfirmSermon(textContent, 'text');
+                setShowTranscriptDialog(true);
             } catch (error) {
                  console.error("File read or Title Suggestion failed", error);
                 toast({
@@ -166,6 +166,37 @@ export default function NewSermonPage() {
             }
         }
     };
+    
+    const handleDrop = (e: React.DragEvent<HTMLLabelElement>, fileSetter: (file: File | null) => void, fileType: 'audio' | 'text') => {
+        e.preventDefault();
+        e.stopPropagation();
+        const files = e.dataTransfer.files;
+        if (files && files.length > 0) {
+            const file = files[0];
+            const acceptedAudioTypes = ['audio/mpeg'];
+            const acceptedTextTypes = ['text/plain', 'text/markdown', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+
+            if (fileType === 'audio' && acceptedAudioTypes.includes(file.type)) {
+                handleAudioFileChange(file);
+            } else if (fileType === 'text' && (acceptedTextTypes.includes(file.type) || file.name.endsWith('.txt') || file.name.endsWith('.md'))) {
+                setTextFile(file);
+                 if (!title && file.name) {
+                    setTitle(file.name.replace(/\.[^/.]+$/, ""));
+                }
+            } else {
+                toast({
+                    variant: 'destructive',
+                    title: 'Invalid File Type',
+                    description: `Please drop a valid ${fileType === 'audio' ? '.mp3' : '.txt, .md, or .docx'} file.`,
+                });
+            }
+        }
+    }
+
+    const handleDragOver = (e: React.DragEvent<HTMLLabelElement>) => {
+        e.preventDefault();
+        e.stopPropagation();
+    }
 
 
     return (
@@ -234,7 +265,12 @@ export default function NewSermonPage() {
                                 <div className="space-y-2">
                                     <Label htmlFor="audio-file">Audio File (MP3)</Label>
                                     <div className="flex items-center justify-center w-full">
-                                        <Label htmlFor="audio-file" className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-card hover:bg-accent">
+                                        <Label 
+                                            htmlFor="audio-file" 
+                                            className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-card hover:bg-accent"
+                                            onDrop={(e) => handleDrop(e, handleAudioFileChange, 'audio')}
+                                            onDragOver={handleDragOver}
+                                        >
                                             <div className="flex flex-col items-center justify-center pt-5 pb-6">
                                                 <UploadCloud className="w-8 h-8 mb-4 text-muted-foreground" />
                                                 <p className="mb-2 text-sm text-muted-foreground">
@@ -252,7 +288,12 @@ export default function NewSermonPage() {
                                 <div className="space-y-2">
                                     <Label htmlFor="text-file">Transcript File</Label>
                                      <div className="flex items-center justify-center w-full">
-                                        <Label htmlFor="text-file" className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-card hover:bg-accent">
+                                        <Label 
+                                            htmlFor="text-file" 
+                                            className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-card hover:bg-accent"
+                                            onDrop={(e) => handleDrop(e, setTextFile, 'text')}
+                                            onDragOver={handleDragOver}
+                                        >
                                             <div className="flex flex-col items-center justify-center pt-5 pb-6">
                                                 <FileText className="w-8 h-8 mb-4 text-muted-foreground" />
                                                 <p className="mb-2 text-sm text-muted-foreground">
@@ -287,12 +328,12 @@ export default function NewSermonPage() {
                 </CardFooter>
             </form>
             
-            <AlertDialog open={showTranscriptDialog} onOpenChange={setShowTranscriptDialog}>
+             <AlertDialog open={showTranscriptDialog} onOpenChange={setShowTranscriptDialog}>
                 <AlertDialogContent className="max-w-3xl">
                     <AlertDialogHeader>
                     <AlertDialogTitle>Confirm Sermon Details</AlertDialogTitle>
                     <AlertDialogDescription>
-                        Review the generated transcript and the suggested title below. You can edit these later.
+                        Review the generated transcript and the sermon title below. You can edit these later.
                     </AlertDialogDescription>
                     </AlertDialogHeader>
                     <div className="space-y-4">
@@ -312,10 +353,11 @@ export default function NewSermonPage() {
                             setShowTranscriptDialog(false);
                             setIsLoading(false);
                         }}>Cancel</Button>
-                        <AlertDialogAction onClick={() => handleConfirmSermon(transcript, 'audio')}>Confirm and Add Sermon</AlertDialogAction>
+                        <AlertDialogAction onClick={() => handleConfirmSermon(transcript, uploadType)}>Confirm and Add Sermon</AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>
         </div>
     );
-}
+
+    
