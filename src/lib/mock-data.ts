@@ -1,6 +1,6 @@
 
 
-import type { Sermon, User, WeeklyContent, ReflectionAnswer } from './types';
+import type { Sermon, User, WeeklyContent, ReflectionAnswer, TenantSettings } from './types';
 
 export const mockUsers: User[] = [
   { id: 'user-master-1', tenantId: 'tenant-1', authId: 'auth-master-1', role: 'MASTER', name: 'Master User', email: 'master@ktazo.com', lastLoginAt: new Date().toISOString(), points: 0 },
@@ -451,7 +451,50 @@ export const saveAnswersForSermon = (userId: string, sermonId: string, answers: 
 };
 
 
+const TENANT_SETTINGS_KEY = 'ktazo-tenant-settings';
+const initialTenantSettings: { [key: string]: TenantSettings } = {
+  'tenant-1': {
+    optionalServices: {
+      ourDailyBread: false,
+    },
+  },
+};
+
+export const getTenantSettings = (tenantId: string): TenantSettings => {
+  if (typeof window !== 'undefined') {
+    const stored = sessionStorage.getItem(TENANT_SETTINGS_KEY);
+    if (stored) {
+      try {
+        const allSettings = JSON.parse(stored);
+        return allSettings[tenantId] || initialTenantSettings[tenantId];
+      } catch (e) {
+        return initialTenantSettings[tenantId];
+      }
+    } else {
+      sessionStorage.setItem(TENANT_SETTINGS_KEY, JSON.stringify(initialTenantSettings));
+      return initialTenantSettings[tenantId];
+    }
+  }
+  return initialTenantSettings[tenantId];
+};
+
+export const saveTenantSettings = (tenantId: string, settings: TenantSettings) => {
+  if (typeof window !== 'undefined') {
+    const stored = sessionStorage.getItem(TENANT_SETTINGS_KEY);
+    let allSettings = {};
+    if (stored) {
+      try {
+        allSettings = JSON.parse(stored);
+      } catch (e) {
+        allSettings = {};
+      }
+    }
+    const updatedSettings = { ...allSettings, [tenantId]: settings };
+    sessionStorage.setItem(TENANT_SETTINGS_KEY, JSON.stringify(updatedSettings));
+  }
+};
+
+
 // For initial load, we still need this export for components that use it directly
 export const mockWeeklyContent = getMockWeeklyContent();
 
-    

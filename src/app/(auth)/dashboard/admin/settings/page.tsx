@@ -1,4 +1,5 @@
 
+
 'use client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -6,11 +7,60 @@ import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Church, Globe, Palette, Volume2, Link as LinkIcon } from "lucide-react";
+import { Church, Globe, Palette, Volume2, Link as LinkIcon, Loader2 } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
+import { useState, useEffect } from "react";
+import { getTenantSettings, saveTenantSettings } from "@/lib/mock-data";
+import { useAuth } from "@/lib/auth";
+import { TenantSettings } from "@/lib/types";
+import { useToast } from "@/hooks/use-toast";
 
 export default function SettingsPage() {
+    const { user } = useAuth();
+    const { toast } = useToast();
+    const [settings, setSettings] = useState<TenantSettings | null>(null);
+    const [isSaving, setIsSaving] = useState(false);
+
+    useEffect(() => {
+        if (user) {
+            const currentSettings = getTenantSettings(user.tenantId);
+            setSettings(currentSettings);
+        }
+    }, [user]);
+
+    const handleSave = () => {
+        if (!user || !settings) return;
+        setIsSaving(true);
+        saveTenantSettings(user.tenantId, settings);
+        
+        // Simulate network delay
+        setTimeout(() => {
+            setIsSaving(false);
+            toast({
+                title: "Settings Saved",
+                description: "Your congregation's settings have been updated.",
+            });
+        }, 500);
+    };
+
+    const handleOdbChange = (checked: boolean) => {
+        setSettings(prev => {
+            if (!prev) return null;
+            return {
+                ...prev,
+                optionalServices: {
+                    ...prev.optionalServices,
+                    ourDailyBread: checked,
+                }
+            }
+        });
+    }
+
+    if (!settings) {
+        return <div>Loading settings...</div>; // Or a skeleton loader
+    }
+
     return (
         <div className="space-y-8 max-w-4xl mx-auto">
              <div>
@@ -99,7 +149,11 @@ export default function SettingsPage() {
                 </CardHeader>
                 <CardContent>
                     <div className="flex items-center space-x-2">
-                        <Checkbox id="odb" />
+                        <Checkbox 
+                            id="odb" 
+                            checked={settings.optionalServices.ourDailyBread}
+                            onCheckedChange={handleOdbChange}
+                        />
                         <Label htmlFor="odb" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
                              <a href="https://podcasts.apple.com/us/search?term=our%20daily%20bread" target="_blank" rel="noopener noreferrer" className="underline">
                                 Our Daily Bread
@@ -130,7 +184,10 @@ export default function SettingsPage() {
             </Card>
 
              <div className="flex justify-end">
-                <Button>Save All Settings</Button>
+                <Button onClick={handleSave} disabled={isSaving}>
+                     {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    Save All Settings
+                </Button>
             </div>
         </div>
     );

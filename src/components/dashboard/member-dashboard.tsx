@@ -1,11 +1,12 @@
 
+
 'use client';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { getMockSermons, getMockWeeklyContent } from "@/lib/mock-data";
+import { getMockSermons, getMockWeeklyContent, getTenantSettings } from "@/lib/mock-data";
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "../ui/button";
-import { ArrowRight, Gamepad2, MessageSquare, PenSquare, Info } from "lucide-react";
+import { ArrowRight, Gamepad2, MessageSquare, PenSquare, Info, Link as LinkIcon, BookOpenCheck } from "lucide-react";
 import { Badge } from "../ui/badge";
 import {
   Sheet,
@@ -17,18 +18,26 @@ import {
 } from "@/components/ui/sheet";
 import { ChatbotPanel } from "../chatbot/chatbot-panel";
 import { useEffect, useState } from "react";
-import { Sermon } from "@/lib/types";
+import { Sermon, TenantSettings } from "@/lib/types";
 import { Skeleton } from "../ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
+import { useAuth } from "@/lib/auth";
 
 export function MemberDashboard() {
+  const { user } = useAuth();
   const [publishedSermon, setPublishedSermon] = useState<Sermon | null | undefined>(undefined);
+  const [settings, setSettings] = useState<TenantSettings | null>(null);
 
   useEffect(() => {
     const sermons = getMockSermons();
     const foundSermon = sermons.find(s => s.status === 'PUBLISHED');
     setPublishedSermon(foundSermon || null); // Set to null if not found
-  }, []);
+    
+    if (user) {
+        const tenantSettings = getTenantSettings(user.tenantId);
+        setSettings(tenantSettings);
+    }
+  }, [user]);
 
   if (publishedSermon === undefined) {
     // Loading state
@@ -75,6 +84,7 @@ export function MemberDashboard() {
   }
 
   const heroImage = publishedSermon.artworkUrl || `https://picsum.photos/seed/${publishedSermon.id}/1200/800`;
+  const showOdb = settings?.optionalServices?.ourDailyBread;
 
   return (
     <div className="grid gap-6">
@@ -159,6 +169,29 @@ export function MemberDashboard() {
             </CardFooter>
         </Card>
       </div>
+
+       {showOdb && (
+        <Card>
+            <CardHeader>
+                <CardTitle className="font-headline flex items-center gap-2"><BookOpenCheck /> Additional Resources</CardTitle>
+                <CardDescription>Explore other resources to supplement your faith journey.</CardDescription>
+            </CardHeader>
+            <CardContent>
+                 <div className="flex items-center justify-between rounded-lg border p-4">
+                    <div>
+                        <h3 className="font-semibold">Our Daily Bread</h3>
+                        <p className="text-sm text-muted-foreground">Listen to the daily podcast devotional.</p>
+                    </div>
+                     <Button asChild variant="secondary">
+                        <a href="https://podcasts.apple.com/us/search?term=our%20daily%20bread" target="_blank" rel="noopener noreferrer">
+                           Listen Now <LinkIcon className="ml-2 h-4 w-4" />
+                        </a>
+                    </Button>
+                 </div>
+            </CardContent>
+        </Card>
+      )}
+
     </div>
   );
 }

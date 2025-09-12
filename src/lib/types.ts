@@ -105,3 +105,9 @@ export interface WeeklyContent {
   games: Game[];
   mondayClipUrl?: string;
 }
+
+export interface TenantSettings {
+    optionalServices: {
+        ourDailyBread: boolean;
+    }
+}
