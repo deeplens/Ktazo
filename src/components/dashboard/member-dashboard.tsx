@@ -146,7 +146,7 @@ export function MemberDashboard() {
                           Launch Companion
                         </Button>
                     </SheetTrigger>
-                    <SheetContent className="w-full sm:w-[540px] p-0 flex flex-col">
+                    <SheetContent className="w-full sm:w-[540px] p-0 flex flex-col h-full">
                         <SheetHeader className="p-4 border-b">
                             <SheetTitle className="font-headline">Ktazo Companion</SheetTitle>
                             <SheetDescription>
