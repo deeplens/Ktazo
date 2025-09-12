@@ -49,7 +49,7 @@ export default function Home() {
       </div>
       <div className="hidden bg-muted lg:block">
         <Image
-          src="https://picsum.photos/seed/new_growth/1920/1080"
+          src="https://picsum.photos/seed/sunrise_mountain/1920/1080"
           alt="A nature scene representing growth and newness."
           data-ai-hint="growth newness"
           width="1920"
