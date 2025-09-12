@@ -108,7 +108,7 @@ const SermonTable = ({sermons, onDelete}: {sermons: Sermon[], onDelete: (sermonI
                                                 <AlertDialogDescription>
                                                     This action cannot be undone. This will permanently delete the sermon
                                                     and all of its associated content.
-                                                </Description>
+                                                </AlertDialogDescription>
                                             </AlertDialogHeader>
                                             <AlertDialogFooter>
                                                 <AlertDialogCancel>Cancel</AlertDialogCancel>

@@ -1,5 +1,5 @@
 'use client';
-import { useAuth } from "@/lib/auth.tsx";
+import { useAuth } from "@/lib/auth";
 import { MemberDashboard } from "@/components/dashboard/member-dashboard";
 import { AdminPastorDashboard } from "@/components/dashboard/admin-pastor-dashboard";
 import { Skeleton } from "@/components/ui/skeleton";
