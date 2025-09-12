@@ -6,8 +6,9 @@ import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Church, Globe, Palette, Volume2 } from "lucide-react";
+import { Church, Globe, Palette, Volume2, Link as LinkIcon } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 
 export default function SettingsPage() {
     return (
@@ -88,6 +89,23 @@ export default function SettingsPage() {
                         <Input id="url2" placeholder="https://approved-theology-resource.com" />
                     </div>
                     <Button variant="outline">Add another URL</Button>
+                </CardContent>
+            </Card>
+
+            <Card>
+                <CardHeader>
+                    <CardTitle className="flex items-center gap-2"><LinkIcon /> Optional Member Services</CardTitle>
+                    <CardDescription>Select optional services to make available to your members.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <div className="flex items-center space-x-2">
+                        <Checkbox id="odb" />
+                        <Label htmlFor="odb" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                             <a href="https://podcasts.apple.com/us/search?term=our%20daily%20bread" target="_blank" rel="noopener noreferrer" className="underline">
+                                Our Daily Bread
+                            </a>
+                        </Label>
+                    </div>
                 </CardContent>
             </Card>
             
