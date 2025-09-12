@@ -132,8 +132,8 @@ export function WeeklyContentView({ content, onGenerateAudio, isGeneratingAudio 
             <CardDescription>Generated questions for different groups.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            {content.reflectionQuestions.map((group) => (
-              <div key={group.audience}>
+            {content.reflectionQuestions.map((group, index) => (
+              <div key={`${group.audience}-${index}`}>
                 <h3 className="font-semibold flex items-center gap-2 mb-2 text-sm">{getIconForAudience(group.audience)} {group.audience}</h3>
                 <ul className="list-disc list-inside space-y-2 text-sm text-muted-foreground pl-2">
                     {group.questions.map((q, i) => <li key={i}>{q}</li>)}
