@@ -49,6 +49,7 @@ const statusColors: { [key: string]: string } = {
 const SermonTable = ({sermons, onDelete}: {sermons: Sermon[], onDelete: (sermonId: string) => void}) => {
     const { user } = useAuth();
     const canManage = user?.role === 'ADMIN' || user?.role === 'PASTOR' || user?.role === 'MASTER';
+    const viewUrl = canManage ? `/dashboard/sermons` : `/dashboard/weekly`;
 
     return (
         <Table>
@@ -58,7 +59,7 @@ const SermonTable = ({sermons, onDelete}: {sermons: Sermon[], onDelete: (sermonI
                 <TableHead>Speaker</TableHead>
                 <TableHead className="hidden md:table-cell">Series</TableHead>
                 <TableHead className="hidden md:table-cell">Date</TableHead>
-                <TableHead>Status</TableHead>
+                {canManage && <TableHead>Status</TableHead>}
                 <TableHead>
                 <span className="sr-only">Actions</span>
                 </TableHead>
@@ -68,21 +69,21 @@ const SermonTable = ({sermons, onDelete}: {sermons: Sermon[], onDelete: (sermonI
             {sermons.map(sermon => (
                 <TableRow key={sermon.id}>
                     <TableCell className="font-medium">
-                        <Link href={`/dashboard/sermons/${sermon.id}`} className="hover:underline">
+                        <Link href={`${viewUrl}/${sermon.id}`} className="hover:underline">
                             {sermon.title}
                         </Link>
                     </TableCell>
                     <TableCell className="text-muted-foreground">{sermon.speaker}</TableCell>
                     <TableCell className="hidden md:table-cell text-muted-foreground">{sermon.series}</TableCell>
                     <TableCell className="hidden md:table-cell text-muted-foreground">{sermon.date}</TableCell>
-                    <TableCell>
+                    {canManage && <TableCell>
                         <Badge 
                             variant={statusStyles[sermon.status] as any}
                             className={statusColors[sermon.status]}
                         >
                             {sermon.status.replace('_', ' ')}
                         </Badge>
-                    </TableCell>
+                    </TableCell>}
                     <TableCell className="text-right">
                          <DropdownMenu>
                             <DropdownMenuTrigger asChild>
@@ -94,7 +95,7 @@ const SermonTable = ({sermons, onDelete}: {sermons: Sermon[], onDelete: (sermonI
                             <DropdownMenuContent align="end">
                                 <DropdownMenuLabel>Actions</DropdownMenuLabel>
                                 <DropdownMenuItem asChild>
-                                    <Link href={`/dashboard/sermons/${sermon.id}`}>Manage</Link>
+                                    <Link href={`${viewUrl}/${sermon.id}`}>{canManage ? 'Manage' : 'View'}</Link>
                                 </DropdownMenuItem>
                                 {canManage && (
                                      <AlertDialog>
@@ -107,7 +108,7 @@ const SermonTable = ({sermons, onDelete}: {sermons: Sermon[], onDelete: (sermonI
                                                 <AlertDialogDescription>
                                                     This action cannot be undone. This will permanently delete the sermon
                                                     and all of its associated content.
-                                                </AlertDialogDescription>
+                                                </Description>
                                             </AlertDialogHeader>
                                             <AlertDialogFooter>
                                                 <AlertDialogCancel>Cancel</AlertDialogCancel>
@@ -130,10 +131,18 @@ const SermonTable = ({sermons, onDelete}: {sermons: Sermon[], onDelete: (sermonI
 export default function SermonsPage() {
     const [allSermons, setAllSermons] = useState<Sermon[]>([]);
     const { toast } = useToast();
+    const { user } = useAuth();
+    const canManage = user?.role === 'ADMIN' || user?.role === 'PASTOR' || user?.role === 'MASTER';
+
 
     useEffect(() => {
-        setAllSermons(getMockSermons());
-    }, []);
+        const sermons = getMockSermons();
+        if (canManage) {
+            setAllSermons(sermons);
+        } else {
+            setAllSermons(sermons.filter(s => s.status === 'PUBLISHED'));
+        }
+    }, [canManage]);
     
     const handleDeleteSermon = (sermonId: string) => {
         deleteSermon(sermonId);
@@ -154,47 +163,59 @@ export default function SermonsPage() {
         <div className="flex items-center">
             <div className="flex-1">
                 <h1 className="text-3xl font-bold tracking-tight font-headline">Sermons</h1>
-                <p className="text-muted-foreground">Manage your congregation's sermons and weekly content.</p>
+                <p className="text-muted-foreground">
+                    {canManage ? "Manage your congregation's sermons and weekly content." : "Browse all published sermons from your congregation."}
+                </p>
             </div>
-            <div className="ml-auto flex items-center gap-2">
-            <Button size="sm" className="h-8 gap-1" asChild>
-              <Link href="/dashboard/sermons/new">
-                <PlusCircle className="h-3.5 w-3.5" />
-                <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-                Upload Sermon
-                </span>
-              </Link>
-            </Button>
-            </div>
+            {canManage && (
+                <div className="ml-auto flex items-center gap-2">
+                <Button size="sm" className="h-8 gap-1" asChild>
+                <Link href="/dashboard/sermons/new">
+                    <PlusCircle className="h-3.5 w-3.5" />
+                    <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
+                    Upload Sermon
+                    </span>
+                </Link>
+                </Button>
+                </div>
+            )}
         </div>
-      <Tabs defaultValue="all">
-        <TabsList>
-          <TabsTrigger value="all">All</TabsTrigger>
-          <TabsTrigger value="published">Published</TabsTrigger>
-          <TabsTrigger value="approved">Approved</TabsTrigger>
-          <TabsTrigger value="review">For Review</TabsTrigger>
-          <TabsTrigger value="drafts">Drafts</TabsTrigger>
-        </TabsList>
+      {canManage ? (
+          <Tabs defaultValue="all">
+            <TabsList>
+            <TabsTrigger value="all">All</TabsTrigger>
+            <TabsTrigger value="published">Published</TabsTrigger>
+            <TabsTrigger value="approved">Approved</TabsTrigger>
+            <TabsTrigger value="review">For Review</TabsTrigger>
+            <TabsTrigger value="drafts">Drafts</TabsTrigger>
+            </TabsList>
+            <Card>
+                <CardContent className="pt-6">
+                    <TabsContent value="all">
+                        <SermonTable sermons={allSermons} onDelete={handleDeleteSermon} />
+                    </TabsContent>
+                    <TabsContent value="published">
+                        <SermonTable sermons={published} onDelete={handleDeleteSermon} />
+                    </TabsContent>
+                    <TabsContent value="approved">
+                        <SermonTable sermons={approved} onDelete={handleDeleteSermon} />
+                    </TabsContent>
+                    <TabsContent value="review">
+                        <SermonTable sermons={readyForReview} onDelete={handleDeleteSermon} />
+                    </TabsContent>
+                    <TabsContent value="drafts">
+                        <SermonTable sermons={drafts} onDelete={handleDeleteSermon} />
+                    </TabsContent>
+                </CardContent>
+            </Card>
+        </Tabs>
+      ) : (
         <Card>
             <CardContent className="pt-6">
-                <TabsContent value="all">
-                    <SermonTable sermons={allSermons} onDelete={handleDeleteSermon} />
-                </TabsContent>
-                <TabsContent value="published">
-                    <SermonTable sermons={published} onDelete={handleDeleteSermon} />
-                </TabsContent>
-                <TabsContent value="approved">
-                    <SermonTable sermons={approved} onDelete={handleDeleteSermon} />
-                </TabsContent>
-                <TabsContent value="review">
-                    <SermonTable sermons={readyForReview} onDelete={handleDeleteSermon} />
-                </TabsContent>
-                <TabsContent value="drafts">
-                    <SermonTable sermons={drafts} onDelete={handleDeleteSermon} />
-                </TabsContent>
+                <SermonTable sermons={allSermons} onDelete={handleDeleteSermon} />
             </CardContent>
         </Card>
-      </Tabs>
+      )}
     </div>
   );
 }

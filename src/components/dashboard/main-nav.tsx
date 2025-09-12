@@ -16,8 +16,7 @@ interface NavItem {
 const navItems: NavItem[] = [
   { href: '/dashboard', label: 'Home', icon: Home, roles: ['MASTER', 'ADMIN', 'PASTOR', 'MEMBER'] },
   { href: '/dashboard/profile', label: 'Profile', icon: UserIcon, roles: ['MASTER', 'ADMIN', 'PASTOR', 'MEMBER'] },
-  { href: '/dashboard/sermons', label: 'Sermons', icon: BookOpen, roles: ['MASTER', 'ADMIN', 'PASTOR'] },
-  { href: '/dashboard/weekly', label: 'This Week', icon: BookOpen, roles: ['MEMBER'] },
+  { href: '/dashboard/sermons', label: 'Sermons', icon: BookOpen, roles: ['MASTER', 'ADMIN', 'PASTOR', 'MEMBER'] },
   { href: '/dashboard/admin/members', label: 'Members', icon: Users, roles: ['MASTER', 'ADMIN'] },
   { href: '/dashboard/admin/settings', label: 'Settings', icon: Settings, roles: ['MASTER', 'ADMIN', 'PASTOR'] },
   { href: '/dashboard/help', label: 'Help Center', icon: HelpCircle, roles: ['MASTER', 'ADMIN', 'PASTOR', 'MEMBER'] },
