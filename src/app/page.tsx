@@ -50,9 +50,9 @@ export default function Home() {
       </div>
       <div className="hidden bg-muted lg:block">
         <Image
-          src="https://picsum.photos/seed/ktazo1/1920/1080"
-          alt="Abstract image representing community and faith"
-          data-ai-hint="abstract spiritual"
+          src="https://picsum.photos/seed/nature2/1920/1080"
+          alt="A beautiful nature scene to inspire reflection."
+          data-ai-hint="nature landscape"
           width="1920"
           height="1080"
           className="h-full w-full object-cover dark:brightness-[0.3]"
