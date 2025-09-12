@@ -249,7 +249,7 @@ function WeeklyPageContent({ sermon, weeklyContent, answers, setAnswers, availab
           </CardHeader>
           <CardContent className="space-y-6">
               {weeklyContent.reflectionQuestions.map((group, groupIndex) => (
-                  <div key={group.audience}>
+                  <div key={`${group.audience}-${groupIndex}`}>
                       <h3 className="font-semibold flex items-center gap-2 mb-4 text-lg border-b pb-2">{getIconForAudience(group.audience)} {group.audience}</h3>
                       <div className="space-y-6">
                           {group.questions.map((q, i) => {
