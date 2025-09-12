@@ -54,7 +54,7 @@ export default function Home() {
           data-ai-hint="beautiful landscape"
           width="1920"
           height="1080"
-          className="h-full w-full object-cover dark:brightness-[0.3]"
+          className="h-full w-full object-cover dark:brightness-[0.3] opacity-80 saturate-150"
         />
       </div>
     </div>
