@@ -31,22 +31,6 @@ const RagChatbotCompanionOutputSchema = z.object({
 
 export type RagChatbotCompanionOutput = z.infer<typeof RagChatbotCompanionOutputSchema>;
 
-
-const ensureTopicalCorrectnessTool = ai.defineTool({
-  name: 'ensureTopicalCorrectness',
-  description: 'This tool will check if the content of the query is relevant to the sermon corpus and the approved custom URLs. It helps maintain topical correctness.',
-  inputSchema: z.object({
-    query: z.string().describe('The user query.'),
-    relevant: z.boolean().describe('Whether the user query is relevant to the current sermon corpus.'),
-  }),
-  outputSchema: z.boolean(),
-}, async (input) => {
-  // In a real implementation, this would involve checking the query against the
-  // sermon corpus and approved URLs.  For this example, we'll just return true.
-  console.log("ensureTopicalCorrectness tool was called with input: ", input);
-  return input.relevant;  // Placeholder implementation
-});
-
 export async function ragChatbotCompanion(input: RagChatbotCompanionInput): Promise<RagChatbotCompanionOutput> {
   return ragChatbotCompanionFlow(input);
 }
@@ -57,25 +41,28 @@ const ragChatbotCompanionPrompt = ai.definePrompt({
     schema: RagChatbotCompanionInputSchema,
   },
   output: {
-    format: 'json',
     schema: RagChatbotCompanionOutputSchema,
   },
-  tools: [ensureTopicalCorrectnessTool],
-  prompt: `You are a helpful chatbot companion that answers questions based on the sermon corpus and approved custom URLs for tenant {{tenantId}}. You must only use information from these sources.
+  prompt: `You are a helpful chatbot companion for a church called Ktazo Weekly. Your purpose is to answer questions based *only* on a provided corpus of sermons and a list of pastor-approved custom URLs.
 
-      User query: {{{query}}}
+You must strictly adhere to the following rules:
+1.  Your knowledge is limited to the documents in the retrieval system (sermons and approved URLs).
+2.  If a user asks a question that is outside the scope of the provided documents (e.g., about general knowledge, other religions, or any topic not covered in the sermons), you MUST politely refuse to answer.
+3.  When you refuse, explain that you can only answer questions about the church's sermons and approved materials. Do not apologize.
+4.  When you can answer a question, provide a helpful and direct response based on the source material.
+5.  After answering, list the specific sources you used. In a real scenario you would be provided with source names, but for now you can use placeholder source names like "Sermon: The Good Shepherd" or "Beliefs Page".
 
-      {{#if conversationHistory}}
-      Conversation History:
-      {{#each conversationHistory}}
-        {{this.role}}: {{this.content}}
-      {{/each}}
-      {{/if}}
+User query: {{{query}}}
 
-      If the user asks a question that is not related to the sermon corpus or approved custom URLs, politely refuse to answer. Before answering, use the ensureTopicalCorrectness tool to ensure topical correctness. If it returns false, then refuse to answer. Make it clear that you cannot answer questions outside of that scope.
+{{#if conversationHistory}}
+Conversation History:
+{{#each conversationHistory}}
+  {{this.role}}: {{this.content}}
+{{/each}}
+{{/if}}
 
-      Output the response and the sources used. Do not mention the tool in your response.
-      `,
+Based on the user's query and the conversation history, generate a response and a list of sources.
+`,
 });
 
 const ragChatbotCompanionFlow = ai.defineFlow(
@@ -88,13 +75,19 @@ const ragChatbotCompanionFlow = ai.defineFlow(
     try {
         console.log('[[DEBUG]] Starting ragChatbotCompanionFlow');
         
-        // In a real implementation, this would query the RAG system and retrieve
-        // relevant documents.
+        // In a real implementation, this would query a RAG system and retrieve
+        // relevant documents. For this demo, we will simulate it.
         const { output } = await ragChatbotCompanionPrompt(input);
 
         if (!output) {
             throw new Error('AI chat generation failed: No output was returned from the model.');
         }
+        
+        // Simulate adding sources if the AI didn't hallucinate them.
+        if (output.sources.length === 0 && !output.response.includes("only answer questions about")) {
+            output.sources = ["Sermon: The Good Shepherd", "Our Beliefs page"];
+        }
+
 
         console.log('[[DEBUG]] Finishing ragChatbotCompanionFlow.');
         return output;
