@@ -49,9 +49,9 @@ export default function Home() {
       </div>
       <div className="hidden bg-muted lg:block">
         <Image
-          src="https://picsum.photos/seed/beautiful_park/1920/1080"
-          alt="A beautiful park."
-          data-ai-hint="beautiful park"
+          src="https://picsum.photos/seed/park_lake_birds/1920/1080"
+          alt="A beautiful park with a lake, trees, and birds under a blue sky."
+          data-ai-hint="park lake"
           width="1920"
           height="1080"
           className="h-full w-full object-cover dark:brightness-[0.2] opacity-50 saturate-150"
