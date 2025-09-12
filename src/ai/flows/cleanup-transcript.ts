@@ -28,6 +28,7 @@ export async function cleanupTranscript(input: CleanupTranscriptInput): Promise<
 const cleanupPrompt = ai.definePrompt({
   name: 'cleanupTranscriptPrompt',
   input: {schema: CleanupTranscriptInputSchema},
+  output: {format: 'text'},
   prompt: `You are an expert editor. Your task is to take the following raw sermon transcript and clean it up for readability.
 
   Your tasks are:
