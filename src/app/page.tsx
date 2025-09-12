@@ -49,9 +49,9 @@ export default function Home() {
       </div>
       <div className="hidden bg-muted lg:block">
         <Image
-          src="https://picsum.photos/seed/nature4/1920/1080"
-          alt="A beautiful nature scene to inspire reflection."
-          data-ai-hint="nature landscape"
+          src="https://picsum.photos/seed/new_growth/1920/1080"
+          alt="A nature scene representing growth and newness."
+          data-ai-hint="growth newness"
           width="1920"
           height="1080"
           className="h-full w-full object-cover dark:brightness-[0.3]"
