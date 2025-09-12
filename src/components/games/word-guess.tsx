@@ -171,6 +171,10 @@ export function WordGuessGame({ data }: WordGuessGameProps) {
 
     const currentItem = data[currentWordIndex];
 
+    if (!currentItem) {
+        return null;
+    }
+
     return (
         <Card className="w-full">
             <CardHeader>
