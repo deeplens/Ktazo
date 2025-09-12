@@ -362,9 +362,26 @@ export const saveWeeklyContent = (content: WeeklyContent) => {
         } else {
             allContent.push(content);
         }
-        sessionStorage.setItem(WEEKLY_CONTENT_STORAGE_KEY, JSON.stringify(allContent));
+        try {
+            sessionStorage.setItem(WEEKLY_CONTENT_STORAGE_KEY, JSON.stringify(allContent));
+        } catch (e) {
+            if (e instanceof DOMException && e.name === 'QuotaExceededError') {
+                console.warn("Session storage quota exceeded. Clearing and retrying with only current content.");
+                // As a fallback, clear the storage and try to save only the current item
+                try {
+                    const singleItemArray = [content];
+                    sessionStorage.setItem(WEEKLY_CONTENT_STORAGE_KEY, JSON.stringify(singleItemArray));
+                } catch (e2) {
+                    console.error("Failed to save even the single item to session storage", e2);
+                }
+            } else {
+                console.error("Failed to save to session storage", e);
+            }
+        }
     }
 };
 
 // For initial load, we still need this export for components that use it directly
 export const mockWeeklyContent = getMockWeeklyContent();
+
+    

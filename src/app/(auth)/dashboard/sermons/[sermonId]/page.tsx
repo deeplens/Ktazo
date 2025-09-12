@@ -1,7 +1,7 @@
 
 'use client';
 import { notFound, useParams } from "next/navigation";
-import { getMockSermons, getMockWeeklyContent, updateSermonWeeklyContentId } from "@/lib/mock-data";
+import { getMockSermons, getMockWeeklyContent, saveWeeklyContent, updateSermonWeeklyContentId } from "@/lib/mock-data";
 import { SermonContent } from "./sermon-content";
 import { useEffect, useState } from "react";
 import { Sermon, WeeklyContent } from "@/lib/types";
@@ -50,7 +50,6 @@ export default function SermonDetailPage() {
         });
         console.log('[[DEBUG]] Received content from generateWeeklyContent', generated);
         
-        // For this mock implementation, we'll just create it in memory
         const newContent: WeeklyContent = {
             id: `wc-${Date.now()}`,
             sermonId: sermon.id,
@@ -60,11 +59,11 @@ export default function SermonDetailPage() {
             devotionals: generated.devotionals.map((d, i) => ({ day: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'][i], content: d })),
             reflectionQuestions: generated.reflectionQuestions,
             games: generated.games,
-            mondayClipUrl: undefined, // Audio is generated separately now
+            mondayClipUrl: undefined,
         };
         
+        saveWeeklyContent(newContent);
         setWeeklyContent(newContent);
-        // Link the new content to the sermon
         updateSermonWeeklyContentId(sermon.id, newContent.id);
         const updatedSermon = getMockSermons().find(s => s.id === sermon.id);
         if(updatedSermon) setSermon(updatedSermon);
@@ -98,6 +97,7 @@ export default function SermonDetailPage() {
         }
 
         const updatedContent = { ...weeklyContent, mondayClipUrl: result.mondayClipUrl };
+        saveWeeklyContent(updatedContent);
         setWeeklyContent(updatedContent);
 
         toast({
@@ -136,3 +136,5 @@ export default function SermonDetailPage() {
             isGeneratingAudio={isGeneratingAudio}
          />;
 }
+
+    
