@@ -316,6 +316,7 @@ export function SermonContent({
   const canDelete = canManage;
   const canTranslate = canManage && sermon.status !== "DRAFT";
   const canCleanup = canManage && sermon.status !== "DRAFT" && activeTab === "original";
+  const showAudioPlayer = sermon.mp3Url && !sermon.mp3Url.startsWith('blob:') && sermon.status === 'PUBLISHED';
 
   const generateButtonText =
     activeTab === "spanish"
@@ -611,7 +612,7 @@ export function SermonContent({
         </div>
 
         <div className="grid auto-rows-max items-start gap-4 lg:gap-8">
-          {sermon.mp3Url && (
+          {showAudioPlayer && (
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">

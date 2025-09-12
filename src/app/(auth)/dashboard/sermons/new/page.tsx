@@ -22,7 +22,7 @@ export default function NewSermonPage() {
     const [speaker, setSpeaker] = useState('');
     const [date, setDate] = useState('');
     const [audioFile, setAudioFile] = useState<File | null>(null);
-    const [audioDataUrl, setAudioDataUrl] = useState<string | null>(null);
+    const [audioBlobUrl, setAudioBlobUrl] = useState<string | null>(null);
     const [textFile, setTextFile] = useState<File | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [loadingMessage, setLoadingMessage] = useState('Transcribing...');
@@ -52,15 +52,18 @@ export default function NewSermonPage() {
 
     const handleAudioFileChange = async (file: File | null) => {
         setAudioFile(file);
+        if (audioBlobUrl) {
+            URL.revokeObjectURL(audioBlobUrl);
+            setAudioBlobUrl(null);
+        }
+
         if (file) {
-            const dataUrl = await fileToDataURI(file);
-            setAudioDataUrl(dataUrl);
+            const blobUrl = URL.createObjectURL(file);
+            setAudioBlobUrl(blobUrl);
             if (!title && file.name) {
                 // Pre-fill title from filename, removing extension
                 setTitle(file.name.replace(/\.[^/.]+$/, ""));
             }
-        } else {
-            setAudioDataUrl(null);
         }
     };
 
@@ -72,7 +75,7 @@ export default function NewSermonPage() {
             series,
             speaker,
             date,
-            mp3Url: source === 'audio' && audioFile ? URL.createObjectURL(audioFile) : '',
+            mp3Url: source === 'audio' && audioBlobUrl ? audioBlobUrl : '',
             transcript: finalTranscript,
             status: 'READY_FOR_REVIEW' as const,
             languages: ['en'],
@@ -105,7 +108,7 @@ export default function NewSermonPage() {
         setIsLoading(true);
 
         if (uploadType === 'audio') {
-            if (!audioFile || !audioDataUrl) {
+            if (!audioFile) {
                  toast({
                     variant: 'destructive',
                     title: "Missing File",
@@ -116,6 +119,7 @@ export default function NewSermonPage() {
             }
              try {
                 setLoadingMessage('Transcribing...');
+                const audioDataUrl = await fileToDataURI(audioFile);
                 const transcriptionResult = await transcribeSermon({ mp3Url: audioDataUrl });
                 const currentTranscript = transcriptionResult.transcript;
                 setTranscript(currentTranscript);
@@ -176,7 +180,7 @@ export default function NewSermonPage() {
             const acceptedAudioTypes = ['audio/mpeg'];
             const acceptedTextTypes = ['text/plain', 'text/markdown', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
 
-            if (fileType === 'audio' && acceptedAudioTypes.includes(file.type)) {
+            if (fileType === 'audio' && (acceptedAudioTypes.includes(file.type) || file.name.endsWith('.mp3'))) {
                 handleAudioFileChange(file);
             } else if (fileType === 'text' && (acceptedTextTypes.includes(file.type) || file.name.endsWith('.txt') || file.name.endsWith('.md'))) {
                 setTextFile(file);
@@ -280,9 +284,17 @@ export default function NewSermonPage() {
                                                 </p>
                                                 <p className="text-xs text-muted-foreground">MP3 audio file</p>
                                             </div>
-                                            <Input id="audio-file" type="file" className="hidden" accept=".mp3" onChange={(e) => handleAudioFileChange(e.target.files?.[0] || null)} disabled={isLoading} />
+                                            <Input id="audio-file" type="file" className="hidden" accept=".mp3,audio/mpeg" onChange={(e) => handleAudioFileChange(e.target.files?.[0] || null)} disabled={isLoading} />
                                         </Label>
-                                    </div> 
+                                    </div>
+                                    {audioBlobUrl && (
+                                        <div className="pt-2">
+                                            <Label>Audio Preview</Label>
+                                            <audio controls src={audioBlobUrl} className="w-full mt-2">
+                                                Your browser does not support the audio element.
+                                            </audio>
+                                        </div>
+                                    )} 
                                 </div>
                              ) : (
                                 <div className="space-y-2">
