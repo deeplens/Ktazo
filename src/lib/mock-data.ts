@@ -190,11 +190,11 @@ const initialWeeklyContent: WeeklyContent[] = [
         summaryShort: "A brief look at Psalm 23, highlighting God's role as our provider and protector.",
         summaryLong: "This week's devotional guide explores the deep comfort and assurance found in Psalm 23. We delve into the metaphor of the shepherd and his sheep, understanding how God leads us, provides for our needs, restores our souls, and walks with us through life's darkest valleys. It's a message of profound trust and unwavering divine care.",
         devotionals: [
-            { day: "Monday", content: "Podcast clip about resting in God's care." },
-            { day: "Tuesday", content: "Reflection on 'The Lord is my shepherd, I shall not want.' What does it mean to be content in His provision?" },
-            { day: "Wednesday", content: "He makes me lie down in green pastures. Where are the 'green pastures' in your life where you can find rest?" },
-            { day: "Thursday", content: "Even though I walk through the valley of the shadow of death, I will fear no evil. How does God's presence comfort you in fearful times?" },
-            { day: "Friday", content: "Surely goodness and mercy shall follow me all the days of my life. Meditate on God's persistent goodness." },
+            { day: "Monday", content: "Podcast clip about resting in God's care. This devotional is now much longer to provide more substance for the reader. It delves deeper into the themes of the sermon and offers more for reflection. We can expand on the idea of rest and what it truly means to trust in God's provision. We can explore the contrast between worldly striving and spiritual peace." },
+            { day: "Tuesday", content: "Reflection on 'The Lord is my shepherd, I shall not want.' What does it mean to be content in His provision? This section is also expanded to provide a richer experience. We can discuss the societal pressures of wanting more and how a relationship with God can free us from that cycle. Practical steps to cultivate contentment can be included." },
+            { day: "Wednesday", content: "He makes me lie down in green pastures. Where are the 'green pastures' in your life where you can find rest? A longer devotional allows for a more detailed exploration of this metaphor. We can talk about creating intentional spaces for spiritual rest and renewal in our busy lives, and what those spaces might look like for different people." },
+            { day: "Thursday", content: "Even though I walk through the valley of the shadow of death, I will fear no evil. How does God's presence comfort you in fearful times? This devotional is now twice as long, allowing for a more sensitive and thorough handling of a difficult topic. We can include stories or examples of how faith provides strength in dark times, and offer specific scriptures for comfort." },
+            { day: "Friday", content: "Surely goodness and mercy shall follow me all the days of my life. Meditate on God's persistent goodness. This expanded devotional provides a more triumphant and worshipful conclusion to the week. We can encourage the reader to look back on their week and identify moments of God's goodness and mercy, fostering a heart of gratitude." },
         ],
         reflectionQuestions: [
             {

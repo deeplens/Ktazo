@@ -6,10 +6,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { UploadCloud, Loader2, FileText } from "lucide-react";
+import { UploadCloud, Loader2, FileText, Sparkles } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { addSermon } from "@/lib/mock-data";
 import { transcribeSermon } from "@/ai/flows/transcribe-sermon";
+import { suggestSermonTitle } from "@/ai/flows/suggest-sermon-title";
 import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
@@ -23,6 +24,7 @@ export default function NewSermonPage() {
     const [audioDataUrl, setAudioDataUrl] = useState<string | null>(null);
     const [textFile, setTextFile] = useState<File | null>(null);
     const [isLoading, setIsLoading] = useState(false);
+    const [loadingMessage, setLoadingMessage] = useState('Transcribing...');
     const [transcript, setTranscript] = useState('');
     const [showTranscriptDialog, setShowTranscriptDialog] = useState(false);
     const [uploadType, setUploadType] = useState<'audio' | 'text'>('audio');
@@ -52,6 +54,10 @@ export default function NewSermonPage() {
         if (file) {
             const dataUrl = await fileToDataURI(file);
             setAudioDataUrl(dataUrl);
+            if (!title && file.name) {
+                // Pre-fill title from filename, removing extension
+                setTitle(file.name.replace(/\.[^/.]+$/, ""));
+            }
         } else {
             setAudioDataUrl(null);
         }
@@ -65,9 +71,7 @@ export default function NewSermonPage() {
             series,
             speaker,
             date,
-            // Use a placeholder URL to avoid quota errors, but keep original for transcription.
-            // In a real app, this would be a URL from a cloud storage service.
-            mp3Url: source === 'audio' && audioFile ? `path/to/${audioFile.name}` : '',
+            mp3Url: source === 'audio' && audioFile ? URL.createObjectURL(audioFile) : '',
             transcript: finalTranscript,
             status: 'READY_FOR_REVIEW' as const,
             languages: ['en'],
@@ -83,16 +87,16 @@ export default function NewSermonPage() {
         
         if(showTranscriptDialog) setShowTranscriptDialog(false);
         setIsLoading(false);
-        router.push('/dashboard/sermons');
+        router.push(`/dashboard/sermons/${newSermon.id}`);
     }
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!title || !speaker) {
+        if (!speaker) {
             toast({
                 variant: 'destructive',
                 title: "Missing Information",
-                description: "Please provide a sermon title and speaker.",
+                description: "Please provide a speaker name.",
             });
             return;
         }
@@ -110,20 +114,26 @@ export default function NewSermonPage() {
                 return;
             }
              try {
+                setLoadingMessage('Transcribing...');
                 const transcriptionResult = await transcribeSermon({ mp3Url: audioDataUrl });
-                setTranscript(transcriptionResult.transcript);
+                const currentTranscript = transcriptionResult.transcript;
+                setTranscript(currentTranscript);
+
+                if (!title) {
+                    setLoadingMessage('Suggesting title...');
+                    const titleResult = await suggestSermonTitle({ transcript: currentTranscript });
+                    setTitle(titleResult.suggestedTitle);
+                }
+
                 setShowTranscriptDialog(true);
             } catch (error) {
-                console.error("Transcription failed", error);
+                console.error("Transcription or Title Suggestion failed", error);
                 toast({
                     variant: 'destructive',
-                    title: "Transcription Failed",
+                    title: "Processing Failed",
                     description: "There was an error processing your audio file. Please try again.",
                 });
-            } finally {
-                if (!showTranscriptDialog) {
-                    setIsLoading(false);
-                }
+                 setIsLoading(false);
             }
         } else { // Text tab
             if (!textFile) {
@@ -137,13 +147,20 @@ export default function NewSermonPage() {
             }
             try {
                 const textContent = await fileToText(textFile);
+                if (!title) {
+                    setLoadingMessage('Suggesting title...');
+                    const titleResult = await suggestSermonTitle({ transcript: textContent });
+                    setTitle(titleResult.suggestedTitle);
+                     // Since this is async, we'll just proceed and the title will be set.
+                     // A more complex implementation might wait here.
+                }
                 handleConfirmSermon(textContent, 'text');
             } catch (error) {
-                 console.error("File read failed", error);
+                 console.error("File read or Title Suggestion failed", error);
                 toast({
                     variant: 'destructive',
-                    title: "File Read Error",
-                    description: "There was an error reading the transcript file.",
+                    title: "Processing Failed",
+                    description: "There was an error processing the transcript file.",
                 });
                 setIsLoading(false);
             }
@@ -162,12 +179,20 @@ export default function NewSermonPage() {
                 <Card className="mt-8">
                     <CardHeader>
                         <CardTitle>Sermon Details</CardTitle>
-                        <CardDescription>Provide the details for the new sermon.</CardDescription>
+                        <CardDescription>Provide the details for the new sermon. A title will be suggested if left blank.</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
                         <div className="space-y-2">
                             <Label htmlFor="title">Sermon Title</Label>
-                            <Input id="title" placeholder="e.g., The Good Shepherd" value={title} onChange={(e) => setTitle(e.target.value)} required disabled={isLoading} />
+                            <div className="flex gap-2 items-center">
+                                <Input id="title" placeholder="e.g., The Good Shepherd" value={title} onChange={(e) => setTitle(e.target.value)} disabled={isLoading} />
+                                {isLoading && loadingMessage === 'Suggesting title...' && (
+                                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                        <Sparkles className="h-4 w-4 animate-pulse" />
+                                        <span>Suggesting...</span>
+                                    </div>
+                                )}
+                            </div>
                         </div>
                          <div className="space-y-2">
                             <Label htmlFor="speaker">Speaker</Label>
@@ -249,14 +274,14 @@ export default function NewSermonPage() {
                 </Card>
                 <CardFooter className="flex justify-end gap-2 mt-4 px-0">
                     <Button variant="outline" type="button" onClick={() => router.back()} disabled={isLoading}>Cancel</Button>
-                    <Button type="submit" disabled={isLoading || !title || !speaker || (uploadType === 'audio' && !audioFile) || (uploadType === 'text' && !textFile)}>
+                    <Button type="submit" disabled={isLoading || !speaker || (uploadType === 'audio' && !audioFile) || (uploadType === 'text' && !textFile)}>
                         {isLoading ? (
                             <>
                                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                {uploadType === 'audio' ? 'Transcribing...' : 'Adding...'}
+                                {loadingMessage}
                             </>
                         ) : (
-                             uploadType === 'audio' ? 'Upload and Transcribe' : 'Add Sermon'
+                             uploadType === 'audio' ? 'Upload and Process' : 'Add Sermon'
                         )}
                     </Button>
                 </CardFooter>
@@ -265,14 +290,23 @@ export default function NewSermonPage() {
             <AlertDialog open={showTranscriptDialog} onOpenChange={setShowTranscriptDialog}>
                 <AlertDialogContent className="max-w-3xl">
                     <AlertDialogHeader>
-                    <AlertDialogTitle>Transcription Result</AlertDialogTitle>
+                    <AlertDialogTitle>Confirm Sermon Details</AlertDialogTitle>
                     <AlertDialogDescription>
-                        Review the generated transcript below. You can edit it later from the sermon detail page.
+                        Review the generated transcript and the suggested title below. You can edit these later.
                     </AlertDialogDescription>
                     </AlertDialogHeader>
-                    <ScrollArea className="h-96 w-full rounded-md border p-4">
-                        <pre className="text-sm whitespace-pre-wrap">{transcript}</pre>
-                    </ScrollArea>
+                    <div className="space-y-4">
+                        <div className="space-y-1">
+                            <Label htmlFor="preview-title">Sermon Title</Label>
+                            <Input id="preview-title" value={title} onChange={(e) => setTitle(e.target.value)} />
+                        </div>
+                        <div className="space-y-1">
+                            <Label>Transcript</Label>
+                            <ScrollArea className="h-72 w-full rounded-md border p-4">
+                                <pre className="text-sm whitespace-pre-wrap">{transcript}</pre>
+                            </ScrollArea>
+                        </div>
+                    </div>
                     <AlertDialogFooter>
                         <Button variant="outline" onClick={() => {
                             setShowTranscriptDialog(false);
@@ -285,5 +319,3 @@ export default function NewSermonPage() {
         </div>
     );
 }
-
-    
