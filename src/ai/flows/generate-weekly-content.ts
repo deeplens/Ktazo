@@ -129,12 +129,22 @@ const generateWeeklyContentFlow = ai.defineFlow(
     outputSchema: GenerateWeeklyContentOutputSchema,
   },
   async input => {
-    console.log('[[DEBUG]] Starting generateWeeklyContentFlow');
-    
-    const { output } = await generateWeeklyContentPrompt(input);
-    const content = output!;
-    
-    console.log('[[DEBUG]] Finishing generateWeeklyContentFlow.');
-    return content;
+    try {
+        console.log('[[DEBUG]] Starting generateWeeklyContentFlow');
+        
+        const { output } = await generateWeeklyContentPrompt(input);
+
+        if (!output) {
+            throw new Error('AI content generation failed: No output was returned from the model.');
+        }
+
+        console.log('[[DEBUG]] Finishing generateWeeklyContentFlow.');
+        return output;
+    } catch (error) {
+        console.error('[[ERROR]] in generateWeeklyContentFlow:', error);
+        // Re-throwing the error to be handled by the calling Server Action and the client.
+        // This ensures the client is aware of the failure.
+        throw new Error('Failed to generate weekly content due to a server-side AI error.');
+    }
   }
 );
