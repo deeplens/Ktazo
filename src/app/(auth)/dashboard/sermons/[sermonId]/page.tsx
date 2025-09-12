@@ -27,9 +27,9 @@ export default function SermonDetailPage() {
     if (sermonId) {
       const foundSermon = getMockSermons().find(s => s.id === sermonId);
       setSermon(foundSermon);
-      if (foundSermon && foundSermon.weeklyContentId) {
-        // This is mock data lookup. In a real app, you'd fetch this.
-        const foundContent = getMockWeeklyContent().find(wc => wc.id === foundSermon.weeklyContentId);
+      if (foundSermon && foundSermon.weeklyContentIds && foundSermon.weeklyContentIds['en']) {
+        const contentId = foundSermon.weeklyContentIds['en'];
+        const foundContent = getMockWeeklyContent().find(wc => wc.id === contentId);
         setWeeklyContent(foundContent);
       } else {
         setWeeklyContent(undefined);
@@ -40,20 +40,24 @@ export default function SermonDetailPage() {
   const handleGenerateContent = async (transcript: string, language?: string) => {
     if (!sermon || !user) return;
     setIsGenerating(true);
+    const targetLang = language || 'English';
+    const langCode = targetLang.toLowerCase().startsWith('span') ? 'es' : 'en';
+
     try {
         console.log('[[DEBUG]] Calling generateWeeklyContent');
         const generated = await generateWeeklyContent({ 
             sermonId: sermon.id, 
             tenantId: user.tenantId,
             sermonTranscript: transcript,
-            targetLanguage: language
+            targetLanguage: targetLang
         });
         console.log('[[DEBUG]] Received content from generateWeeklyContent', generated);
         
         const newContent: WeeklyContent = {
-            id: `wc-${Date.now()}`,
+            id: `wc-${sermon.id}-${langCode}-${Date.now()}`,
             sermonId: sermon.id,
             tenantId: user.tenantId,
+            language: langCode,
             summaryShort: generated.summaryShort,
             summaryLong: generated.summaryLong,
             devotionals: generated.devotionals.map((d, i) => ({ day: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'][i], content: d })),
@@ -63,15 +67,17 @@ export default function SermonDetailPage() {
         };
         
         saveWeeklyContent(newContent);
-        setWeeklyContent(newContent);
-        updateSermonWeeklyContentId(sermon.id, newContent.id);
+        if (langCode === 'en') {
+          setWeeklyContent(newContent);
+        }
+        updateSermonWeeklyContentId(sermon.id, newContent.id, langCode);
         const updatedSermon = getMockSermons().find(s => s.id === sermon.id);
         if(updatedSermon) setSermon(updatedSermon);
 
 
         toast({
             title: "Content Generated",
-            description: `Weekly content has been successfully generated ${language ? `in ${language}` : ''}.`,
+            description: `Weekly content has been successfully generated in ${targetLang}.`,
         });
 
     } catch (error) {
@@ -136,5 +142,3 @@ export default function SermonDetailPage() {
             isGeneratingAudio={isGeneratingAudio}
          />;
 }
-
-    

@@ -21,11 +21,12 @@ const initialSermons: Sermon[] = [
     date: '2024-05-12',
     mp3Url: 'https://storage.googleapis.com/studioprod-55829.appspot.com/652932b172a5a544256c70c2/sermons/kE3z98a4aT6s1B2aY1E2/audio.mp3',
     transcript: "This is the full transcript for The Good Shepherd sermon... It is a long text that can be edited.",
+    translatedTranscript: "Esta es la transcripción completa del sermón El Buen Pastor...",
     status: 'PUBLISHED',
     languages: ['en', 'es'],
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
-    weeklyContentId: 'wc-1',
+    weeklyContentIds: { 'en': 'wc-1-en', 'es': 'wc-1-es' },
     artworkUrl: 'https://picsum.photos/seed/sermon1/1200/800'
   },
   {
@@ -41,7 +42,7 @@ const initialSermons: Sermon[] = [
     languages: ['en'],
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
-    weeklyContentId: 'wc-2'
+    weeklyContentIds: { 'en': 'wc-2' }
   },
   {
     id: 'sermon-3',
@@ -118,10 +119,14 @@ export const updateSermonTranscript = (sermonId: string, transcript: string, lan
         const sermons = getMockSermons();
         const updatedSermons = sermons.map(s => {
             if (s.id === sermonId) {
+                const updatedLanguages = s.languages;
+                if (language === 'es' && !updatedLanguages.includes('es')) {
+                    updatedLanguages.push('es');
+                }
                 if (language === 'en') {
                     return { ...s, transcript, updatedAt: new Date().toISOString() };
                 } else {
-                    return { ...s, translatedTranscript: transcript, updatedAt: new Date().toISOString() };
+                    return { ...s, translatedTranscript: transcript, languages: updatedLanguages, updatedAt: new Date().toISOString() };
                 }
             }
             return s;
@@ -169,12 +174,13 @@ export const updateSermonArtwork = (sermonId: string, artworkUrl: string) => {
     }
 };
 
-export const updateSermonWeeklyContentId = (sermonId: string, weeklyContentId: string) => {
+export const updateSermonWeeklyContentId = (sermonId: string, weeklyContentId: string, language: string) => {
     if (typeof window !== 'undefined') {
         const sermons = getMockSermons();
         const updatedSermons = sermons.map(s => {
             if (s.id === sermonId) {
-                return { ...s, weeklyContentId, updatedAt: new Date().toISOString() };
+                const newWeeklyContentIds = { ...(s.weeklyContentIds || {}), [language]: weeklyContentId };
+                return { ...s, weeklyContentIds: newWeeklyContentIds, updatedAt: new Date().toISOString() };
             }
             return s;
         });
@@ -185,9 +191,10 @@ export const updateSermonWeeklyContentId = (sermonId: string, weeklyContentId: s
 
 const initialWeeklyContent: WeeklyContent[] = [
     {
-        id: "wc-1",
+        id: "wc-1-en",
         tenantId: "tenant-1",
         sermonId: "sermon-1",
+        language: 'en',
         summaryShort: "A brief look at Psalm 23, highlighting God's role as our provider and protector.",
         summaryLong: "This week's devotional guide explores the deep comfort and assurance found in Psalm 23. We delve into the metaphor of the shepherd and his sheep, understanding how God leads us, provides for our needs, restores our souls, and walks with us through life's darkest valleys. It's a message of profound trust and unwavering divine care.",
         devotionals: [
@@ -316,10 +323,28 @@ const initialWeeklyContent: WeeklyContent[] = [
         ],
         mondayClipUrl: 'https://storage.googleapis.com/studioprod-55829.appspot.com/652932b172a5a544256c70c2/sermons/kE3z98a4aT6s1B2aY1E2/audio.mp3',
     },
+    {
+        id: "wc-1-es",
+        tenantId: "tenant-1",
+        sermonId: "sermon-1",
+        language: 'es',
+        summaryShort: "Un breve vistazo al Salmo 23, destacando el papel de Dios como nuestro proveedor y protector.",
+        summaryLong: "La guía devocional de esta semana explora el profundo consuelo y la seguridad que se encuentran en el Salmo 23...",
+        devotionals: [
+            { day: "Lunes", content: "Clip de podcast sobre descansar en el cuidado de Dios..." },
+            { day: "Martes", content: "Reflexión sobre 'El Señor es mi pastor, nada me faltará.'..." },
+            { day: "Miércoles", content: "En lugares de delicados pastos me hará descansar..." },
+            { day: "Jueves", content: "Aunque ande en valle de sombra de muerte, no temeré mal alguno..." },
+            { day: "Viernes", content: "Ciertamente el bien y la misericordia me seguirán todos los días de mi vida..." },
+        ],
+        reflectionQuestions: [],
+        games: [],
+    },
      {
         id: 'wc-2',
         tenantId: 'tenant-1',
         sermonId: 'sermon-2',
+        language: 'en',
         summaryShort: 'Exploring the connection between genuine faith and tangible actions as described in the book of James.',
         summaryLong: 'This study from the book of James challenges us to examine the nature of our faith. Is it a passive belief or an active, living force? We will see that James is not advocating for salvation by works, but is instead arguing that true, saving faith inevitably produces good works. It is a call to a faith that is visible, practical, and transformative.',
         devotionals: [
@@ -359,17 +384,8 @@ export const saveWeeklyContent = (content: WeeklyContent) => {
         const allContent = getMockWeeklyContent();
         const index = allContent.findIndex(c => c.id === content.id);
         
-        // Create a serializable-safe copy of the content to avoid storing large blobs if they exist
         const contentToSave = { ...content };
-        if (contentToSave.mondayClipUrl && contentToSave.mondayClipUrl.startsWith('data:audio')) {
-            // In a real app, you'd save the blob and store a URL. Here we just prevent session storage overflow
-            // by not saving the large data URI if it's too big.
-            if(contentToSave.mondayClipUrl.length > 500000) { //~500kb limit
-                 // @ts-ignore - For demo purposes, we replace it with a placeholder
-                contentToSave.mondayClipUrl = 'placeholder_clip_url';
-            }
-        }
-
+       
         if (index > -1) {
             allContent[index] = contentToSave;
         } else {
@@ -379,13 +395,11 @@ export const saveWeeklyContent = (content: WeeklyContent) => {
             sessionStorage.setItem(WEEKLY_CONTENT_STORAGE_KEY, JSON.stringify(allContent));
         } catch (e) {
             if (e instanceof DOMException && e.name === 'QuotaExceededError') {
-                console.warn("Session storage quota exceeded. Saving only current content as fallback.");
                  try {
-                    // Fallback: try to save only the current item.
-                     const singleItemArray = [contentToSave];
-                     sessionStorage.setItem(WEEKLY_CONTENT_STORAGE_KEY, JSON.stringify(singleItemArray));
+                     sessionStorage.clear();
+                     sessionStorage.setItem(WEEKLY_CONTENT_STORAGE_KEY, JSON.stringify(allContent));
                 } catch (e2) {
-                    console.error("Failed to save even the single item to session storage", e2);
+                    console.error("Failed to save to session storage even after clearing.", e2);
                 }
             } else {
                 console.error("Failed to save to session storage", e);

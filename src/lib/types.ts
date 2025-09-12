@@ -29,7 +29,7 @@ export interface Sermon {
   languages: string[];
   createdAt: string;
   updatedAt: string;
-  weeklyContentId?: string;
+  weeklyContentIds?: { [key: string]: string };
 }
 
 export interface ReflectionQuestionGroup {
@@ -97,6 +97,7 @@ export interface WeeklyContent {
   id: string;
   tenantId: string;
   sermonId: string;
+  language: string;
   summaryShort: string;
   summaryLong: string;
   devotionals: { day: string; content: string }[];

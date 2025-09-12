@@ -46,7 +46,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger
 } from "@/components/ui/alert-dialog";
-import { deleteSermon, saveWeeklyContent, updateSermonArtwork, updateSermonDetails, updateSermonStatus, updateSermonTranscript } from "@/lib/mock-data";
+import { deleteSermon, getMockWeeklyContent, saveWeeklyContent, updateSermonArtwork, updateSermonDetails, updateSermonStatus, updateSermonTranscript } from "@/lib/mock-data";
 import { useToast } from "@/hooks/use-toast";
 import { translateTranscript } from "@/ai/flows/translate-transcript";
 import { useState, useEffect } from "react";
@@ -67,7 +67,7 @@ interface SermonContentProps {
 
 export function SermonContent({
   sermon: initialSermon,
-  weeklyContent,
+  weeklyContent: initialWeeklyContent,
   onGenerateContent,
   onGenerateAudio,
   isGenerating,
@@ -78,6 +78,7 @@ export function SermonContent({
   const { toast } = useToast();
 
   const [sermon, setSermon] = useState(initialSermon);
+  const [weeklyContent, setWeeklyContent] = useState(initialWeeklyContent);
   const [sermonDetails, setSermonDetails] = useState({
       title: initialSermon.title || '',
       speaker: initialSermon.speaker || '',
@@ -111,7 +112,8 @@ export function SermonContent({
     setOriginalTranscript(initialSermon.transcript);
     setTranslatedTranscript(initialSermon.translatedTranscript || null);
     setArtworkPreview(initialSermon.artworkUrl || null);
-  }, [initialSermon]);
+    setWeeklyContent(initialWeeklyContent);
+  }, [initialSermon, initialWeeklyContent]);
 
   const fileToDataURI = (file: File): Promise<string> => {
         return new Promise((resolve, reject) => {
@@ -198,9 +200,6 @@ export function SermonContent({
   };
 
   const handlePublish = () => {
-    if (weeklyContent) {
-      saveWeeklyContent(weeklyContent);
-    }
     updateSermonStatus(sermon.id, "PUBLISHED");
     setSermon((prev) => (prev ? { ...prev, status: "PUBLISHED" } : prev));
     toast({
@@ -217,9 +216,14 @@ export function SermonContent({
         transcript: originalTranscript,
       });
 
-      setTranslatedTranscript(result.translatedTranscript);
+      const newTranslatedTranscript = result.translatedTranscript;
+      setTranslatedTranscript(newTranslatedTranscript);
       // Persist to mock data
-      updateSermonTranscript(sermon.id, result.translatedTranscript, "es");
+      updateSermonTranscript(sermon.id, newTranslatedTranscript, "es");
+
+      // Update sermon state to reflect new language availability
+      setSermon(prev => prev ? { ...prev, translatedTranscript: newTranslatedTranscript, languages: [...prev.languages, 'es'] } : prev);
+
 
       toast({
         title: "Transcript Translated",
@@ -303,7 +307,7 @@ export function SermonContent({
 
   const handleGenerate = () => {
     if (activeTab === "original") {
-      onGenerateContent(originalTranscript);
+      onGenerateContent(originalTranscript, "English");
     } else if (activeTab === "spanish" && translatedTranscript) {
       onGenerateContent(translatedTranscript, "Spanish");
     }
@@ -314,14 +318,17 @@ export function SermonContent({
   const canApprove = canManage;
   const canPublish = canManage;
   const canDelete = canManage;
-  const canTranslate = canManage && sermon.status !== "DRAFT";
+  const canTranslate = canManage && sermon.status !== "DRAFT" && !sermon.languages.includes('es');
   const canCleanup = canManage && sermon.status !== "DRAFT" && activeTab === "original";
-  const showAudioPlayer = sermon.mp3Url && !sermon.mp3Url.startsWith('blob:') && sermon.status === 'PUBLISHED';
+  const showAudioPlayer = sermon.mp3Url && !sermon.mp3Url.startsWith('blob:');
 
   const generateButtonText =
     activeTab === "spanish"
       ? "Generate Weekly Content in Spanish"
       : "Generate Weekly Content";
+    
+  const hasGeneratedEnglish = sermon.weeklyContentIds && sermon.weeklyContentIds['en'];
+  const hasGeneratedSpanish = sermon.weeklyContentIds && sermon.weeklyContentIds['es'];
 
   return (
     <div className="mx-auto grid max-w-6xl flex-1 auto-rows-max gap-4">
@@ -432,7 +439,7 @@ export function SermonContent({
                     <div className="flex flex-col items-center gap-4">
                         <div className="w-full aspect-video rounded-md bg-muted overflow-hidden relative flex items-center justify-center">
                             {artworkPreview ? (
-                                <Image src={artworkPreview} alt="Sermon artwork preview" layout="fill" objectFit="cover" />
+                                <Image src={artworkPreview} alt="Sermon artwork preview" fill objectFit="cover" />
                             ) : (
                                 <Palette className="w-12 h-12 text-muted-foreground" />
                             )}
@@ -569,44 +576,46 @@ export function SermonContent({
               </CardDescription>
             </CardHeader>
             <CardContent>
-              {weeklyContent ? (
-                <WeeklyContentView
-                  content={weeklyContent}
-                  onGenerateAudio={onGenerateAudio}
-                  isGeneratingAudio={isGeneratingAudio}
-                />
-              ) : (
-                <div className="flex flex-col items-center justify-center text-center p-8 border-2 border-dashed rounded-lg">
-                  <p className="mb-4 text-muted-foreground">
-                    No content has been generated for this sermon yet.
-                  </p>
-                  <Button
-                    onClick={handleGenerate}
-                    disabled={
-                      sermon.status === "DRAFT" ||
-                      isGenerating ||
-                      (activeTab === "spanish" && !translatedTranscript)
-                    }
-                  >
-                    {isGenerating ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Generating...
-                      </>
-                    ) : (
-                      <>
-                        <Sparkles className="mr-2 h-4 w-4" />
-                        {generateButtonText}
-                      </>
-                    )}
-                  </Button>
-                  {sermon.status === "DRAFT" && (
-                    <p className="text-xs mt-2 text-muted-foreground">
-                      Transcription must be complete.
+              {
+                (activeTab === 'original' && hasGeneratedEnglish) || (activeTab === 'spanish' && hasGeneratedSpanish) ? (
+                    <WeeklyContentView
+                    content={activeTab === 'spanish' ? getMockWeeklyContent().find(c => c.id === sermon.weeklyContentIds!['es'])! : weeklyContent!}
+                    onGenerateAudio={onGenerateAudio}
+                    isGeneratingAudio={isGeneratingAudio}
+                    />
+                ) : (
+                    <div className="flex flex-col items-center justify-center text-center p-8 border-2 border-dashed rounded-lg">
+                    <p className="mb-4 text-muted-foreground">
+                        No content has been generated for this sermon language yet.
                     </p>
-                  )}
-                </div>
-              )}
+                    <Button
+                        onClick={handleGenerate}
+                        disabled={
+                        sermon.status === "DRAFT" ||
+                        isGenerating ||
+                        (activeTab === "spanish" && !translatedTranscript)
+                        }
+                    >
+                        {isGenerating ? (
+                        <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Generating...
+                        </>
+                        ) : (
+                        <>
+                            <Sparkles className="mr-2 h-4 w-4" />
+                            {generateButtonText}
+                        </>
+                        )}
+                    </Button>
+                    {sermon.status === "DRAFT" && (
+                        <p className="text-xs mt-2 text-muted-foreground">
+                        Transcription must be complete.
+                        </p>
+                    )}
+                    </div>
+                )
+              }
             </CardContent>
           </Card>
         </div>

@@ -7,7 +7,7 @@ import { getMockSermons, getMockWeeklyContent, getAnswersForSermon, saveAnswersF
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
-import { Gamepad2, Headphones, MessageCircleQuestion, Users, User, HeartHandshake, MessageSquare, MicVocal } from "lucide-react";
+import { Gamepad2, Headphones, MessageCircleQuestion, Users, User, HeartHandshake, MessageSquare, MicVocal, Languages } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Sermon, WeeklyContent, Game } from "@/lib/types";
@@ -22,10 +22,12 @@ export default function WeeklyPage() {
   const params = useParams();
   const weekId = params.weekId as string;
   const { user } = useAuth();
-
   const [sermon, setSermon] = useState<Sermon | undefined>(undefined);
-  const [weeklyContent, setWeeklyContent] = useState<WeeklyContent | undefined | null>(undefined);
+  const [allContent, setAllContent] = useState<Record<string, WeeklyContent | undefined>>({});
+  const [selectedLanguage, setSelectedLanguage] = useState('en');
   const [answers, setAnswers] = useState<Record<string, string>>({});
+  
+  const weeklyContent = allContent[selectedLanguage];
 
   useEffect(() => {
     if (weekId) {
@@ -33,9 +35,16 @@ export default function WeeklyPage() {
         const currentSermon = sermons.find(s => s.id === weekId);
         setSermon(currentSermon);
 
-        if (currentSermon) {
-            const content = getMockWeeklyContent().find(wc => wc.sermonId === currentSermon.id);
-            setWeeklyContent(content);
+        if (currentSermon?.weeklyContentIds) {
+            const allMockContent = getMockWeeklyContent();
+            const contents: Record<string, WeeklyContent | undefined> = {};
+            for (const lang in currentSermon.weeklyContentIds) {
+                const contentId = currentSermon.weeklyContentIds[lang];
+                contents[lang] = allMockContent.find(wc => wc.id === contentId);
+            }
+            setAllContent(contents);
+            // Default to 'en' or the first available language
+            setSelectedLanguage(contents['en'] ? 'en' : Object.keys(contents)[0] || 'en');
         }
         
         if (user && weekId) {
@@ -43,10 +52,9 @@ export default function WeeklyPage() {
             setAnswers(savedAnswers);
         }
     }
-
   }, [weekId, user]);
 
-  if (sermon === undefined || weeklyContent === undefined) {
+  if (sermon === undefined || Object.keys(allContent).length === 0) {
     return <div>Loading...</div>; // Or a skeleton loader
   }
 
@@ -56,20 +64,29 @@ export default function WeeklyPage() {
         id: 'wc-placeholder',
         tenantId: 'tenant-1',
         sermonId: placeholderSermon?.id || 'sermon-placeholder',
+        language: 'en',
         summaryShort: 'Summary not available.',
         summaryLong: 'Devotional guide not available.',
         devotionals: [],
         reflectionQuestions: [],
         games: [],
     };
-    return <WeeklyPageContent sermon={placeholderSermon || {} as Sermon} weeklyContent={placeholderContent} answers={{}} setAnswers={setAnswers} />;
+    return <WeeklyPageContent sermon={placeholderSermon || {} as Sermon} weeklyContent={placeholderContent} answers={{}} setAnswers={setAnswers} availableLanguages={[]} selectedLanguage="en" onSelectLanguage={() => {}} />;
   }
   
-  return <WeeklyPageContent sermon={sermon} weeklyContent={weeklyContent} answers={answers} setAnswers={setAnswers} />;
+  return <WeeklyPageContent 
+    sermon={sermon} 
+    weeklyContent={weeklyContent} 
+    answers={answers} 
+    setAnswers={setAnswers} 
+    availableLanguages={Object.keys(allContent)}
+    selectedLanguage={selectedLanguage}
+    onSelectLanguage={setSelectedLanguage}
+    />;
 }
 
 
-function WeeklyPageContent({ sermon, weeklyContent, answers, setAnswers }: { sermon: Sermon, weeklyContent: WeeklyContent, answers: Record<string, string>, setAnswers: React.Dispatch<React.SetStateAction<Record<string, string>>> }) {
+function WeeklyPageContent({ sermon, weeklyContent, answers, setAnswers, availableLanguages, selectedLanguage, onSelectLanguage }: { sermon: Sermon, weeklyContent: WeeklyContent, answers: Record<string, string>, setAnswers: React.Dispatch<React.SetStateAction<Record<string, string>>>, availableLanguages: string[], selectedLanguage: string, onSelectLanguage: (lang: string) => void }) {
   const { user } = useAuth();
   const { toast } = useToast();
   
@@ -108,6 +125,7 @@ function WeeklyPageContent({ sermon, weeklyContent, answers, setAnswers }: { ser
   }
 
   const heroImage = sermon.artworkUrl || `https://picsum.photos/seed/${sermon.id}/1200/800`;
+  const showLanguageSwitcher = availableLanguages.length > 1;
 
   return (
     <div className="container mx-auto py-8 px-4 space-y-8">
@@ -121,6 +139,14 @@ function WeeklyPageContent({ sermon, weeklyContent, answers, setAnswers }: { ser
           data-ai-hint="spiritual abstract"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
+        <div className="absolute top-4 right-4 z-10">
+            {showLanguageSwitcher && (
+                <div className="flex items-center gap-1 bg-black/50 p-1 rounded-full">
+                    <Button size="sm" variant={selectedLanguage === 'en' ? 'secondary' : 'ghost'} className="rounded-full" onClick={() => onSelectLanguage('en')}>EN</Button>
+                    <Button size="sm" variant={selectedLanguage === 'es' ? 'secondary' : 'ghost'} className="rounded-full" onClick={() => onSelectLanguage('es')}>ES</Button>
+                </div>
+            )}
+        </div>
         <div className="absolute bottom-0 left-0 p-8">
             <Badge variant="secondary" className="mb-2">Weekly Theme</Badge>
             <h1 className="text-3xl md:text-5xl font-bold text-white font-headline">{sermon.title}</h1>
