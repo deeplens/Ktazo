@@ -57,27 +57,25 @@ const ragChatbotCompanionPrompt = ai.definePrompt({
     schema: RagChatbotCompanionInputSchema,
   },
   output: {
+    format: 'json',
     schema: RagChatbotCompanionOutputSchema,
   },
   tools: [ensureTopicalCorrectnessTool],
-  prompt: `You are a helpful chatbot companion that answers questions based on the sermon corpus and approved custom URLs for tenant {{tenantId}}.  You must only use information from these sources.
+  prompt: `You are a helpful chatbot companion that answers questions based on the sermon corpus and approved custom URLs for tenant {{tenantId}}. You must only use information from these sources.
 
       User query: {{{query}}}
 
-      {% if conversationHistory %}
+      {{#if conversationHistory}}
       Conversation History:
-      {% each conversationHistory %}
+      {{#each conversationHistory}}
         {{this.role}}: {{this.content}}
-      {% endeach %}
-      {% endif %}
+      {{/each}}
+      {{/if}}
 
-      If the user asks a question that is not related to the sermon corpus or approved custom URLs, politely refuse to answer. Before answering, use the ensureTopicalCorrectness tool to ensure topical correctness. If it returns false, then refuse to answer.  Make it clear that you cannot answer questions outside of that scope.
+      If the user asks a question that is not related to the sermon corpus or approved custom URLs, politely refuse to answer. Before answering, use the ensureTopicalCorrectness tool to ensure topical correctness. If it returns false, then refuse to answer. Make it clear that you cannot answer questions outside of that scope.
 
       Output the response and the sources used. Do not mention the tool in your response.
-      {
-        response: string,
-        sources: string[],
-      }`,
+      `,
 });
 
 const ragChatbotCompanionFlow = ai.defineFlow(
