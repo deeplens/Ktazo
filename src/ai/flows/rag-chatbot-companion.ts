@@ -1,3 +1,4 @@
+
 'use server';
 
 /**
@@ -86,10 +87,22 @@ const ragChatbotCompanionFlow = ai.defineFlow(
     outputSchema: RagChatbotCompanionOutputSchema,
   },
   async input => {
-    // In a real implementation, this would query the RAG system and retrieve
-    // relevant documents.
+    try {
+        console.log('[[DEBUG]] Starting ragChatbotCompanionFlow');
+        
+        // In a real implementation, this would query the RAG system and retrieve
+        // relevant documents.
+        const { output } = await ragChatbotCompanionPrompt(input);
 
-    const {output} = await ragChatbotCompanionPrompt(input);
-    return output!;
+        if (!output) {
+            throw new Error('AI chat generation failed: No output was returned from the model.');
+        }
+
+        console.log('[[DEBUG]] Finishing ragChatbotCompanionFlow.');
+        return output;
+    } catch (error) {
+        console.error('[[ERROR]] in ragChatbotCompanionFlow:', error);
+        throw new Error('Failed to get a response from the chatbot due to a server-side AI error.');
+    }
   }
 );
