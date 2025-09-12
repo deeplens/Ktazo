@@ -1,4 +1,3 @@
-
 import { LoginForm } from '@/components/auth/login-form';
 import Image from 'next/image';
 
@@ -50,7 +49,7 @@ export default function Home() {
       </div>
       <div className="hidden bg-muted lg:block">
         <Image
-          src="https://picsum.photos/seed/nature2/1920/1080"
+          src="https://picsum.photos/seed/nature4/1920/1080"
           alt="A beautiful nature scene to inspire reflection."
           data-ai-hint="nature landscape"
           width="1920"
