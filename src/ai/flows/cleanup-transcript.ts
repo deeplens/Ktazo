@@ -28,7 +28,6 @@ export async function cleanupTranscript(input: CleanupTranscriptInput): Promise<
 const cleanupPrompt = ai.definePrompt({
   name: 'cleanupTranscriptPrompt',
   input: {schema: CleanupTranscriptInputSchema},
-  output: {schema: CleanupTranscriptOutputSchema},
   prompt: `You are an expert editor. Your task is to take the following raw sermon transcript and clean it up for readability.
 
   Your tasks are:
@@ -38,9 +37,8 @@ const cleanupPrompt = ai.definePrompt({
   - Ensure consistent spacing.
   - Fix any obvious formatting errors.
   - Do not change the words or the meaning of the content.
+  - Return ONLY the cleaned transcript text, with no other formatting, preamble, or explanation.
 
-  Return the result in a JSON object with the key "cleanedTranscript".
-  
   Raw Transcript:
   \`\`\`
   {{{transcript}}}
@@ -58,14 +56,15 @@ const cleanupTranscriptFlow = ai.defineFlow(
     try {
         console.log('[[DEBUG]] Starting cleanupTranscriptFlow');
         
-        const { output } = await cleanupPrompt(input);
+        const response = await cleanupPrompt(input);
+        const cleanedText = response.text;
 
-        if (!output) {
-            throw new Error('AI cleanup failed: No output was returned from the model.');
+        if (!cleanedText) {
+            throw new Error('AI cleanup failed: No text was returned from the model.');
         }
 
         console.log('[[DEBUG]] Finishing cleanupTranscriptFlow.');
-        return output;
+        return { cleanedTranscript: cleanedText };
     } catch (error) {
         console.error('[[ERROR]] in cleanupTranscriptFlow:', error);
         throw new Error('Failed to clean up transcript due to a server-side AI error.');
