@@ -1,4 +1,5 @@
 
+
 export type UserRole = 'MASTER' | 'ADMIN' | 'PASTOR' | 'MEMBER';
 
 export interface User {
@@ -34,6 +35,13 @@ export interface Sermon {
 export interface ReflectionQuestionGroup {
   audience: 'Individuals' | 'Families' | 'Small Groups' | 'Youth';
   questions: string[];
+}
+
+export interface ReflectionAnswer {
+  id: string;
+  userId: string;
+  sermonId: string;
+  answers: Record<string, string>;
 }
 
 export interface GameQuestion {

@@ -1,5 +1,6 @@
 
-import type { Sermon, User, WeeklyContent } from './types';
+
+import type { Sermon, User, WeeklyContent, ReflectionAnswer } from './types';
 
 export const mockUsers: User[] = [
   { id: 'user-master-1', tenantId: 'tenant-1', authId: 'auth-master-1', role: 'MASTER', name: 'Master User', email: 'master@ktazo.com', lastLoginAt: new Date().toISOString(), points: 0 },
@@ -357,20 +358,32 @@ export const saveWeeklyContent = (content: WeeklyContent) => {
     if (typeof window !== 'undefined') {
         const allContent = getMockWeeklyContent();
         const index = allContent.findIndex(c => c.id === content.id);
+        
+        // Create a serializable-safe copy of the content to avoid storing large blobs if they exist
+        const contentToSave = { ...content };
+        if (contentToSave.mondayClipUrl && contentToSave.mondayClipUrl.startsWith('data:audio')) {
+            // In a real app, you'd save the blob and store a URL. Here we just prevent session storage overflow
+            // by not saving the large data URI if it's too big.
+            if(contentToSave.mondayClipUrl.length > 500000) { //~500kb limit
+                 // @ts-ignore - For demo purposes, we replace it with a placeholder
+                contentToSave.mondayClipUrl = 'placeholder_clip_url';
+            }
+        }
+
         if (index > -1) {
-            allContent[index] = content;
+            allContent[index] = contentToSave;
         } else {
-            allContent.push(content);
+            allContent.push(contentToSave);
         }
         try {
             sessionStorage.setItem(WEEKLY_CONTENT_STORAGE_KEY, JSON.stringify(allContent));
         } catch (e) {
             if (e instanceof DOMException && e.name === 'QuotaExceededError') {
-                console.warn("Session storage quota exceeded. Clearing and retrying with only current content.");
-                // As a fallback, clear the storage and try to save only the current item
-                try {
-                    const singleItemArray = [content];
-                    sessionStorage.setItem(WEEKLY_CONTENT_STORAGE_KEY, JSON.stringify(singleItemArray));
+                console.warn("Session storage quota exceeded. Saving only current content as fallback.");
+                 try {
+                    // Fallback: try to save only the current item.
+                     const singleItemArray = [contentToSave];
+                     sessionStorage.setItem(WEEKLY_CONTENT_STORAGE_KEY, JSON.stringify(singleItemArray));
                 } catch (e2) {
                     console.error("Failed to save even the single item to session storage", e2);
                 }
@@ -380,6 +393,49 @@ export const saveWeeklyContent = (content: WeeklyContent) => {
         }
     }
 };
+
+const REFLECTION_ANSWERS_KEY = 'ktazo-reflection-answers';
+const initialReflectionAnswers: ReflectionAnswer[] = [];
+
+export const getMockReflectionAnswers = (): ReflectionAnswer[] => {
+    if (typeof window !== 'undefined') {
+        const stored = sessionStorage.getItem(REFLECTION_ANSWERS_KEY);
+        if (stored) {
+            try {
+                return JSON.parse(stored);
+            } catch (e) {
+                return initialReflectionAnswers;
+            }
+        }
+    }
+    return initialReflectionAnswers;
+};
+
+export const getAnswersForSermon = (userId: string, sermonId: string): Record<string, string> => {
+    const allAnswers = getMockReflectionAnswers();
+    const userSermonAnswers = allAnswers.find(a => a.userId === userId && a.sermonId === sermonId);
+    return userSermonAnswers ? userSermonAnswers.answers : {};
+};
+
+export const saveAnswersForSermon = (userId: string, sermonId: string, answers: Record<string, string>) => {
+    if (typeof window !== 'undefined') {
+        let allAnswers = getMockReflectionAnswers();
+        const existingAnswerIndex = allAnswers.findIndex(a => a.userId === userId && a.sermonId === sermonId);
+
+        if (existingAnswerIndex > -1) {
+            allAnswers[existingAnswerIndex].answers = answers;
+        } else {
+            allAnswers.push({
+                id: `ans-${userId}-${sermonId}`,
+                userId,
+                sermonId,
+                answers,
+            });
+        }
+        sessionStorage.setItem(REFLECTION_ANSWERS_KEY, JSON.stringify(allAnswers));
+    }
+};
+
 
 // For initial load, we still need this export for components that use it directly
 export const mockWeeklyContent = getMockWeeklyContent();

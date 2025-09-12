@@ -1,8 +1,9 @@
 
+
 'use client';
 import { notFound, useParams } from "next/navigation";
 import Image from "next/image";
-import { getMockSermons, getMockWeeklyContent } from "@/lib/mock-data";
+import { getMockSermons, getMockWeeklyContent, getAnswersForSermon, saveAnswersForSermon } from "@/lib/mock-data";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
@@ -15,13 +16,16 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { GamePlayer } from "@/components/games/game-player";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/lib/auth";
 
 export default function WeeklyPage() {
   const params = useParams();
   const weekId = params.weekId as string;
+  const { user } = useAuth();
 
   const [sermon, setSermon] = useState<Sermon | undefined>(undefined);
   const [weeklyContent, setWeeklyContent] = useState<WeeklyContent | undefined | null>(undefined);
+  const [answers, setAnswers] = useState<Record<string, string>>({});
 
   useEffect(() => {
     if (weekId) {
@@ -33,9 +37,14 @@ export default function WeeklyPage() {
             const content = getMockWeeklyContent().find(wc => wc.sermonId === currentSermon.id);
             setWeeklyContent(content);
         }
+        
+        if (user && weekId) {
+            const savedAnswers = getAnswersForSermon(user.id, weekId);
+            setAnswers(savedAnswers);
+        }
     }
 
-  }, [weekId]);
+  }, [weekId, user]);
 
   if (sermon === undefined || weeklyContent === undefined) {
     return <div>Loading...</div>; // Or a skeleton loader
@@ -53,29 +62,35 @@ export default function WeeklyPage() {
         reflectionQuestions: [],
         games: [],
     };
-    return <WeeklyPageContent sermon={placeholderSermon || {} as Sermon} weeklyContent={placeholderContent} />;
+    return <WeeklyPageContent sermon={placeholderSermon || {} as Sermon} weeklyContent={placeholderContent} answers={{}} setAnswers={setAnswers} />;
   }
   
-  return <WeeklyPageContent sermon={sermon} weeklyContent={weeklyContent} />;
+  return <WeeklyPageContent sermon={sermon} weeklyContent={weeklyContent} answers={answers} setAnswers={setAnswers} />;
 }
 
 
-function WeeklyPageContent({ sermon, weeklyContent }: { sermon: Sermon, weeklyContent: WeeklyContent }) {
+function WeeklyPageContent({ sermon, weeklyContent, answers, setAnswers }: { sermon: Sermon, weeklyContent: WeeklyContent, answers: Record<string, string>, setAnswers: React.Dispatch<React.SetStateAction<Record<string, string>>> }) {
+  const { user } = useAuth();
   const { toast } = useToast();
-  const [answers, setAnswers] = useState<Record<string, string>>({});
-
+  
   const handleAnswerChange = (questionId: string, value: string) => {
     setAnswers(prev => ({ ...prev, [questionId]: value }));
   };
 
   const handleSaveAnswers = () => {
-    // In a real app, this would save to a database.
-    // For now, we'll just show a confirmation toast.
-    console.log("Saving answers:", answers);
-    toast({
-      title: "Answers Saved",
-      description: "Your reflections have been saved.",
-    });
+    if (user) {
+        saveAnswersForSermon(user.id, sermon.id, answers);
+        toast({
+        title: "Answers Saved",
+        description: "Your reflections have been saved.",
+        });
+    } else {
+        toast({
+            variant: "destructive",
+            title: "Not Logged In",
+            description: "You must be logged in to save your answers."
+        });
+    }
   };
 
   const getIconForAudience = (audience: string) => {
