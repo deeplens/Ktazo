@@ -155,9 +155,7 @@ export default function SettingsPage() {
                             onCheckedChange={handleOdbChange}
                         />
                         <Label htmlFor="odb" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                             <a href="https://podcasts.apple.com/us/search?term=our%20daily%20bread" target="_blank" rel="noopener noreferrer" className="underline">
-                                Our Daily Bread
-                            </a>
+                           Our Daily Bread podcast
                         </Label>
                     </div>
                 </CardContent>

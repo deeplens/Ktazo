@@ -22,6 +22,7 @@ import { Sermon, TenantSettings } from "@/lib/types";
 import { Skeleton } from "../ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
 import { useAuth } from "@/lib/auth";
+import ApplePodcastsButtonODB from "../ApplePodcastsButtonODB";
 
 export function MemberDashboard() {
   const { user } = useAuth();
@@ -182,11 +183,7 @@ export function MemberDashboard() {
                         <h3 className="font-semibold">Our Daily Bread</h3>
                         <p className="text-sm text-muted-foreground">Listen to the daily podcast devotional.</p>
                     </div>
-                     <Button asChild variant="secondary">
-                        <a href="https://podcasts.apple.com/us/search?term=our%20daily%20bread" target="_blank" rel="noopener noreferrer">
-                           Listen Now <LinkIcon className="ml-2 h-4 w-4" />
-                        </a>
-                    </Button>
+                    <ApplePodcastsButtonODB />
                  </div>
             </CardContent>
         </Card>
