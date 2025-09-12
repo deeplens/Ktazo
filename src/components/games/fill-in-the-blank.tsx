@@ -77,6 +77,11 @@ export function FillInTheBlankGame({ data }: FillInTheBlankGameProps) {
     );
   }
   
+  if (!currentItem) {
+    // This can happen briefly when the game finishes before the `isFinished` state update renders.
+    return null;
+  }
+
   const sentenceParts = currentItem.sentence.split(/_{3,}/);
 
   return (
