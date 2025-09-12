@@ -55,7 +55,20 @@ const cleanupTranscriptFlow = ai.defineFlow(
     outputSchema: CleanupTranscriptOutputSchema,
   },
   async input => {
-    const {output} = await cleanupPrompt(input);
-    return output!;
+    try {
+        console.log('[[DEBUG]] Starting cleanupTranscriptFlow');
+        
+        const { output } = await cleanupPrompt(input);
+
+        if (!output) {
+            throw new Error('AI cleanup failed: No output was returned from the model.');
+        }
+
+        console.log('[[DEBUG]] Finishing cleanupTranscriptFlow.');
+        return output;
+    } catch (error) {
+        console.error('[[ERROR]] in cleanupTranscriptFlow:', error);
+        throw new Error('Failed to clean up transcript due to a server-side AI error.');
+    }
   }
 );
