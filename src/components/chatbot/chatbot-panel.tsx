@@ -76,7 +76,7 @@ export function ChatbotPanel() {
   };
 
   return (
-    <div className="flex flex-col h-full bg-background">
+    <div className="flex flex-col h-full bg-background flex-1 min-h-0">
       <ScrollArea className="flex-1 p-4">
         <div className="space-y-6">
           {messages.map((message, index) => (
