@@ -158,7 +158,7 @@ export function SermonContent({
         toast({
             variant: "destructive",
             title: "Generation Failed",
-            description: "An error occurred while generating artwork.",
+            description: (error as Error).message || "An error occurred while generating artwork.",
         });
     } finally {
         setIsGeneratingArtwork(false);
@@ -236,7 +236,7 @@ export function SermonContent({
       toast({
         variant: "destructive",
         title: "Translation Failed",
-        description: "An error occurred during translation.",
+        description: (error as Error).message || "An error occurred during translation.",
       });
     } finally {
       setIsTranslating(false);
@@ -260,7 +260,7 @@ export function SermonContent({
       toast({
         variant: "destructive",
         title: "Cleanup Failed",
-        description: "An error occurred while cleaning the transcript.",
+        description: (error as Error).message || "An error occurred while cleaning the transcript.",
       });
     } finally {
       setIsCleaning(false);

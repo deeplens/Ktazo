@@ -88,6 +88,7 @@ const generateMondayClipFlow = ai.defineFlow(
   },
   async input => {
     try {
+        console.log('[[DEBUG]] Starting generateMondayClipFlow');
         const scriptResponse = await podcastScriptPrompt(input);
         const script = scriptResponse.output?.podcastScript;
 
@@ -133,11 +134,12 @@ const generateMondayClipFlow = ai.defineFlow(
         const wavBase64 = await toWav(audioBuffer);
         const mondayClipUrl = `data:audio/wav;base64,${wavBase64}`;
 
+        console.log('[[DEBUG]] Finishing generateMondayClipFlow.');
         return { mondayClipUrl };
 
     } catch (error) {
-        console.error('Error in Monday clip generation:', error);
-        return { mondayClipUrl: 'error' };
+        console.error('[[ERROR]] in generateMondayClipFlow:', error);
+        throw new Error('Failed to generate Monday audio clip due to a server-side AI error.');
     }
   }
 );

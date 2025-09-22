@@ -85,7 +85,7 @@ export default function SermonDetailPage() {
         toast({
             variant: "destructive",
             title: "Generation Failed",
-            description: "An unexpected error occurred while generating content. The AI may be busy or the request may have timed out. Please try again in a moment.",
+            description: (error as Error).message || "An unexpected error occurred while generating content. Please try again in a moment.",
         });
     } finally {
         setIsGenerating(false);
@@ -98,10 +98,6 @@ export default function SermonDetailPage() {
     try {
         const result = await generateMondayClip({ summaryLong: weeklyContent.summaryLong });
         
-        if (result.mondayClipUrl === 'error') {
-            throw new Error("Podcast generation failed on the server.");
-        }
-
         const updatedContent = { ...weeklyContent, mondayClipUrl: result.mondayClipUrl };
         saveWeeklyContent(updatedContent);
         setWeeklyContent(updatedContent);
@@ -116,7 +112,7 @@ export default function SermonDetailPage() {
         toast({
             variant: "destructive",
             title: "Audio Generation Failed",
-            description: "An unexpected error occurred. The AI may be busy or the request may have timed out. Please try again.",
+            description: (error as Error).message || "An unexpected error occurred. Please try again.",
         });
     } finally {
         setIsGeneratingAudio(false);

@@ -35,15 +35,22 @@ const generateSermonArtworkFlow = ai.defineFlow(
     outputSchema: GenerateSermonArtworkOutputSchema,
   },
   async ({prompt}) => {
-    const {media} = await ai.generate({
-      model: googleAI.model('imagen-4.0-fast-generate-001'),
-      prompt: `Generate a sermon artwork image with a spiritual and abstract theme. The style should be sophisticated and modern, suitable for a church. The primary colors should be deep purple (#673AB7), soft lavender (#D1C4E9), and light gray (#F5F5F5). Do not include any text in the image. Prompt: ${prompt}`,
-    });
+    try {
+      console.log('[[DEBUG]] Starting generateSermonArtworkFlow');
+      const {media} = await ai.generate({
+        model: googleAI.model('imagen-4.0-fast-generate-001'),
+        prompt: `Generate a sermon artwork image with a spiritual and abstract theme. The style should be sophisticated and modern, suitable for a church. The primary colors should be deep purple (#673AB7), soft lavender (#D1C4E9), and light gray (#F5F5F5). Do not include any text in the image. Prompt: ${prompt}`,
+      });
 
-    if (!media.url) {
-      throw new Error('Image generation failed to produce a URL.');
+      if (!media.url) {
+        throw new Error('Image generation failed to produce a URL.');
+      }
+      
+      console.log('[[DEBUG]] Finishing generateSermonArtworkFlow.');
+      return {artworkUrl: media.url};
+    } catch (error) {
+        console.error('[[ERROR]] in generateSermonArtworkFlow:', error);
+        throw new Error('Failed to generate sermon artwork due to a server-side AI error.');
     }
-
-    return {artworkUrl: media.url};
   }
 );

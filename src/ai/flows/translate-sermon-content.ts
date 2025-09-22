@@ -79,9 +79,17 @@ const translateSermonContentFlow = ai.defineFlow(
     outputSchema: TranslateSermonContentOutputSchema,
   },
   async input => {
-    const {output} = await translatePrompt(input);
-    return output!;
+    try {
+      console.log('[[DEBUG]] Starting translateSermonContentFlow');
+      const {output} = await translatePrompt(input);
+      if (!output) {
+        throw new Error('AI translation failed: No output was returned from the model.');
+      }
+      console.log('[[DEBUG]] Finishing translateSermonContentFlow.');
+      return output;
+    } catch (error) {
+        console.error('[[ERROR]] in translateSermonContentFlow:', error);
+        throw new Error('Failed to translate sermon content due to a server-side AI error.');
+    }
   }
 );
-
-    

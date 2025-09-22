@@ -45,7 +45,17 @@ const translateTranscriptFlow = ai.defineFlow(
     outputSchema: TranslateTranscriptOutputSchema,
   },
   async input => {
-    const {output} = await translatePrompt(input);
-    return output!;
+    try {
+        console.log('[[DEBUG]] Starting translateTranscriptFlow');
+        const {output} = await translatePrompt(input);
+        if (!output) {
+            throw new Error('AI translation failed: No output was returned from the model.');
+        }
+        console.log('[[DEBUG]] Finishing translateTranscriptFlow.');
+        return output;
+    } catch (error) {
+        console.error('[[ERROR]] in translateTranscriptFlow:', error);
+        throw new Error('Failed to translate transcript due to a server-side AI error.');
+    }
   }
 );

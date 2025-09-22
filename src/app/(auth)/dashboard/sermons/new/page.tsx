@@ -140,7 +140,7 @@ export default function NewSermonPage() {
         toast({
           variant: 'destructive',
           title: "Processing Failed",
-          description: "There was an error processing your audio file. Please try again.",
+          description: (error as Error).message || "There was an error processing your audio file. Please try again.",
         });
         setIsLoading(false);
       }
@@ -169,7 +169,7 @@ export default function NewSermonPage() {
         toast({
           variant: 'destructive',
           title: "Processing Failed",
-          description: "There was an error processing the transcript file.",
+          description: (error as Error).message || "There was an error processing the transcript file.",
         });
         setIsLoading(false);
       }
