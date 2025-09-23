@@ -1,13 +1,18 @@
 
 'use client';
 
-import { Game, WeeklyContent } from "@/lib/types";
+import { Game, ReflectionQuestionGroup, WeeklyContent } from "@/lib/types";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "../ui/accordion";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../ui/card";
 import { Separator } from "../ui/separator";
 import { Headphones, Loader2, Sparkles, Users, User, MessageCircleQuestion, Gamepad2 } from "lucide-react";
 import { Button } from "../ui/button";
 import { Badge } from "../ui/badge";
+import { useState } from "react";
+import { useToast } from "@/hooks/use-toast";
+import { saveWeeklyContent as saveContent } from "@/lib/mock-data";
+import { Textarea } from "../ui/textarea";
+import { Label } from "../ui/label";
 
 interface WeeklyContentViewProps {
   content: WeeklyContent;
@@ -16,6 +21,23 @@ interface WeeklyContentViewProps {
 }
 
 export function WeeklyContentView({ content, onGenerateAudio, isGeneratingAudio }: WeeklyContentViewProps) {
+    const { toast } = useToast();
+    const [editableQuestions, setEditableQuestions] = useState<ReflectionQuestionGroup[]>(JSON.parse(JSON.stringify(content.reflectionQuestions)));
+
+    const handleQuestionChange = (groupIndex: number, questionIndex: number, value: string) => {
+        const newQuestions = [...editableQuestions];
+        newQuestions[groupIndex].questions[questionIndex] = value;
+        setEditableQuestions(newQuestions);
+    };
+
+    const handleSaveQuestions = () => {
+        const updatedContent = { ...content, reflectionQuestions: editableQuestions };
+        saveContent(updatedContent);
+        toast({
+            title: "Questions Saved",
+            description: "Your reflection questions have been updated.",
+        });
+    };
     
     const getIconForAudience = (audience: string) => {
         switch (audience) {
@@ -129,18 +151,32 @@ export function WeeklyContentView({ content, onGenerateAudio, isGeneratingAudio 
       <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2"><MessageCircleQuestion /> Reflection Questions</CardTitle>
-            <CardDescription>Generated questions for different groups.</CardDescription>
+            <CardDescription>Generated questions for different groups. Edit them as needed.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            {content.reflectionQuestions.map((group, index) => (
-              <div key={`${group.audience}-${index}`}>
+            {editableQuestions.map((group, groupIndex) => (
+              <div key={`${group.audience}-${groupIndex}`}>
                 <h3 className="font-semibold flex items-center gap-2 mb-2 text-sm">{getIconForAudience(group.audience)} {group.audience}</h3>
-                <ul className="list-disc list-inside space-y-2 text-sm text-muted-foreground pl-2">
-                    {group.questions.map((q, i) => <li key={i}>{q}</li>)}
-                </ul>
+                <div className="space-y-2 pl-2">
+                    {group.questions.map((q, questionIndex) => (
+                        <div key={questionIndex} className="space-y-1">
+                            <Label htmlFor={`q-${groupIndex}-${questionIndex}`} className="sr-only">Question {questionIndex + 1}</Label>
+                            <Textarea 
+                                id={`q-${groupIndex}-${questionIndex}`}
+                                value={q}
+                                onChange={(e) => handleQuestionChange(groupIndex, questionIndex, e.target.value)}
+                                className="text-sm"
+                                rows={2}
+                            />
+                        </div>
+                    ))}
+                </div>
               </div>
             ))}
           </CardContent>
+          <CardFooter>
+              <Button onClick={handleSaveQuestions}>Save Questions</Button>
+          </CardFooter>
       </Card>
     </div>
   );
