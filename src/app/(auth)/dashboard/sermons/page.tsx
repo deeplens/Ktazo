@@ -127,8 +127,8 @@ const SermonTable = ({sermons, onDelete, onApprove}: {sermons: Sermon[], onDelet
             ))}
             </TableBody>
       </Table>
-    )
-}
+    );
+};
 
 
 export default function SermonsPage() {
