@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileOverview A sermon transcription AI agent.
@@ -29,7 +30,7 @@ export async function transcribeSermon(input: TranscribeSermonInput): Promise<Tr
 const transcribeSermonPrompt = ai.definePrompt({
   name: 'transcribeSermonPrompt',
   input: {schema: TranscribeSermonInputSchema},
-  output: {schema: TranscribeSermonOutputSchema},
+  output: {format: 'text'},
   prompt: `You are an expert transcriptionist specializing in transcribing sermons.
 
   You will use this information to transcribe the sermon to text.
@@ -45,12 +46,15 @@ const transcribeSermonFlow = ai.defineFlow(
   async input => {
     try {
       console.log('[[DEBUG]] Starting transcribeSermonFlow');
-      const {output} = await transcribeSermonPrompt(input);
-      if (!output) {
-        throw new Error('AI transcription failed: No output was returned from the model.');
+      const response = await transcribeSermonPrompt(input);
+      const transcript = response.text;
+
+      if (!transcript) {
+        throw new Error('AI transcription failed: No text was returned from the model.');
       }
+      
       console.log('[[DEBUG]] Finishing transcribeSermonFlow.');
-      return output;
+      return { transcript };
     } catch (error) {
         console.error('[[ERROR]] in transcribeSermonFlow:', error);
         throw new Error('Failed to transcribe sermon due to a server-side AI error.');
