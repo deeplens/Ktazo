@@ -87,7 +87,7 @@ export interface VerseScrambleItem {
 }
 
 export interface Game {
-    type: 'Quiz' | 'Word Search' | 'Fill in the Blank' | 'Matching' | 'Word Guess' | 'Wordle' | 'Jeopardy' | 'Verse Scramble';
+    type: 'Quiz' | 'Word Search' | 'Fill in the Blank' | 'Matching' | 'Word Guess' | 'Wordle' | 'Jeopardy';
     title: string;
     audience: 'Youth' | 'Adults';
     data: GameQuestion[] | { words: string[] } | FillInTheBlankItem[] | MatchingGameItem[] | WordGuessItem[] | WordleItem | JeopardyCategory[] | VerseScrambleItem;
