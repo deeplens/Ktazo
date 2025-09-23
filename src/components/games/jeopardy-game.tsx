@@ -3,9 +3,8 @@
 
 import { useState } from 'react';
 import { JeopardyCategory, JeopardyQuestion } from '@/lib/types';
-import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '../ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../ui/dialog';
 import { cn } from '@/lib/utils';
 import { RefreshCcw } from 'lucide-react';
 
@@ -39,37 +38,45 @@ export function JeopardyGame({ data }: JeopardyGameProps) {
   };
   
   const allAnswered = data.flatMap(c => c.questions).length === Object.keys(answered).length;
+  const numRows = data[0]?.questions.length || 0;
 
 
   return (
     <div className="w-full">
       <div className="grid gap-1" style={{ gridTemplateColumns: `repeat(${data.length}, minmax(0, 1fr))` }}>
+        {/* Category Headers */}
         {data.map(category => (
           <div key={category.title} className="text-center bg-primary text-primary-foreground p-2 rounded-t-lg font-bold h-24 flex items-center justify-center">
             {category.title}
           </div>
         ))}
-        {data.flatMap(category =>
-          category.questions.map(question => {
-            const key = `${category.title}-${question.points}`;
-            const isAnswered = !!answered[key];
-            return (
-              <Dialog key={key} onOpenChange={(open) => !open && handleCloseDialog()}>
-                <DialogTrigger asChild>
-                    <button
-                        onClick={() => handleSelectQuestion(category.title, question)}
-                        disabled={isAnswered}
-                        className={cn(
-                        'text-center bg-blue-800 text-yellow-300 p-2 font-bold text-2xl h-20 flex items-center justify-center cursor-pointer hover:bg-blue-700 transition-colors disabled:cursor-not-allowed disabled:opacity-50',
-                        (category.questions.indexOf(question) === category.questions.length - 1) && 'rounded-b-lg'
-                        )}
-                    >
-                        {isAnswered ? '' : `$${question.points}`}
-                    </button>
-                </DialogTrigger>
-              </Dialog>
-            );
-          })
+        
+        {/* Questions Grid - Rendered Row by Row */}
+        {Array.from({ length: numRows }).map((_, rowIndex) => 
+            data.map(category => {
+                const question = category.questions[rowIndex];
+                if (!question) return <div key={`${category.title}-${rowIndex}`} />; // Should not happen with consistent data
+
+                const key = `${category.title}-${question.points}`;
+                const isAnswered = !!answered[key];
+                
+                return (
+                    <Dialog key={key} onOpenChange={(open) => !open && handleCloseDialog()}>
+                        <DialogTrigger asChild>
+                            <button
+                                onClick={() => handleSelectQuestion(category.title, question)}
+                                disabled={isAnswered}
+                                className={cn(
+                                'text-center bg-blue-800 text-yellow-300 p-2 font-bold text-2xl h-20 flex items-center justify-center cursor-pointer hover:bg-blue-700 transition-colors disabled:cursor-not-allowed disabled:opacity-50',
+                                (rowIndex === numRows - 1) && 'rounded-b-lg'
+                                )}
+                            >
+                                {isAnswered ? '' : `$${question.points}`}
+                            </button>
+                        </DialogTrigger>
+                    </Dialog>
+                );
+            })
         )}
       </div>
       
