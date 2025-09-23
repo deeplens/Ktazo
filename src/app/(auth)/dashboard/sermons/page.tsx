@@ -78,9 +78,9 @@ const SermonTable = ({sermons, onDelete}: {sermons: Sermon[], onDelete: (sermonI
                     <TableCell className="hidden md:table-cell text-muted-foreground">{sermon.series}</TableCell>
                     <TableCell className="hidden md:table-cell text-muted-foreground">{sermon.date}</TableCell>
                     {canManage && <TableCell>
-                        <Badge 
-                            variant={statusStyles[sermon.status] as any}
-                            className={statusColors[sermon.status]}
+                        <Badge
+                            variant={sermon.status === 'READY_FOR_REVIEW' ? 'default' : 'secondary'}
+                            className={cn(statusColors[sermon.status], 'text-white')}
                         >
                             {sermon.status.replace(/_/g, ' ')}
                         </Badge>
