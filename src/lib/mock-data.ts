@@ -380,33 +380,70 @@ export const getMockWeeklyContent = (): WeeklyContent[] => {
 };
 
 export const saveWeeklyContent = (content: WeeklyContent) => {
-    if (typeof window !== 'undefined') {
-        const allContent = getMockWeeklyContent();
-        const index = allContent.findIndex(c => c.id === content.id);
-        
-        const contentToSave = { ...content };
-       
-        if (index > -1) {
-            allContent[index] = contentToSave;
-        } else {
-            allContent.push(contentToSave);
-        }
+    if (typeof window === 'undefined') return;
+
+    let allContent = getMockWeeklyContent();
+    const index = allContent.findIndex(c => c.id === content.id);
+
+    if (index > -1) {
+        allContent[index] = content;
+    } else {
+        allContent.push(content);
+    }
+
+    const trySave = (data: WeeklyContent[]) => {
         try {
-            sessionStorage.setItem(WEEKLY_CONTENT_STORAGE_KEY, JSON.stringify(allContent));
+            sessionStorage.setItem(WEEKLY_CONTENT_STORAGE_KEY, JSON.stringify(data));
+            return true;
         } catch (e) {
             if (e instanceof DOMException && e.name === 'QuotaExceededError') {
-                 try {
-                     sessionStorage.clear();
-                     sessionStorage.setItem(WEEKLY_CONTENT_STORAGE_KEY, JSON.stringify(allContent));
-                } catch (e2) {
-                    console.error("Failed to save to session storage even after clearing.", e2);
-                }
-            } else {
-                console.error("Failed to save to session storage", e);
+                return false;
             }
+            console.error("Failed to save to session storage", e);
+            // For other errors, we might not want to trim data.
+            return true; 
+        }
+    };
+    
+    // Attempt to save the updated content
+    if (trySave(allContent)) {
+        return; // Success
+    }
+
+    // If it fails due to quota, start trimming old content
+    console.warn("Session storage quota exceeded. Trimming old content.");
+
+    // Sort content by a timestamp derived from the ID, oldest first
+    const sortedContent = allContent.sort((a, b) => {
+        const timeA = parseInt(a.id.split('-').pop() || '0');
+        const timeB = parseInt(b.id.split('-').pop() || '0');
+        return timeA - timeB;
+    });
+
+    // Remove old items one by one until it fits, but don't remove the one we're trying to save
+    for (let i = 0; i < sortedContent.length; i++) {
+        const itemToRemove = sortedContent[i];
+        if (itemToRemove.id === content.id) continue; // Don't remove the current item
+
+        const indexToRemove = allContent.findIndex(c => c.id === itemToRemove.id);
+        if (indexToRemove > -1) {
+            allContent.splice(indexToRemove, 1);
+        }
+
+        // Try saving again
+        if (trySave(allContent)) {
+            console.log("Successfully saved after trimming old content.");
+            return;
         }
     }
+
+    // If we're here, it means even after removing all other content, the current item is too large.
+    // This is an edge case, but we should handle it.
+    console.error(`The content with ID "${content.id}" is too large to be saved to session storage on its own.`);
+    // As a last resort, we could clear everything BUT the auth key, and try to save just this one item.
+    // For this app, we'll just log the error to avoid destructive actions.
 };
+
 
 const REFLECTION_ANSWERS_KEY = 'ktazo-reflection-answers';
 const initialReflectionAnswers: ReflectionAnswer[] = [];
@@ -497,4 +534,5 @@ export const saveTenantSettings = (tenantId: string, settings: TenantSettings) =
 
 // For initial load, we still need this export for components that use it directly
 export const mockWeeklyContent = getMockWeeklyContent();
+
 
