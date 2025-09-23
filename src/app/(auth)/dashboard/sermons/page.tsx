@@ -32,6 +32,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { useAuth } from "@/lib/auth";
 import { useToast } from "@/hooks/use-toast";
+import { cn } from "@/lib/utils";
 
 
 const statusStyles: { [key: string]: string } = {
@@ -80,7 +81,7 @@ const SermonTable = ({sermons, onDelete}: {sermons: Sermon[], onDelete: (sermonI
                     {canManage && <TableCell>
                         <Badge
                             variant={sermon.status === 'READY_FOR_REVIEW' ? 'default' : 'secondary'}
-                            className={cn(statusColors[sermon.status], 'text-white')}
+                            className={cn(statusColors[sermon.status], sermon.status !== 'DRAFT' && 'text-white')}
                         >
                             {sermon.status.replace(/_/g, ' ')}
                         </Badge>
@@ -201,7 +202,7 @@ export default function SermonsPage() {
                     <TabsContent value="approved">
                         <SermonTable sermons={approved} onDelete={handleDeleteSermon} />
                     </TabsContent>
-                    <TabsContent value="review">
+                    <TabsContent value="ready-for-review">
                         <SermonTable sermons={readyForReview} onDelete={handleDeleteSermon} />
                     </TabsContent>
                     <TabsContent value="drafts">
@@ -220,3 +221,5 @@ export default function SermonsPage() {
     </div>
   );
 }
+
+    
