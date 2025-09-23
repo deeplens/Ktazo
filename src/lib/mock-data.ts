@@ -343,6 +343,11 @@ const initialWeeklyContent: WeeklyContent[] = [
             { "title": "Practice Hospitality", "description": "Prepare a 'table' for someone this week. Invite a neighbor, coworker, or friend for a meal, coffee, or a simple conversation, showing them unexpected kindness." },
             { "title": "Find Your 'Green Pasture'", "description": "Intentionally schedule 20 minutes of uninterrupted quiet time this week. Go to a park, a quiet room, or any place you can be still and rest in God's presence without distractions." }
         ],
+        outwardFocus: {
+            missionFocus: { title: "Spotlight on the Smiths", description: "The Smith family serves in Southeast Asia, translating scripture.", details: "This week, let's pray for the Smith family as they navigate cultural challenges while translating the book of Psalms into a new language. Their work directly relates to making God's word, like the comforting message of Psalm 23, accessible to an unreached people group." },
+            serviceChallenge: { title: "Prepare a Meal", description: "Bring a meal to a neighbor or a family from church.", details: "Psalm 23 says, 'You prepare a table before me.' Be the hands of God this week by preparing a meal for someone. It could be a family with a new baby, someone recovering from illness, or just a neighbor you want to connect with. Let your act of service be a tangible expression of God's provision." },
+            culturalEngagement: { title: "Discussing 'Success'", description: "How does Psalm 23 challenge the world's definition of a 'good life'?", details: "Our culture often defines success by wealth, status, and constant striving. The 'good life' in Psalm 23 is defined by contentment, guidance, and presence, even in hardship. How does this perspective change how you approach your work, your ambitions, and your social media presence this week? Discuss this with a friend or family member." }
+        },
         mondayClipUrl: 'https://storage.googleapis.com/studioprod-55829.appspot.com/652932b172a5a544256c70c2/sermons/kE3z98a4aT6s1B2aY1E2/audio.mp3',
     },
     {
@@ -363,6 +368,11 @@ const initialWeeklyContent: WeeklyContent[] = [
         games: [],
         bibleReadingPlan: [],
         spiritualPractices: [],
+        outwardFocus: {
+            missionFocus: { title: "Enfoque en los Smith", description: "La familia Smith sirve en el sudeste asiático, traduciendo las escrituras.", details: "Esta semana, oremos por la familia Smith mientras navegan por los desafíos culturales al traducir el libro de los Salmos a un nuevo idioma. Su trabajo se relaciona directamente con hacer que la palabra de Dios, como el reconfortante mensaje del Salmo 23, sea accesible para un grupo de personas no alcanzado." },
+            serviceChallenge: { title: "Preparar una comida", description: "Lleva una comida a un vecino o a una familia de la iglesia.", details: "El Salmo 23 dice: 'Preparas una mesa delante de mí'. Sé las manos de Dios esta semana preparando una comida para alguien. Podría ser una familia con un bebé nuevo, alguien que se recupera de una enfermedad o simplemente un vecino con el que quieras conectar. Deja que tu acto de servicio sea una expresión tangible de la provisión de Dios." },
+            culturalEngagement: { title: "Discutiendo el 'Éxito'", description: "¿Cómo desafía el Salmo 23 la definición mundial de una 'buena vida'?", details: "Nuestra cultura a menudo define el éxito por la riqueza, el estatus y el esfuerzo constante. La 'buena vida' en el Salmo 23 se define por el contentamiento, la guía y la presencia, incluso en la adversidad. ¿Cómo cambia esta perspectiva tu enfoque en el trabajo, tus ambiciones y tu presencia en las redes sociales esta semana? Discútelo con un amigo o familiar." }
+        },
     },
      {
         id: 'wc-2',
@@ -382,6 +392,11 @@ const initialWeeklyContent: WeeklyContent[] = [
         games: [],
         bibleReadingPlan: [],
         spiritualPractices: [],
+        outwardFocus: {
+            missionFocus: { title: "Spotlight on Local Shelter", description: "Our local homeless shelter provides meals and a safe place to stay.", details: "James writes about showing faith through action. Our partner, The Springfield Shelter, does this every day. This week, let's pray for their staff and volunteers. Consider donating canned goods or volunteering for a shift." },
+            serviceChallenge: { title: "Anonymous Encouragement", description: "Write an anonymous note of encouragement to someone.", details: "Faith is shown in how we treat others. This week, write a card or note of encouragement and leave it anonymously for a coworker, classmate, or service worker. Your small act of kindness can be a powerful demonstration of faith." },
+            culturalEngagement: { title: "Faith in the Workplace", description: "How does your faith visibly manifest in your professional life?", details: "James challenges the idea of a private, unseen faith. How does your faith impact your ethics, your interactions with colleagues, and your attitude towards your work? Is your faith visible to those you work with? Reflect on one practical way to live out your faith at work this week." }
+        },
     }
 ];
 
@@ -560,9 +575,3 @@ export const saveTenantSettings = (tenantId: string, settings: TenantSettings) =
 
 // For initial load, we still need this export for components that use it directly
 export const mockWeeklyContent = getMockWeeklyContent();
-
-
-
-
-
-    

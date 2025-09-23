@@ -106,6 +106,12 @@ export interface SpiritualPractice {
     description: string;
 }
 
+export interface OutwardFocusItem {
+    title: string;
+    description: string;
+    details: string;
+}
+
 export interface WeeklyContent {
   id: string;
   tenantId: string;
@@ -118,6 +124,11 @@ export interface WeeklyContent {
   games: Game[];
   bibleReadingPlan: BibleReadingPlanItem[];
   spiritualPractices: SpiritualPractice[];
+  outwardFocus: {
+      missionFocus: OutwardFocusItem;
+      serviceChallenge: OutwardFocusItem;
+      culturalEngagement: OutwardFocusItem;
+  };
   mondayClipUrl?: string;
 }
 

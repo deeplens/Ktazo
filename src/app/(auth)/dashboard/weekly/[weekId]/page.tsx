@@ -7,10 +7,10 @@ import { getMockSermons, getMockWeeklyContent, getAnswersForSermon, saveAnswersF
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
-import { Gamepad2, Headphones, MessageCircleQuestion, Users, User, HeartHandshake, MessageSquare, MicVocal, Languages, BookOpen, HandHeart, Sparkles } from "lucide-react";
+import { Gamepad2, Headphones, MessageCircleQuestion, Users, User, HeartHandshake, MessageSquare, MicVocal, Languages, BookOpen, HandHeart, Sparkles, Globe, Target, Briefcase } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Sermon, WeeklyContent, Game, VerseScrambleItem, BibleReadingPlanItem, SpiritualPractice } from "@/lib/types";
+import { Sermon, WeeklyContent, Game, VerseScrambleItem, BibleReadingPlanItem, SpiritualPractice, OutwardFocusItem } from "@/lib/types";
 import { useEffect, useState } from "react";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -73,6 +73,11 @@ export default function WeeklyPage() {
         games: [],
         bibleReadingPlan: [],
         spiritualPractices: [],
+        outwardFocus: {
+            missionFocus: { title: 'Not available', description: '', details: '' },
+            serviceChallenge: { title: 'Not available', description: '', details: '' },
+            culturalEngagement: { title: 'Not available', description: '', details: '' },
+        },
     };
     return <WeeklyPageContent sermon={placeholderSermon || {} as Sermon} weeklyContent={placeholderContent} answers={{}} setAnswers={setAnswers} availableLanguages={[]} selectedLanguage="en" onSelectLanguage={() => {}} />;
   }
@@ -267,6 +272,41 @@ function WeeklyPageContent({ sermon, weeklyContent, answers, setAnswers, availab
         </div>
       </div>
 
+       {weeklyContent.outwardFocus && (
+        <div id="outward-focus">
+            <h2 className="text-2xl font-bold tracking-tight font-headline flex items-center gap-3 mb-4"><Globe /> Outward Focus</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <Card className="flex flex-col">
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2 text-xl"><Target /> {weeklyContent.outwardFocus.missionFocus.title}</CardTitle>
+                        <CardDescription>{weeklyContent.outwardFocus.missionFocus.description}</CardDescription>
+                    </CardHeader>
+                    <CardContent className="flex-grow">
+                        <p className="text-sm text-muted-foreground">{weeklyContent.outwardFocus.missionFocus.details}</p>
+                    </CardContent>
+                </Card>
+                <Card className="flex flex-col">
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2 text-xl"><HeartHandshake /> {weeklyContent.outwardFocus.serviceChallenge.title}</CardTitle>
+                        <CardDescription>{weeklyContent.outwardFocus.serviceChallenge.description}</CardDescription>
+                    </CardHeader>
+                    <CardContent className="flex-grow">
+                        <p className="text-sm text-muted-foreground">{weeklyContent.outwardFocus.serviceChallenge.details}</p>
+                    </CardContent>
+                </Card>
+                <Card className="flex flex-col">
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2 text-xl"><Briefcase /> {weeklyContent.outwardFocus.culturalEngagement.title}</CardTitle>
+                        <CardDescription>{weeklyContent.outwardFocus.culturalEngagement.description}</CardDescription>
+                    </CardHeader>
+                    <CardContent className="flex-grow">
+                        <p className="text-sm text-muted-foreground">{weeklyContent.outwardFocus.culturalEngagement.details}</p>
+                    </CardContent>
+                </Card>
+            </div>
+        </div>
+       )}
+
       <Card id="games">
           <CardHeader>
               <CardTitle className="font-headline flex items-center gap-2"><Gamepad2 /> Interactive Games</CardTitle>
@@ -304,7 +344,7 @@ function WeeklyPageContent({ sermon, weeklyContent, answers, setAnswers, availab
           <CardHeader>
             <CardTitle className="font-headline flex items-center gap-2"><MessageCircleQuestion /> Reflection Questions</CardTitle>
             <CardDescription>Ponder these questions on your own, or discuss them with your family, friends, or small group.</CardDescription>
-          </Header>
+          </CardHeader>
           <CardContent className="space-y-6">
               {weeklyContent.reflectionQuestions.map((group, groupIndex) => (
                   <div key={`${group.audience}-${groupIndex}`}>
@@ -336,9 +376,3 @@ function WeeklyPageContent({ sermon, weeklyContent, answers, setAnswers, availab
     </div>
   );
 }
-
-
-
-
-
-    

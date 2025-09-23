@@ -96,6 +96,12 @@ const SpiritualPracticeSchema = z.object({
     description: z.string().describe('A short, practical description of the challenge and how to do it.'),
 });
 
+const OutwardFocusItemSchema = z.object({
+    title: z.string().describe('The title for this outward focus item.'),
+    description: z.string().describe('A short, 1-2 sentence description of the item.'),
+    details: z.string().describe('A longer paragraph providing more details, context, or specific steps for the item.'),
+});
+
 
 const GenerateWeeklyContentOutputSchema = z.object({
   summaryShort: z.string().describe('A short summary of the sermon.'),
@@ -111,6 +117,11 @@ const GenerateWeeklyContentOutputSchema = z.object({
   games: z.array(GameSchema).describe('An array of 6 interactive games based on the sermon. One of these games MUST be a Jeopardy game. Include a mix of other types like Quiz, Word Search, Fill in the Blank, Matching, Word Guess, or Wordle. For Quizzes, provide 3-4 questions with 4 multiple-choice options each. For Matching games, provide 4-6 pairs of terms and definitions. For Fill in the Blank, provide four key sentences with an important word missing. For Word Guess, provide four key words from the sermon, each with a hint. For Wordle, provide a single, relevant 5-letter word from the sermon. For the required Jeopardy game, create 2-3 categories with 3 questions each, with point values of 100, 200, and 300.'),
   bibleReadingPlan: z.array(BibleReadingPlanItemSchema).describe('An array of 2-3 thematic Bible reading connections based on the sermon, including cross-references and Old/New Testament echoes.'),
   spiritualPractices: z.array(SpiritualPracticeSchema).describe('An array of 2-3 small, practical spiritual practice challenges related to the sermon theme (e.g., fasting one meal, practicing hospitality, journaling gratitude).'),
+  outwardFocus: z.object({
+      missionFocus: OutwardFocusItemSchema.describe("Spotlight a missionary or ministry the church supports, tying it to the sermon's theme if possible."),
+      serviceChallenge: OutwardFocusItemSchema.describe("Provide one tangible way for members to bless someone this week, inspired by the sermon."),
+      culturalEngagement: OutwardFocusItemSchema.describe("Offer a reflection question or resource on applying the sermon in today's world (workplace, school, media, etc.)."),
+  }).describe('A section dedicated to outward-focused application of the sermon.'),
 });
 export type GenerateWeeklyContentOutput = z.infer<typeof GenerateWeeklyContentOutputSchema>;
 
@@ -142,6 +153,10 @@ const generateWeeklyContentPrompt = ai.definePrompt({
   - An array of exactly 6 interactive games based on the sermon's content. One of these games MUST be a 'Jeopardy' game. One of the games must be a 'Verse Scramble' game based on a key bible verse from the sermon. Include a mix of other game types like 'Quiz', 'Word Search', 'Fill in the Blank', 'Matching', 'Word Guess', or 'Wordle'. For Quizzes, provide 3-4 questions with 4 multiple-choice options each. For Matching games, provide 4-6 pairs of terms and definitions. For Fill in the Blank, provide four key sentences with an important word missing. For Word Guess, provide four key words from the sermon, each with a hint for it. For Wordle, provide one significant 5-letter word from the sermon. For the required Jeopardy game, create 2-3 categories, each with 3 questions having point values of 100, 200, and 300.
   - A Bible Reading Plan (bibleReadingPlan): Generate 2-3 thematic reading connections based on the sermon. For each theme, provide 2-3 relevant Bible passages (cross-references, Old/New Testament echoes) and a brief explanation for each passage's connection to the sermon.
   - A list of 2-3 Spiritual Practice Challenges (spiritualPractices): Generate small, practical challenges that are thematically related to the sermon. Examples include fasting one meal, practicing hospitality by inviting someone over, or keeping a gratitude journal for a week.
+  - An Outward Focus section (outwardFocus):
+    - Mission Focus: Spotlight a real or exemplary missionary/ministry, connecting their work to the sermon's theme.
+    - Service Challenge: Create a tangible, actionable service challenge for the week.
+    - Cultural Engagement: Pose a thought-provoking question or resource link about applying the sermon in modern culture (work, media, etc.).
   `,
 });
 
@@ -172,9 +187,3 @@ const generateWeeklyContentFlow = ai.defineFlow(
     }
   }
 );
-
-
-
-
-
-    

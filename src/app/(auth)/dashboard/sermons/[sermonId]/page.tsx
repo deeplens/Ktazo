@@ -71,6 +71,7 @@ export default function SermonDetailPage() {
             games: generated.games,
             bibleReadingPlan: generated.bibleReadingPlan,
             spiritualPractices: generated.spiritualPractices,
+            outwardFocus: generated.outwardFocus,
             mondayClipUrl: undefined,
         };
         
@@ -146,5 +147,3 @@ export default function SermonDetailPage() {
             isGeneratingAudio={isGeneratingAudio}
          />;
 }
-
-    
