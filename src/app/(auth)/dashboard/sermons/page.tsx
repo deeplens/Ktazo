@@ -111,7 +111,7 @@ const SermonTable = ({sermons, onDelete, onApprove}: {sermons: Sermon[], onDelet
                                                 <AlertDialogDescription>
                                                     This action cannot be undone. This will permanently delete the sermon
                                                     and all of its associated content.
-                                                </Description>
+                                                </AlertDialogDescription>
                                             </AlertDialogHeader>
                                             <AlertDialogFooter>
                                                 <AlertDialogCancel>Cancel</AlertDialogCancel>
@@ -200,7 +200,7 @@ export default function SermonsPage() {
             <TabsTrigger value="all">All</TabsTrigger>
             <TabsTrigger value="published">Published</TabsTrigger>
             <TabsTrigger value="approved">Approved</TabsTrigger>
-            <TabsTrigger value="review">For Review</TabsTrigger>
+            <TabsTrigger value="ready-for-review">For Review</TabsTrigger>
             <TabsTrigger value="drafts">Drafts</TabsTrigger>
             </TabsList>
             <Card>
@@ -214,7 +214,7 @@ export default function SermonsPage() {
                     <TabsContent value="approved">
                         <SermonTable sermons={approved} onDelete={handleDeleteSermon} onApprove={handleApproveSermon} />
                     </TabsContent>
-                    <TabsContent value="review">
+                    <TabsContent value="ready-for-review">
                         <SermonTable sermons={readyForReview} onDelete={handleDeleteSermon} onApprove={handleApproveSermon} />
                     </TabsContent>
                     <TabsContent value="drafts">
