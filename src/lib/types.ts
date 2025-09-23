@@ -101,6 +101,11 @@ export interface BibleReadingPlanItem {
     }[];
 }
 
+export interface SpiritualPractice {
+    title: string;
+    description: string;
+}
+
 export interface WeeklyContent {
   id: string;
   tenantId: string;
@@ -112,6 +117,7 @@ export interface WeeklyContent {
   reflectionQuestions: ReflectionQuestionGroup[];
   games: Game[];
   bibleReadingPlan: BibleReadingPlanItem[];
+  spiritualPractices: SpiritualPractice[];
   mondayClipUrl?: string;
 }
 
@@ -120,3 +126,5 @@ export interface TenantSettings {
         ourDailyBread: boolean;
     }
 }
+
+    

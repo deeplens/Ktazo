@@ -338,6 +338,11 @@ const initialWeeklyContent: WeeklyContent[] = [
                 ]
             }
         ],
+        spiritualPractices: [
+            { "title": "Practice Gratitude", "description": "Keep a journal for a week. Each day, write down three specific things you are thankful for, reflecting on God's provision in your life." },
+            { "title": "Practice Hospitality", "description": "Prepare a 'table' for someone this week. Invite a neighbor, coworker, or friend for a meal, coffee, or a simple conversation, showing them unexpected kindness." },
+            { "title": "Find Your 'Green Pasture'", "description": "Intentionally schedule 20 minutes of uninterrupted quiet time this week. Go to a park, a quiet room, or any place you can be still and rest in God's presence without distractions." }
+        ],
         mondayClipUrl: 'https://storage.googleapis.com/studioprod-55829.appspot.com/652932b172a5a544256c70c2/sermons/kE3z98a4aT6s1B2aY1E2/audio.mp3',
     },
     {
@@ -357,6 +362,7 @@ const initialWeeklyContent: WeeklyContent[] = [
         reflectionQuestions: [],
         games: [],
         bibleReadingPlan: [],
+        spiritualPractices: [],
     },
      {
         id: 'wc-2',
@@ -375,6 +381,7 @@ const initialWeeklyContent: WeeklyContent[] = [
         reflectionQuestions: [],
         games: [],
         bibleReadingPlan: [],
+        spiritualPractices: [],
     }
 ];
 
@@ -556,3 +563,6 @@ export const mockWeeklyContent = getMockWeeklyContent();
 
 
 
+
+
+    

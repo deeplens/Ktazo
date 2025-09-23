@@ -91,6 +91,12 @@ const BibleReadingPlanItemSchema = z.object({
     })).describe('An array of 2-3 related Bible passages.')
 });
 
+const SpiritualPracticeSchema = z.object({
+    title: z.string().describe('The name of the spiritual practice challenge.'),
+    description: z.string().describe('A short, practical description of the challenge and how to do it.'),
+});
+
+
 const GenerateWeeklyContentOutputSchema = z.object({
   summaryShort: z.string().describe('A short summary of the sermon.'),
   summaryLong: z.string().describe('A longer devotional guide summary of the sermon.'),
@@ -102,8 +108,9 @@ const GenerateWeeklyContentOutputSchema = z.object({
       friday: z.string().describe('A devotional for Friday, approximately 200 words.'),
   }).describe('An object containing five daily devotionals for Mon-Fri.'),
   reflectionQuestions: z.array(ReflectionQuestionGroupSchema).describe('An array of reflection question groups for different audiences.'),
-  games: z.array(GameSchema).describe('An array of 6 interactive games based on the sermon. One of these games MUST be a Jeopardy game. Include a mix of other types like Quiz, Word Search, Fill in the Blank, Matching, Word Guess, or Wordle. For Quizzes, provide 3-4 questions with 4 multiple-choice options each. For Matching games, provide 4-6 pairs of terms and definitions. For Fill in the Blank, provide four key sentences with an important word missing. For Word Guess, provide four key words from the sermon, each with its own hint. For Wordle, provide a single, relevant 5-letter word from the sermon. For the required Jeopardy game, create 2-3 categories with 3 questions each, with point values of 100, 200, and 300.'),
+  games: z.array(GameSchema).describe('An array of 6 interactive games based on the sermon. One of these games MUST be a Jeopardy game. Include a mix of other types like Quiz, Word Search, Fill in the Blank, Matching, Word Guess, or Wordle. For Quizzes, provide 3-4 questions with 4 multiple-choice options each. For Matching games, provide 4-6 pairs of terms and definitions. For Fill in the Blank, provide four key sentences with an important word missing. For Word Guess, provide four key words from the sermon, each with a hint. For Wordle, provide a single, relevant 5-letter word from the sermon. For the required Jeopardy game, create 2-3 categories with 3 questions each, with point values of 100, 200, and 300.'),
   bibleReadingPlan: z.array(BibleReadingPlanItemSchema).describe('An array of 2-3 thematic Bible reading connections based on the sermon, including cross-references and Old/New Testament echoes.'),
+  spiritualPractices: z.array(SpiritualPracticeSchema).describe('An array of 2-3 small, practical spiritual practice challenges related to the sermon theme (e.g., fasting one meal, practicing hospitality, journaling gratitude).'),
 });
 export type GenerateWeeklyContentOutput = z.infer<typeof GenerateWeeklyContentOutputSchema>;
 
@@ -134,6 +141,7 @@ const generateWeeklyContentPrompt = ai.definePrompt({
   - Reflection questions for four audiences: Individuals, Families, Small Groups, and Youth. Each audience should have its own group with 3-4 questions.
   - An array of exactly 6 interactive games based on the sermon's content. One of these games MUST be a 'Jeopardy' game. One of the games must be a 'Verse Scramble' game based on a key bible verse from the sermon. Include a mix of other game types like 'Quiz', 'Word Search', 'Fill in the Blank', 'Matching', 'Word Guess', or 'Wordle'. For Quizzes, provide 3-4 questions with 4 multiple-choice options each. For Matching games, provide 4-6 pairs of terms and definitions. For Fill in the Blank, provide four key sentences with an important word missing. For Word Guess, provide four key words from the sermon, each with a hint for it. For Wordle, provide one significant 5-letter word from the sermon. For the required Jeopardy game, create 2-3 categories, each with 3 questions having point values of 100, 200, and 300.
   - A Bible Reading Plan (bibleReadingPlan): Generate 2-3 thematic reading connections based on the sermon. For each theme, provide 2-3 relevant Bible passages (cross-references, Old/New Testament echoes) and a brief explanation for each passage's connection to the sermon.
+  - A list of 2-3 Spiritual Practice Challenges (spiritualPractices): Generate small, practical challenges that are thematically related to the sermon. Examples include fasting one meal, practicing hospitality by inviting someone over, or keeping a gratitude journal for a week.
   `,
 });
 
@@ -167,3 +175,6 @@ const generateWeeklyContentFlow = ai.defineFlow(
 
 
 
+
+
+    

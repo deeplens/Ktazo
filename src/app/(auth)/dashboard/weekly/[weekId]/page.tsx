@@ -7,10 +7,10 @@ import { getMockSermons, getMockWeeklyContent, getAnswersForSermon, saveAnswersF
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
-import { Gamepad2, Headphones, MessageCircleQuestion, Users, User, HeartHandshake, MessageSquare, MicVocal, Languages, BookOpen } from "lucide-react";
+import { Gamepad2, Headphones, MessageCircleQuestion, Users, User, HeartHandshake, MessageSquare, MicVocal, Languages, BookOpen, HandHeart } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Sermon, WeeklyContent, Game, VerseScrambleItem, BibleReadingPlanItem } from "@/lib/types";
+import { Sermon, WeeklyContent, Game, VerseScrambleItem, BibleReadingPlanItem, SpiritualPractice } from "@/lib/types";
 import { useEffect, useState } from "react";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -72,6 +72,7 @@ export default function WeeklyPage() {
         reflectionQuestions: [],
         games: [],
         bibleReadingPlan: [],
+        spiritualPractices: [],
     };
     return <WeeklyPageContent sermon={placeholderSermon || {} as Sermon} weeklyContent={placeholderContent} answers={{}} setAnswers={setAnswers} availableLanguages={[]} selectedLanguage="en" onSelectLanguage={() => {}} />;
   }
@@ -225,6 +226,27 @@ function WeeklyPageContent({ sermon, weeklyContent, answers, setAnswers, availab
             </Card>
            )}
 
+            {weeklyContent.spiritualPractices && weeklyContent.spiritualPractices.length > 0 && (
+            <Card id="spiritual-practices">
+                <CardHeader>
+                    <CardTitle className="font-headline flex items-center gap-2"><HandHeart /> Spiritual Practice Challenges</CardTitle>
+                    <CardDescription>Put this week's sermon into action with these practical challenges.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <Accordion type="single" collapsible className="w-full">
+                        {weeklyContent.spiritualPractices.map((item: SpiritualPractice, index: number) => (
+                            <AccordionItem value={`item-${index}`} key={index}>
+                                <AccordionTrigger className="text-lg font-semibold">{item.title}</AccordionTrigger>
+                                <AccordionContent className="prose prose-stone dark:prose-invert max-w-none">
+                                    <p>{item.description}</p>
+                                </AccordionContent>
+                            </AccordionItem>
+                        ))}
+                    </Accordion>
+                </CardContent>
+            </Card>
+           )}
+
         </div>
 
         <div className="space-y-8">
@@ -317,3 +339,6 @@ function WeeklyPageContent({ sermon, weeklyContent, answers, setAnswers, availab
 
 
 
+
+
+    
