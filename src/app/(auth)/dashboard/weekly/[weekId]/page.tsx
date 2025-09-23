@@ -7,7 +7,7 @@ import { getMockSermons, getMockWeeklyContent, getAnswersForSermon, saveAnswersF
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
-import { Gamepad2, Headphones, MessageCircleQuestion, Users, User, HeartHandshake, MessageSquare, MicVocal, Languages, BookOpen, HandHeart } from "lucide-react";
+import { Gamepad2, Headphones, MessageCircleQuestion, Users, User, HeartHandshake, MessageSquare, MicVocal, Languages, BookOpen, HandHeart, Sparkles } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Sermon, WeeklyContent, Game, VerseScrambleItem, BibleReadingPlanItem, SpiritualPractice } from "@/lib/types";
@@ -253,13 +253,13 @@ function WeeklyPageContent({ sermon, weeklyContent, answers, setAnswers, availab
             {verseData && verseScrambleGame && <MemoryVerseCard verse={verseData.verse} reference={verseData.reference} game={verseScrambleGame} />}
             <Card>
                 <CardHeader>
-                    <CardTitle className="font-headline flex items-center gap-2"><HeartHandshake /> Feedback</CardTitle>
-                    <CardDescription>Share your thoughts on this week's content.</CardDescription>
+                    <CardTitle className="font-headline flex items-center gap-2"><Sparkles /> God Stories</CardTitle>
+                    <CardDescription>Share how God is working in your life through this week's theme.</CardDescription>
                 </CardHeader>
                 <CardContent>
                     <Button asChild className="w-full">
-                        <a href="mailto:feedback@ktazo.com">
-                            <MessageSquare className="mr-2 h-4 w-4"/> Give Feedback
+                        <a href={`mailto:stories@ktazo.com?subject=My Story: Week of ${sermon.title}`}>
+                            <MessageSquare className="mr-2 h-4 w-4"/> Share Your Story
                         </a>
                     </Button>
                 </CardContent>
@@ -304,7 +304,7 @@ function WeeklyPageContent({ sermon, weeklyContent, answers, setAnswers, availab
           <CardHeader>
             <CardTitle className="font-headline flex items-center gap-2"><MessageCircleQuestion /> Reflection Questions</CardTitle>
             <CardDescription>Ponder these questions on your own, or discuss them with your family, friends, or small group.</CardDescription>
-          </CardHeader>
+          </Header>
           <CardContent className="space-y-6">
               {weeklyContent.reflectionQuestions.map((group, groupIndex) => (
                   <div key={`${group.audience}-${groupIndex}`}>
