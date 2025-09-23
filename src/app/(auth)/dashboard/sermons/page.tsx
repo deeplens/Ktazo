@@ -1,6 +1,6 @@
 
 'use client';
-import { PlusCircle, File, MoreHorizontal } from "lucide-react";
+import { PlusCircle, File, MoreHorizontal, Check } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import {
@@ -25,30 +25,24 @@ import {
     TabsTrigger,
 } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { deleteSermon, getMockSermons } from "@/lib/mock-data";
+import { deleteSermon, getMockSermons, updateSermonStatus } from "@/lib/mock-data";
 import { Sermon } from "@/lib/types";
 import { useEffect, useState } from "react";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { useAuth } from "@/lib/auth";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 
 
-const statusStyles: { [key: string]: string } = {
-    DRAFT: "secondary",
-    READY_FOR_REVIEW: "default",
-    APPROVED: "default",
-    PUBLISHED: "default",
-};
-
 const statusColors: { [key: string]: string } = {
-    READY_FOR_REVIEW: "bg-yellow-500",
-    APPROVED: "bg-blue-500",
-    PUBLISHED: "bg-green-500",
+    DRAFT: "",
+    READY_FOR_REVIEW: "bg-yellow-500 hover:bg-yellow-500/80",
+    APPROVED: "bg-blue-500 hover:bg-blue-500/80",
+    PUBLISHED: "bg-green-500 hover:bg-green-500/80",
 };
 
-const SermonTable = ({sermons, onDelete}: {sermons: Sermon[], onDelete: (sermonId: string) => void}) => {
+const SermonTable = ({sermons, onDelete, onApprove}: {sermons: Sermon[], onDelete: (sermonId: string) => void, onApprove: (sermonId: string) => void}) => {
     const { user } = useAuth();
     const canManage = user?.role === 'ADMIN' || user?.role === 'PASTOR' || user?.role === 'MASTER';
     const viewUrl = canManage ? `/dashboard/sermons` : `/dashboard/weekly`;
@@ -80,7 +74,7 @@ const SermonTable = ({sermons, onDelete}: {sermons: Sermon[], onDelete: (sermonI
                     <TableCell className="hidden md:table-cell text-muted-foreground">{sermon.date}</TableCell>
                     {canManage && <TableCell>
                         <Badge
-                            variant={sermon.status === 'READY_FOR_REVIEW' ? 'default' : 'secondary'}
+                            variant={sermon.status === 'DRAFT' ? 'secondary' : 'default'}
                             className={cn(statusColors[sermon.status], sermon.status !== 'DRAFT' && 'text-white')}
                         >
                             {sermon.status.replace(/_/g, ' ')}
@@ -99,6 +93,13 @@ const SermonTable = ({sermons, onDelete}: {sermons: Sermon[], onDelete: (sermonI
                                 <DropdownMenuItem asChild>
                                     <Link href={`${viewUrl}/${sermon.id}`}>{canManage ? 'Manage' : 'View'}</Link>
                                 </DropdownMenuItem>
+                                {canManage && sermon.status === 'READY_FOR_REVIEW' && (
+                                     <DropdownMenuItem onClick={() => onApprove(sermon.id)}>
+                                        <Check className="mr-2 h-4 w-4" />
+                                        Approve
+                                    </DropdownMenuItem>
+                                )}
+                                {canManage && <DropdownMenuSeparator />}
                                 {canManage && (
                                      <AlertDialog>
                                         <AlertDialogTrigger asChild>
@@ -110,7 +111,7 @@ const SermonTable = ({sermons, onDelete}: {sermons: Sermon[], onDelete: (sermonI
                                                 <AlertDialogDescription>
                                                     This action cannot be undone. This will permanently delete the sermon
                                                     and all of its associated content.
-                                                </AlertDialogDescription>
+                                                </Description>
                                             </AlertDialogHeader>
                                             <AlertDialogFooter>
                                                 <AlertDialogCancel>Cancel</AlertDialogCancel>
@@ -140,18 +141,29 @@ export default function SermonsPage() {
     useEffect(() => {
         const sermons = getMockSermons();
         if (canManage) {
-            setAllSermons(sermons);
+            setAllSermons(sermons.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()));
         } else {
-            setAllSermons(sermons.filter(s => s.status === 'PUBLISHED'));
+            setAllSermons(sermons.filter(s => s.status === 'PUBLISHED').sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()));
         }
     }, [canManage]);
     
     const handleDeleteSermon = (sermonId: string) => {
+        const sermonToDelete = allSermons.find(s => s.id === sermonId);
         deleteSermon(sermonId);
         setAllSermons(getMockSermons()); // Refresh the list
         toast({
             title: "Sermon Deleted",
-            description: "The sermon has been successfully deleted.",
+            description: `"${sermonToDelete?.title}" has been successfully deleted.`,
+        });
+    };
+    
+    const handleApproveSermon = (sermonId: string) => {
+        const sermonToApprove = allSermons.find(s => s.id === sermonId);
+        updateSermonStatus(sermonId, 'APPROVED');
+        setAllSermons(getMockSermons()); // Refresh the list
+        toast({
+            title: "Sermon Approved",
+            description: `"${sermonToApprove?.title}" has been approved.`,
         });
     };
 
@@ -194,19 +206,19 @@ export default function SermonsPage() {
             <Card>
                 <CardContent className="pt-6">
                     <TabsContent value="all">
-                        <SermonTable sermons={allSermons} onDelete={handleDeleteSermon} />
+                        <SermonTable sermons={allSermons} onDelete={handleDeleteSermon} onApprove={handleApproveSermon} />
                     </TabsContent>
                     <TabsContent value="published">
-                        <SermonTable sermons={published} onDelete={handleDeleteSermon} />
+                        <SermonTable sermons={published} onDelete={handleDeleteSermon} onApprove={handleApproveSermon} />
                     </TabsContent>
                     <TabsContent value="approved">
-                        <SermonTable sermons={approved} onDelete={handleDeleteSermon} />
+                        <SermonTable sermons={approved} onDelete={handleDeleteSermon} onApprove={handleApproveSermon} />
                     </TabsContent>
-                    <TabsContent value="ready-for-review">
-                        <SermonTable sermons={readyForReview} onDelete={handleDeleteSermon} />
+                    <TabsContent value="review">
+                        <SermonTable sermons={readyForReview} onDelete={handleDeleteSermon} onApprove={handleApproveSermon} />
                     </TabsContent>
                     <TabsContent value="drafts">
-                        <SermonTable sermons={drafts} onDelete={handleDeleteSermon} />
+                        <SermonTable sermons={drafts} onDelete={handleDeleteSermon} onApprove={handleApproveSermon} />
                     </TabsContent>
                 </CardContent>
             </Card>
@@ -214,12 +226,10 @@ export default function SermonsPage() {
       ) : (
         <Card>
             <CardContent className="pt-6">
-                <SermonTable sermons={allSermons} onDelete={handleDeleteSermon} />
+                <SermonTable sermons={allSermons} onDelete={handleDeleteSermon} onApprove={handleApproveSermon} />
             </CardContent>
         </Card>
       )}
     </div>
   );
 }
-
-    
