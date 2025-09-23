@@ -2,7 +2,7 @@
 'use client';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, BookOpen, Users, Settings, HelpCircle, User as UserIcon } from 'lucide-react';
+import { Home, BookCopy, Users, Settings, HelpCircle, User as UserIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { UserRole } from '@/lib/types';
 
@@ -16,7 +16,7 @@ interface NavItem {
 const navItems: NavItem[] = [
   { href: '/dashboard', label: 'Home', icon: Home, roles: ['MASTER', 'ADMIN', 'PASTOR', 'MEMBER'] },
   { href: '/dashboard/profile', label: 'Profile', icon: UserIcon, roles: ['MASTER', 'ADMIN', 'PASTOR', 'MEMBER'] },
-  { href: '/dashboard/sermons', label: 'Sermons', icon: BookOpen, roles: ['MASTER', 'ADMIN', 'PASTOR', 'MEMBER'] },
+  { href: '/dashboard/sermons', label: 'Sermons', icon: BookCopy, roles: ['MASTER', 'ADMIN', 'PASTOR', 'MEMBER'] },
   { href: '/dashboard/admin/members', label: 'Members', icon: Users, roles: ['MASTER', 'ADMIN'] },
   { href: '/dashboard/admin/settings', label: 'Settings', icon: Settings, roles: ['MASTER', 'ADMIN', 'PASTOR'] },
   { href: '/dashboard/help', label: 'Help Center', icon: HelpCircle, roles: ['MASTER', 'ADMIN', 'PASTOR', 'MEMBER'] },
