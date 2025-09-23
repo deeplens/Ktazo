@@ -201,8 +201,10 @@ function WeeklyPageContent({ sermon, weeklyContent, answers, setAnswers, availab
                     <CardDescription>Share your thoughts on this week's content.</CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <Button className="w-full">
-                        <MessageSquare className="mr-2 h-4 w-4"/> Give Feedback
+                    <Button asChild className="w-full">
+                        <a href="mailto:feedback@ktazo.com">
+                            <MessageSquare className="mr-2 h-4 w-4"/> Give Feedback
+                        </a>
                     </Button>
                 </CardContent>
             </Card>
