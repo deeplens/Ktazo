@@ -7,10 +7,10 @@ import { getMockSermons, getMockWeeklyContent, getAnswersForSermon, saveAnswersF
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
-import { Gamepad2, Headphones, MessageCircleQuestion, Users, User, HeartHandshake, MessageSquare, MicVocal, Languages } from "lucide-react";
+import { Gamepad2, Headphones, MessageCircleQuestion, Users, User, HeartHandshake, MessageSquare, MicVocal, Languages, BookOpen } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Sermon, WeeklyContent, Game, VerseScrambleItem } from "@/lib/types";
+import { Sermon, WeeklyContent, Game, VerseScrambleItem, BibleReadingPlanItem } from "@/lib/types";
 import { useEffect, useState } from "react";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -71,6 +71,7 @@ export default function WeeklyPage() {
         devotionals: [],
         reflectionQuestions: [],
         games: [],
+        bibleReadingPlan: [],
     };
     return <WeeklyPageContent sermon={placeholderSermon || {} as Sermon} weeklyContent={placeholderContent} answers={{}} setAnswers={setAnswers} availableLanguages={[]} selectedLanguage="en" onSelectLanguage={() => {}} />;
   }
@@ -197,6 +198,33 @@ function WeeklyPageContent({ sermon, weeklyContent, answers, setAnswers, availab
               </Accordion>
             </CardContent>
           </Card>
+
+           {weeklyContent.bibleReadingPlan && weeklyContent.bibleReadingPlan.length > 0 && (
+            <Card id="reading-plan">
+                <CardHeader>
+                    <CardTitle className="font-headline flex items-center gap-2"><BookOpen /> Bible Reading Plan</CardTitle>
+                    <CardDescription>Explore passages related to this week's sermon theme.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <Accordion type="single" collapsible className="w-full">
+                        {weeklyContent.bibleReadingPlan.map((item: BibleReadingPlanItem, index: number) => (
+                            <AccordionItem value={`item-${index}`} key={index}>
+                                <AccordionTrigger className="text-lg font-semibold">{item.theme}</AccordionTrigger>
+                                <AccordionContent className="space-y-4">
+                                    {item.passages.map((passage, pIndex) => (
+                                        <div key={pIndex} className="p-4 rounded-lg bg-muted/50">
+                                            <h4 className="font-bold text-primary">{passage.reference}</h4>
+                                            <p className="text-sm text-muted-foreground mt-1">{passage.explanation}</p>
+                                        </div>
+                                    ))}
+                                </AccordionContent>
+                            </AccordionItem>
+                        ))}
+                    </Accordion>
+                </CardContent>
+            </Card>
+           )}
+
         </div>
 
         <div className="space-y-8">
@@ -286,5 +314,6 @@ function WeeklyPageContent({ sermon, weeklyContent, answers, setAnswers, availab
     </div>
   );
 }
+
 
 

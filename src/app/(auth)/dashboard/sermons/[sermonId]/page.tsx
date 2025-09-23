@@ -69,6 +69,7 @@ export default function SermonDetailPage() {
             ],
             reflectionQuestions: generated.reflectionQuestions,
             games: generated.games,
+            bibleReadingPlan: generated.bibleReadingPlan,
             mondayClipUrl: undefined,
         };
         

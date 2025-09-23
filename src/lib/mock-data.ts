@@ -321,6 +321,23 @@ const initialWeeklyContent: WeeklyContent[] = [
                 }
             }
         ],
+        bibleReadingPlan: [
+            {
+                "theme": "The Shepherd Motif",
+                "passages": [
+                    { "reference": "John 10:11-18", "explanation": "Jesus declares Himself as the 'Good Shepherd' who lays down His life for the sheep, directly echoing the protective and sacrificial nature of the shepherd in Psalm 23." },
+                    { "reference": "Ezekiel 34:11-16", "explanation": "This Old Testament prophecy depicts God as a shepherd who will search for, rescue, and care for His scattered flock, providing a rich background for the personal relationship described in Psalm 23." },
+                    { "reference": "1 Peter 5:2-4", "explanation": "Peter exhorts church elders to 'shepherd the flock of God,' showing how the shepherd metaphor is extended to human leaders who are to care for God's people under the authority of the Chief Shepherd, Jesus." }
+                ]
+            },
+            {
+                "theme": "Divine Provision and Rest",
+                "passages": [
+                    { "reference": "Matthew 6:25-34", "explanation": "Jesus' teaching on not worrying about daily needs complements the Psalmist's declaration 'I shall not want.' Both passages point to a radical trust in God's provision." },
+                    { "reference": "Hebrews 4:9-11", "explanation": "The 'green pastures' and 'still waters' of Psalm 23 are a picture of spiritual rest. This passage in Hebrews speaks of a 'Sabbath-rest for the people of God,' linking physical rest to the ultimate spiritual rest found in Christ." }
+                ]
+            }
+        ],
         mondayClipUrl: 'https://storage.googleapis.com/studioprod-55829.appspot.com/652932b172a5a544256c70c2/sermons/kE3z98a4aT6s1B2aY1E2/audio.mp3',
     },
     {
@@ -339,6 +356,7 @@ const initialWeeklyContent: WeeklyContent[] = [
         ],
         reflectionQuestions: [],
         games: [],
+        bibleReadingPlan: [],
     },
      {
         id: 'wc-2',
@@ -356,6 +374,7 @@ const initialWeeklyContent: WeeklyContent[] = [
         ],
         reflectionQuestions: [],
         games: [],
+        bibleReadingPlan: [],
     }
 ];
 
@@ -534,5 +553,6 @@ export const saveTenantSettings = (tenantId: string, settings: TenantSettings) =
 
 // For initial load, we still need this export for components that use it directly
 export const mockWeeklyContent = getMockWeeklyContent();
+
 
 

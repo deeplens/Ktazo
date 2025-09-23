@@ -93,6 +93,14 @@ export interface Game {
     data: GameQuestion[] | { words: string[] } | FillInTheBlankItem[] | MatchingGameItem[] | WordGuessItem[] | WordleItem | JeopardyCategory[] | VerseScrambleItem;
 }
 
+export interface BibleReadingPlanItem {
+    theme: string;
+    passages: {
+        reference: string;
+        explanation: string;
+    }[];
+}
+
 export interface WeeklyContent {
   id: string;
   tenantId: string;
@@ -103,6 +111,7 @@ export interface WeeklyContent {
   devotionals: { day: string; content: string }[];
   reflectionQuestions: ReflectionQuestionGroup[];
   games: Game[];
+  bibleReadingPlan: BibleReadingPlanItem[];
   mondayClipUrl?: string;
 }
 
