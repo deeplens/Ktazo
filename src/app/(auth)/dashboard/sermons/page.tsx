@@ -36,12 +36,13 @@ import { useToast } from "@/hooks/use-toast";
 
 const statusStyles: { [key: string]: string } = {
     DRAFT: "secondary",
-    READY_FOR_REVIEW: "outline",
+    READY_FOR_REVIEW: "default",
     APPROVED: "default",
     PUBLISHED: "default",
 };
 
 const statusColors: { [key: string]: string } = {
+    READY_FOR_REVIEW: "bg-yellow-500",
     APPROVED: "bg-blue-500",
     PUBLISHED: "bg-green-500",
 };
@@ -81,7 +82,7 @@ const SermonTable = ({sermons, onDelete}: {sermons: Sermon[], onDelete: (sermonI
                             variant={statusStyles[sermon.status] as any}
                             className={statusColors[sermon.status]}
                         >
-                            {sermon.status.replace('_', ' ')}
+                            {sermon.status.replace(/_/g, ' ')}
                         </Badge>
                     </TableCell>}
                     <TableCell className="text-right">
