@@ -4,7 +4,7 @@
 import { useState } from 'react';
 import { JeopardyCategory, JeopardyQuestion } from '@/lib/types';
 import { Button } from '../ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '../ui/dialog';
 import { cn } from '@/lib/utils';
 import { RefreshCcw } from 'lucide-react';
 
