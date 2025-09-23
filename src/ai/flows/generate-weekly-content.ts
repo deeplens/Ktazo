@@ -52,8 +52,8 @@ const WordleItemSchema = z.object({
 });
 
 const JeopardyQuestionSchema = z.object({
-    question: z.string().describe('The clue or question.'),
-    answer: z.string().describe('The correct response.'),
+    question: z.string().describe('The clue or prompt provided to the contestant.'),
+    answer: z.string().describe('The correct response, which MUST be in the form of a question (e.g., "What is...").'),
     points: z.number().describe('The point value of the question (e.g., 100, 200, 300).'),
 });
 
@@ -150,13 +150,21 @@ const generateWeeklyContentPrompt = ai.definePrompt({
   - A longer devotional guide summary (summaryLong).
   - An object containing five daily devotionals for Monday (monday), Tuesday (tuesday), Wednesday (wednesday), Thursday (thursday), and Friday (friday). Each devotional should be substantial, around 200 words long.
   - Reflection questions for four audiences: Individuals, Families, Small Groups, and Youth. Each audience should have its own group with 3-4 questions.
-  - An array of exactly 6 interactive games based on the sermon's content. One of these games MUST be a 'Jeopardy' game. One of the games must be a 'Verse Scramble' game based on a key bible verse from the sermon. Include a mix of other game types like 'Quiz', 'Word Search', 'Fill in the Blank', 'Matching', 'Word Guess', or 'Wordle'. For Quizzes, provide 3-4 questions with 4 multiple-choice options each. For Matching games, provide 4-6 pairs of terms and definitions. For Fill in the Blank, provide four key sentences with an important word missing. For Word Guess, provide four key words from the sermon, each with a hint for it. For Wordle, provide one significant 5-letter word from the sermon. For the required Jeopardy game, create 2-3 categories, each with 3 questions having point values of 100, 200, and 300.
+  - An array of exactly 6 interactive games based on the sermon's content. 
+    - One of these games MUST be a 'Jeopardy' game. For the Jeopardy game, the 'answer' field MUST be in the form of a question (e.g., "What is..."). Create 2-3 categories, each with 3 questions having point values of 100, 200, and 300.
+    - One of the games must be a 'Verse Scramble' game based on a key bible verse from the sermon. 
+    - Include a mix of other game types like 'Quiz', 'Word Search', 'Fill in the Blank', 'Matching', 'Word Guess', or 'Wordle'. 
+    - For Quizzes, provide 3-4 questions with 4 multiple-choice options each. 
+    - For Matching games, provide 4-6 pairs of terms and definitions. 
+    - For Fill in the Blank, provide four key sentences with an important word missing. 
+    - For Word Guess, provide four key words from the sermon, each with a hint for it. 
+    - For Wordle, provide one significant 5-letter word from the sermon.
   - A Bible Reading Plan (bibleReadingPlan): Generate 2-3 thematic reading connections based on the sermon. For each theme, provide 2-3 relevant Bible passages (cross-references, Old/New Testament echoes) and a brief explanation for each passage's connection to the sermon.
   - A list of 2-3 Spiritual Practice Challenges (spiritualPractices): Generate small, practical challenges that are thematically related to the sermon. Examples include fasting one meal, practicing hospitality by inviting someone over, or keeping a gratitude journal for a week.
   - An Outward Focus section (outwardFocus):
     - Mission Focus: Spotlight a real or exemplary missionary/ministry, connecting their work to the sermon's theme.
     - Service Challenge: Create a tangible, actionable service challenge for the week.
-    - Cultural Engagement: Pose a thought-provoking question or resource link about applying the sermon in modern culture (work, media, etc.).
+    - Cultural Engagement: Pose a thought-provoking question or resource about applying the sermon in modern culture (work, media, etc.).
   `,
 });
 
