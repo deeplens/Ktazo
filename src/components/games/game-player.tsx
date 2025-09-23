@@ -129,6 +129,8 @@ export function GamePlayer({ game }: GamePlayerProps) {
              return <WordleGame data={game.data as WordleItem} />;
         case "Jeopardy":
             return <JeopardyGame data={game.data as JeopardyCategory[]} />;
+        case "Verse Scramble":
+            return <VerseScrambleGame data={game.data as VerseScrambleItem} />;
         default:
             return <p>Unknown game type</p>;
     }

@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Gamepad2, Headphones, MessageCircleQuestion, Users, User, HeartHandshake, MessageSquare, MicVocal, Languages } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Sermon, WeeklyContent, Game, WordGuessItem } from "@/lib/types";
+import { Sermon, WeeklyContent, Game, VerseScrambleItem } from "@/lib/types";
 import { useEffect, useState } from "react";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -128,9 +128,8 @@ function WeeklyPageContent({ sermon, weeklyContent, answers, setAnswers, availab
   const heroImage = sermon.artworkUrl || `https://picsum.photos/seed/${sermon.id}/1200/800`;
   const showLanguageSwitcher = availableLanguages.length > 1;
 
-  const wordGuessGame = weeklyContent.games?.find(g => g.type === 'Word Guess') as Game | undefined;
-  const wordGuessData = wordGuessGame?.data as WordGuessItem[] | undefined;
-  const verseData = wordGuessData ? wordGuessData[0] : undefined;
+  const verseScrambleGame = weeklyContent.games?.find(g => g.type === 'Verse Scramble') as Game | undefined;
+  const verseData = verseScrambleGame?.data as VerseScrambleItem | undefined;
 
 
   return (
@@ -201,7 +200,7 @@ function WeeklyPageContent({ sermon, weeklyContent, answers, setAnswers, availab
         </div>
 
         <div className="space-y-8">
-            {verseData && wordGuessGame && <MemoryVerseCard verse={verseData.hint} reference={verseData.word} game={wordGuessGame} />}
+            {verseData && verseScrambleGame && <MemoryVerseCard verse={verseData.verse} reference={verseData.reference} game={verseScrambleGame} />}
             <Card>
                 <CardHeader>
                     <CardTitle className="font-headline flex items-center gap-2"><HeartHandshake /> Feedback</CardTitle>
@@ -287,4 +286,5 @@ function WeeklyPageContent({ sermon, weeklyContent, answers, setAnswers, availab
     </div>
   );
 }
+
 
