@@ -138,4 +138,12 @@ export interface TenantSettings {
     }
 }
 
+export interface Missionary {
+    id: string;
+    name: string;
+    location: string;
+    bio: string;
+    summary: string;
+    prayerRequests: string[];
+}
     

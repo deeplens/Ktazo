@@ -5,7 +5,7 @@ import { Game, ReflectionQuestionGroup, WeeklyContent } from "@/lib/types";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "../ui/accordion";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../ui/card";
 import { Separator } from "../ui/separator";
-import { Headphones, Loader2, Sparkles, Users, User, MessageCircleQuestion, Gamepad2 } from "lucide-react";
+import { Headphones, Loader2, Sparkles, Users, User, MessageCircleQuestion, Gamepad2, Globe, HeartHandshake, Briefcase, Target } from "lucide-react";
 import { Button } from "../ui/button";
 import { Badge } from "../ui/badge";
 import { useState } from "react";
@@ -13,6 +13,10 @@ import { useToast } from "@/hooks/use-toast";
 import { saveWeeklyContent as saveContent } from "@/lib/mock-data";
 import { Textarea } from "../ui/textarea";
 import { Label } from "../ui/label";
+import { useAuth } from "@/lib/auth";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
+import { mockMissionaries, Missionary } from "@/lib/missionaries";
+import { Input } from "../ui/input";
 
 interface WeeklyContentViewProps {
   content: WeeklyContent;
@@ -21,21 +25,42 @@ interface WeeklyContentViewProps {
 }
 
 export function WeeklyContentView({ content, onGenerateAudio, isGeneratingAudio }: WeeklyContentViewProps) {
+    const { user } = useAuth();
     const { toast } = useToast();
-    const [editableQuestions, setEditableQuestions] = useState<ReflectionQuestionGroup[]>(JSON.parse(JSON.stringify(content.reflectionQuestions)));
+    const [editableContent, setEditableContent] = useState<WeeklyContent>(JSON.parse(JSON.stringify(content)));
+    
+    const canManage = user?.role === 'ADMIN' || user?.role === 'PASTOR' || user?.role === 'MASTER';
 
     const handleQuestionChange = (groupIndex: number, questionIndex: number, value: string) => {
-        const newQuestions = [...editableQuestions];
-        newQuestions[groupIndex].questions[questionIndex] = value;
-        setEditableQuestions(newQuestions);
+        const newContent = { ...editableContent };
+        newContent.reflectionQuestions[groupIndex].questions[questionIndex] = value;
+        setEditableContent(newContent);
     };
 
-    const handleSaveQuestions = () => {
-        const updatedContent = { ...content, reflectionQuestions: editableQuestions };
-        saveContent(updatedContent);
+    const handleOutwardFocusChange = (section: 'missionFocus' | 'serviceChallenge' | 'culturalEngagement', field: 'title' | 'description' | 'details', value: string) => {
+        const newContent = { ...editableContent };
+        (newContent.outwardFocus[section] as any)[field] = value;
+        setEditableContent(newContent);
+    };
+
+    const handleMissionarySelect = (missionaryId: string) => {
+        const selectedMissionary = mockMissionaries.find(m => m.id === missionaryId);
+        if (selectedMissionary) {
+            const newContent = { ...editableContent };
+            newContent.outwardFocus.missionFocus = {
+                title: `Spotlight on ${selectedMissionary.name}`,
+                description: selectedMissionary.summary,
+                details: `**Who they are:** ${selectedMissionary.bio}\n\n**Prayer Requests:**\n${selectedMissionary.prayerRequests.map(p => `- ${p}`).join('\n')}`
+            };
+            setEditableContent(newContent);
+        }
+    };
+
+    const handleSave = () => {
+        saveContent(editableContent);
         toast({
-            title: "Questions Saved",
-            description: "Your reflection questions have been updated.",
+            title: "Content Saved",
+            description: "Your changes to the weekly content have been saved.",
         });
     };
     
@@ -148,13 +173,82 @@ export function WeeklyContentView({ content, onGenerateAudio, isGeneratingAudio 
         </CardContent>
       </Card>
       
+      {canManage && (
+        <Card>
+            <CardHeader>
+                <CardTitle className="flex items-center gap-2"><Globe /> Outward Focus</CardTitle>
+                <CardDescription>Edit the mission focus, service challenge, and cultural engagement sections.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+                {/* Mission Focus */}
+                <div className="space-y-4 p-4 border rounded-lg">
+                    <h3 className="font-semibold flex items-center gap-2"><Target /> Mission Focus</h3>
+                    <div className="space-y-2">
+                        <Label>Select a Missionary (Optional)</Label>
+                        <Select onValueChange={handleMissionarySelect}>
+                            <SelectTrigger>
+                                <SelectValue placeholder="Load missionary data..." />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {mockMissionaries.map(m => (
+                                    <SelectItem key={m.id} value={m.id}>{m.name}</SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+                     <div className="space-y-2">
+                        <Label htmlFor="mission-title">Title</Label>
+                        <Input id="mission-title" value={editableContent.outwardFocus.missionFocus.title} onChange={e => handleOutwardFocusChange('missionFocus', 'title', e.target.value)} />
+                    </div>
+                     <div className="space-y-2">
+                        <Label htmlFor="mission-desc">Short Description</Label>
+                        <Textarea id="mission-desc" value={editableContent.outwardFocus.missionFocus.description} onChange={e => handleOutwardFocusChange('missionFocus', 'description', e.target.value)} rows={2} />
+                    </div>
+                     <div className="space-y-2">
+                        <Label htmlFor="mission-details">Details & Prayer Requests</Label>
+                        <Textarea id="mission-details" value={editableContent.outwardFocus.missionFocus.details} onChange={e => handleOutwardFocusChange('missionFocus', 'details', e.target.value)} rows={5} />
+                    </div>
+                </div>
+
+                {/* Service Challenge */}
+                <div className="space-y-4 p-4 border rounded-lg">
+                    <h3 className="font-semibold flex items-center gap-2"><HeartHandshake /> Service Challenge</h3>
+                    <div className="space-y-2">
+                        <Label htmlFor="service-title">Title</Label>
+                        <Input id="service-title" value={editableContent.outwardFocus.serviceChallenge.title} onChange={e => handleOutwardFocusChange('serviceChallenge', 'title', e.target.value)} />
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="service-details">Details</Label>
+                        <Textarea id="service-details" value={editableContent.outwardFocus.serviceChallenge.details} onChange={e => handleOutwardFocusChange('serviceChallenge', 'details', e.target.value)} rows={3} />
+                    </div>
+                </div>
+
+                {/* Cultural Engagement */}
+                 <div className="space-y-4 p-4 border rounded-lg">
+                    <h3 className="font-semibold flex items-center gap-2"><Briefcase /> Cultural Engagement</h3>
+                    <div className="space-y-2">
+                        <Label htmlFor="culture-title">Title</Label>
+                        <Input id="culture-title" value={editableContent.outwardFocus.culturalEngagement.title} onChange={e => handleOutwardFocusChange('culturalEngagement', 'title', e.target.value)} />
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="culture-details">Details / Question</Label>
+                        <Textarea id="culture-details" value={editableContent.outwardFocus.culturalEngagement.details} onChange={e => handleOutwardFocusChange('culturalEngagement', 'details', e.target.value)} rows={3} />
+                    </div>
+                </div>
+            </CardContent>
+             <CardFooter>
+              <Button onClick={handleSave}>Save Outward Focus</Button>
+            </CardFooter>
+        </Card>
+      )}
+
       <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2"><MessageCircleQuestion /> Reflection Questions</CardTitle>
-            <CardDescription>Generated questions for different groups. Edit them as needed.</CardDescription>
+            <CardDescription>Generated questions for different groups. {canManage && "Edit them as needed."}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            {editableQuestions.map((group, groupIndex) => (
+            {editableContent.reflectionQuestions.map((group, groupIndex) => (
               <div key={`${group.audience}-${groupIndex}`}>
                 <h3 className="font-semibold flex items-center gap-2 mb-2 text-sm">{getIconForAudience(group.audience)} {group.audience}</h3>
                 <div className="space-y-2 pl-2">
@@ -167,6 +261,7 @@ export function WeeklyContentView({ content, onGenerateAudio, isGeneratingAudio 
                                 onChange={(e) => handleQuestionChange(groupIndex, questionIndex, e.target.value)}
                                 className="text-sm"
                                 rows={2}
+                                disabled={!canManage}
                             />
                         </div>
                     ))}
@@ -174,9 +269,11 @@ export function WeeklyContentView({ content, onGenerateAudio, isGeneratingAudio 
               </div>
             ))}
           </CardContent>
-          <CardFooter>
-              <Button onClick={handleSaveQuestions}>Save Questions</Button>
-          </CardFooter>
+          {canManage && (
+            <CardFooter>
+                <Button onClick={handleSave}>Save Questions</Button>
+            </CardFooter>
+          )}
       </Card>
     </div>
   );
