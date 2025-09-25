@@ -54,7 +54,7 @@ const WordleItemSchema = z.object({
 const JeopardyQuestionSchema = z.object({
     question: z.string().describe('The clue or prompt provided to the contestant.'),
     answer: z.string().describe('The correct response, which MUST be in the form of a question (e.g., "What is...").'),
-    points: z.number().describe('The point value of the question (e.g., 100, 200, 300).'),
+    points: z.number().describe('The point value of the question (e.g., 200, 400, 600).'),
 });
 
 const JeopardyCategorySchema = z.object({
@@ -114,7 +114,7 @@ const GenerateWeeklyContentOutputSchema = z.object({
       friday: z.string().describe('A devotional for Friday, approximately 200 words.'),
   }).describe('An object containing five daily devotionals for Mon-Fri.'),
   reflectionQuestions: z.array(ReflectionQuestionGroupSchema).describe('An array of reflection question groups for different audiences.'),
-  games: z.array(GameSchema).describe('An array of 6 interactive games based on the sermon. One of these games MUST be a Jeopardy game. Include a mix of other types like Quiz, Word Search, Fill in the Blank, Matching, Word Guess, or Wordle. For Quizzes, provide 3-4 questions with 4 multiple-choice options each. For Matching games, provide 4-6 pairs of terms and definitions. For Fill in the Blank, provide four key sentences with an important word missing. For Word Guess, provide four key words from the sermon, each with a hint. For Wordle, provide a single, relevant 5-letter word from the sermon. For the required Jeopardy game, create 2-3 categories with 3 questions each, with point values of 100, 200, and 300.'),
+  games: z.array(GameSchema).describe('An array of 6 interactive games based on the sermon. One of these games MUST be a Jeopardy game. Include a mix of other types like Quiz, Word Search, Fill in the Blank, Matching, Word Guess, or Wordle. For Quizzes, provide 3-4 questions with 4 multiple-choice options each. For Matching games, provide 4-6 pairs of terms and definitions. For Fill in the Blank, provide four key sentences with an important word missing. For Word Guess, provide four key words from the sermon, each with a hint. For Wordle, provide a single, relevant 5-letter word from the sermon. For the required Jeopardy game, create 2-3 categories with 3 questions each, with point values of 200, 400, and 600.'),
   bibleReadingPlan: z.array(BibleReadingPlanItemSchema).describe('An array of 2-3 thematic Bible reading connections based on the sermon, including cross-references and Old/New Testament echoes.'),
   spiritualPractices: z.array(SpiritualPracticeSchema).describe('An array of 2-3 small, practical spiritual practice challenges related to the sermon theme (e.g., fasting one meal, practicing hospitality, journaling gratitude).'),
   outwardFocus: z.object({
@@ -151,7 +151,7 @@ const generateWeeklyContentPrompt = ai.definePrompt({
   - An object containing five daily devotionals for Monday (monday), Tuesday (tuesday), Wednesday (wednesday), Thursday (thursday), and Friday (friday). Each devotional should be substantial, around 200 words long.
   - Reflection questions for four audiences: Individuals, Families, Small Groups, and Youth. Each audience should have its own group with 3-4 questions.
   - An array of exactly 6 interactive games based on the sermon's content. 
-    - One of these games MUST be a 'Jeopardy' game. For the Jeopardy game, the 'answer' field MUST be in the form of a question (e.g., "What is..."). Create 2-3 categories, each with 3 questions having point values of 100, 200, and 300.
+    - One of these games MUST be a 'Jeopardy' game. For the Jeopardy game, the 'answer' field MUST be in the form of a question (e.g., "What is..."). Create 2-3 categories, each with 3 questions having point values of 200, 400, and 600.
     - One of the games must be a 'Verse Scramble' game based on a key bible verse from the sermon. 
     - Include a mix of other game types like 'Quiz', 'Word Search', 'Fill in the Blank', 'Matching', 'Word Guess', or 'Wordle'. 
     - For Quizzes, provide 3-4 questions with 4 multiple-choice options each. 
