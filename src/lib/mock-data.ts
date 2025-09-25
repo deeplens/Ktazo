@@ -197,6 +197,11 @@ const initialWeeklyContent: WeeklyContent[] = [
         language: 'en',
         summaryShort: "A brief look at Psalm 23, highlighting God's role as our provider and protector.",
         summaryLong: "This week's devotional guide explores the deep comfort and assurance found in Psalm 23. We delve into the metaphor of the shepherd and his sheep, understanding how God leads us, provides for our needs, restores our souls, and walks with us through life's darkest valleys. It's a message of profound trust and unwavering divine care.",
+        oneLiners: {
+            tuesday: "The Lord is my shepherd, I shall not want.",
+            thursday: "Surely goodness and mercy shall follow me all the days of my life."
+        },
+        sendOneLiners: true,
         devotionals: [
             { day: "Monday", content: "Podcast clip about resting in God's care. This devotional is now much longer to provide more substance for the reader. It delves deeper into the themes of the sermon and offers more for reflection. We can expand on the idea of rest and what it truly means to trust in God's provision. We can explore the contrast between worldly striving and spiritual peace." },
             { day: "Tuesday", content: "Reflection on 'The Lord is my shepherd, I shall not want.' What does it mean to be content in His provision? This section is also expanded to provide a richer experience. We can discuss the societal pressures of wanting more and how a relationship with God can free us from that cycle. Practical steps to cultivate contentment can be included." },
@@ -256,17 +261,17 @@ const initialWeeklyContent: WeeklyContent[] = [
                     {
                         "title": "Key Figures",
                         "questions": [
-                            { "question": "He is described as 'my shepherd'.", "answer": "The Lord", "points": 100 },
-                            { "question": "I will fear no evil, for you are with me; your rod and your ____, they comfort me.", "answer": "Staff", "points": 200 },
-                            { "question": "The psalmist declares that he will dwell in the house of the Lord for this long.", "answer": "Forever", "points": 300 }
+                            { "question": "He is described as 'my shepherd'.", "answer": "What is the Lord?", "points": 200 },
+                            { "question": "I will fear no evil, for you are with me; your rod and your ____, they comfort me.", "answer": "What is a staff?", "points": 400 },
+                            { "question": "The psalmist declares that he will dwell in the house of the Lord for this long.", "answer": "What is forever?", "points": 600 }
                         ]
                     },
                     {
                         "title": "Places & Things",
                         "questions": [
-                            { "question": "He makes me lie down in these.", "answer": "Green pastures", "points": 100 },
-                            { "question": "He leads me beside these.", "answer": "Still waters", "points": 200 },
-                            { "question": "This is prepared for the psalmist in the presence of his enemies.", "answer": "A table", "points": 300 }
+                            { "question": "He makes me lie down in these.", "answer": "What are green pastures?", "points": 200 },
+                            { "question": "He leads me beside these.", "answer": "What are still waters?", "points": 400 },
+                            { "question": "This is prepared for the psalmist in the presence of his enemies.", "answer": "What is a table?", "points": 600 }
                         ]
                     }
                 ]
@@ -357,6 +362,11 @@ const initialWeeklyContent: WeeklyContent[] = [
         language: 'es',
         summaryShort: "Un breve vistazo al Salmo 23, destacando el papel de Dios como nuestro proveedor y protector.",
         summaryLong: "La guía devocional de esta semana explora el profundo consuelo y la seguridad que se encuentran en el Salmo 23...",
+        oneLiners: {
+            tuesday: "El Señor es mi pastor, nada me faltará.",
+            thursday: "Ciertamente el bien y la misericordia me seguirán todos los días de mi vida."
+        },
+        sendOneLiners: true,
         devotionals: [
             { day: "Lunes", content: "Clip de podcast sobre descansar en el cuidado de Dios..." },
             { day: "Martes", content: "Reflexión sobre 'El Señor es mi pastor, nada me faltará.'..." },
@@ -381,6 +391,11 @@ const initialWeeklyContent: WeeklyContent[] = [
         language: 'en',
         summaryShort: 'Exploring the connection between genuine faith and tangible actions as described in the book of James.',
         summaryLong: 'This study from the book of James challenges us to examine the nature of our faith. Is it a passive belief or an active, living force? We will see that James is not advocating for salvation by works, but is instead arguing that true, saving faith inevitably produces good works. It is a call to a faith that is visible, practical, and transformative.',
+        oneLiners: {
+            tuesday: "Faith by itself, if it does not have works, is dead.",
+            thursday: "Show me your faith apart from your works, and I will show you my faith by my works."
+        },
+        sendOneLiners: true,
         devotionals: [
             { day: 'Monday', content: 'Podcast intro to Faith and Works.' },
             { day: 'Tuesday', content: 'What good is it, my brothers, if someone says he has faith but does not have works? Can that faith save him? Reflect on this question.' },
@@ -535,22 +550,50 @@ const initialTenantSettings: { [key: string]: TenantSettings } = {
     optionalServices: {
       ourDailyBread: false,
     },
+    notifications: {
+        oneLiners: {
+            enabled: true,
+            sendByEmail: true,
+            sendBySms: false,
+            audience: 'all',
+        },
+        suspendDuringBackfill: false,
+    }
   },
 };
 
 export const getTenantSettings = (tenantId: string): TenantSettings => {
   if (typeof window !== 'undefined') {
     const stored = sessionStorage.getItem(TENANT_SETTINGS_KEY);
+    const defaultSettings = initialTenantSettings[tenantId] || {
+        optionalServices: { ourDailyBread: false },
+        notifications: {
+            oneLiners: { enabled: false, sendByEmail: false, sendBySms: false, audience: 'all' },
+            suspendDuringBackfill: false,
+        }
+    };
+
     if (stored) {
       try {
         const allSettings = JSON.parse(stored);
-        return allSettings[tenantId] || initialTenantSettings[tenantId];
+        // Merge stored settings with defaults to handle missing keys
+        const tenantSettings = allSettings[tenantId];
+        return {
+            ...defaultSettings,
+            ...tenantSettings,
+            optionalServices: { ...defaultSettings.optionalServices, ...tenantSettings?.optionalServices },
+            notifications: {
+                ...defaultSettings.notifications,
+                ...tenantSettings?.notifications,
+                oneLiners: { ...defaultSettings.notifications.oneLiners, ...tenantSettings?.notifications?.oneLiners }
+            },
+        };
       } catch (e) {
-        return initialTenantSettings[tenantId];
+        return defaultSettings;
       }
     } else {
       sessionStorage.setItem(TENANT_SETTINGS_KEY, JSON.stringify(initialTenantSettings));
-      return initialTenantSettings[tenantId];
+      return defaultSettings;
     }
   }
   return initialTenantSettings[tenantId];

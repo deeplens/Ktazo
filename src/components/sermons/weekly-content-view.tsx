@@ -5,7 +5,7 @@ import { Game, ReflectionQuestionGroup, WeeklyContent } from "@/lib/types";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "../ui/accordion";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../ui/card";
 import { Separator } from "../ui/separator";
-import { Headphones, Loader2, Sparkles, Users, User, MessageCircleQuestion, Gamepad2, Globe, HeartHandshake, Briefcase, Target } from "lucide-react";
+import { Headphones, Loader2, Sparkles, Users, User, MessageCircleQuestion, Gamepad2, Globe, HeartHandshake, Briefcase, Target, MessageSquareQuote } from "lucide-react";
 import { Button } from "../ui/button";
 import { Badge } from "../ui/badge";
 import { useState } from "react";
@@ -17,6 +17,8 @@ import { useAuth } from "@/lib/auth";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import { mockMissionaries, Missionary } from "@/lib/missionaries";
 import { Input } from "../ui/input";
+import { Checkbox } from "../ui/checkbox";
+import { Switch } from "../ui/switch";
 
 interface WeeklyContentViewProps {
   content: WeeklyContent;
@@ -55,6 +57,21 @@ export function WeeklyContentView({ content, onGenerateAudio, isGeneratingAudio 
             setEditableContent(newContent);
         }
     };
+    
+    const handleOneLinerChange = (day: 'tuesday' | 'thursday', value: string) => {
+        const newContent = { ...editableContent };
+        if (!newContent.oneLiners) {
+            newContent.oneLiners = { tuesday: '', thursday: '' };
+        }
+        newContent.oneLiners[day] = value;
+        setEditableContent(newContent);
+    };
+
+    const handleSendOneLinersChange = (checked: boolean) => {
+        const newContent = { ...editableContent, sendOneLiners: checked };
+        setEditableContent(newContent);
+    };
+
 
     const handleSave = () => {
         saveContent(editableContent);
@@ -146,6 +163,33 @@ export function WeeklyContentView({ content, onGenerateAudio, isGeneratingAudio 
           </Accordion>
         </CardContent>
       </Card>
+
+       {canManage && editableContent.oneLiners && (
+        <Card>
+            <CardHeader>
+                <CardTitle className="flex items-center gap-2"><MessageSquareQuote /> Mid-Week One-Liners</CardTitle>
+                <CardDescription>Edit and manage the one-liner notifications that get sent out on Tuesday and Thursday.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+                <div className="space-y-2">
+                    <Label htmlFor="one-liner-tuesday">Tuesday One-Liner</Label>
+                    <Input id="one-liner-tuesday" value={editableContent.oneLiners.tuesday} onChange={e => handleOneLinerChange('tuesday', e.target.value)} />
+                </div>
+                <div className="space-y-2">
+                    <Label htmlFor="one-liner-thursday">Thursday One-Liner</Label>
+                    <Input id="one-liner-thursday" value={editableContent.oneLiners.thursday} onChange={e => handleOneLinerChange('thursday', e.target.value)} />
+                </div>
+                <div className="flex items-center space-x-2 pt-2">
+                    <Switch id="send-one-liners" checked={editableContent.sendOneLiners} onCheckedChange={handleSendOneLinersChange} />
+                    <Label htmlFor="send-one-liners">Send one-liners for this sermon</Label>
+                </div>
+            </CardContent>
+            <CardFooter>
+              <Button onClick={handleSave}>Save One-Liners</Button>
+            </CardFooter>
+        </Card>
+      )}
+
 
       <Card>
         <CardHeader>

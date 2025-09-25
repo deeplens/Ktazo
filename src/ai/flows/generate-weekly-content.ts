@@ -106,6 +106,10 @@ const OutwardFocusItemSchema = z.object({
 const GenerateWeeklyContentOutputSchema = z.object({
   summaryShort: z.string().describe('A short summary of the sermon.'),
   summaryLong: z.string().describe('A longer devotional guide summary of the sermon.'),
+  oneLiners: z.object({
+    tuesday: z.string().describe('A concise, impactful one-liner quote or thought from the sermon for Tuesday.'),
+    thursday: z.string().describe('A concise, impactful one-liner quote or thought from the sermon for Thursday.'),
+  }).describe('Two one-liner reminders from the sermon for mid-week engagement.'),
   devotionals: z.object({
       monday: z.string().describe('A devotional for Monday, approximately 200 words.'),
       tuesday: z.string().describe('A devotional for Tuesday, approximately 200 words.'),
@@ -148,6 +152,7 @@ const generateWeeklyContentPrompt = ai.definePrompt({
 
   - A short summary (summaryShort).
   - A longer devotional guide summary (summaryLong).
+  - Two one-liner reminders (oneLiners): one for Tuesday and one for Thursday. These should be concise, memorable, and impactful quotes or thoughts directly from the sermon.
   - An object containing five daily devotionals for Monday (monday), Tuesday (tuesday), Wednesday (wednesday), Thursday (thursday), and Friday (friday). Each devotional should be substantial, around 200 words long.
   - Reflection questions for four audiences: Individuals, Families, Small Groups, and Youth. Each audience should have its own group with 3-4 questions.
   - An array of exactly 6 interactive games based on the sermon's content. 

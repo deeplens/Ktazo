@@ -119,6 +119,11 @@ export interface WeeklyContent {
   language: string;
   summaryShort: string;
   summaryLong: string;
+  oneLiners: {
+    tuesday: string;
+    thursday: string;
+  };
+  sendOneLiners: boolean;
   devotionals: { day: string; content: string }[];
   reflectionQuestions: ReflectionQuestionGroup[];
   games: Game[];
@@ -135,6 +140,15 @@ export interface WeeklyContent {
 export interface TenantSettings {
     optionalServices: {
         ourDailyBread: boolean;
+    };
+    notifications: {
+        oneLiners: {
+            enabled: boolean;
+            sendByEmail: boolean;
+            sendBySms: boolean;
+            audience: 'all' | 'members_and_regulars' | 'members_only';
+        };
+        suspendDuringBackfill: boolean;
     }
 }
 

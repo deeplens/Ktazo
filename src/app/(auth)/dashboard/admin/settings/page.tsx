@@ -7,7 +7,7 @@ import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Church, Globe, Palette, Volume2, Link as LinkIcon, Loader2 } from "lucide-react";
+import { Church, Globe, Palette, Volume2, Link as LinkIcon, Loader2, MessageSquareQuote, Mail, Smartphone } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useState, useEffect } from "react";
@@ -15,6 +15,7 @@ import { getTenantSettings, saveTenantSettings } from "@/lib/mock-data";
 import { useAuth } from "@/lib/auth";
 import { TenantSettings } from "@/lib/types";
 import { useToast } from "@/hooks/use-toast";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 export default function SettingsPage() {
     const { user } = useAuth();
@@ -44,16 +45,10 @@ export default function SettingsPage() {
         }, 500);
     };
 
-    const handleOdbChange = (checked: boolean) => {
+    const handleSettingChange = (key: keyof TenantSettings, value: any) => {
         setSettings(prev => {
             if (!prev) return null;
-            return {
-                ...prev,
-                optionalServices: {
-                    ...prev.optionalServices,
-                    ourDailyBread: checked,
-                }
-            }
+            return { ...prev, [key]: value };
         });
     }
 
@@ -141,6 +136,56 @@ export default function SettingsPage() {
                     <Button variant="outline">Add another URL</Button>
                 </CardContent>
             </Card>
+            
+            <Card>
+                <CardHeader>
+                    <CardTitle className="flex items-center gap-2"><MessageSquareQuote /> Weekly One-Liner Notifications</CardTitle>
+                    <CardDescription>Send concise, impactful quotes from the sermon mid-week to keep the message top-of-mind.</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                    <div className="flex items-center space-x-4 rounded-md border p-4">
+                        <div className="flex-1 space-y-1">
+                            <Label htmlFor="one-liner-switch" className="text-base">Enable Weekly One-Liners</Label>
+                            <p className="text-sm text-muted-foreground">
+                            When enabled, automated messages will be sent for any sermon where one-liners are active.
+                            </p>
+                        </div>
+                        <Switch id="one-liner-switch" checked={settings.notifications.oneLiners.enabled} onCheckedChange={checked => handleSettingChange('notifications', { ...settings.notifications, oneLiners: { ...settings.notifications.oneLiners, enabled: checked } })} />
+                    </div>
+
+                    <div className="space-y-4">
+                        <Label className="font-semibold">Delivery Method</Label>
+                        <div className="flex items-start space-x-6">
+                            <div className="flex items-center space-x-2">
+                                <Checkbox id="email-delivery" checked={settings.notifications.oneLiners.sendByEmail} onCheckedChange={checked => handleSettingChange('notifications', { ...settings.notifications, oneLiners: { ...settings.notifications.oneLiners, sendByEmail: !!checked } })} />
+                                <Label htmlFor="email-delivery" className="flex items-center gap-2"><Mail /> Email</Label>
+                            </div>
+                             <div className="flex items-center space-x-2">
+                                <Checkbox id="sms-delivery" checked={settings.notifications.oneLiners.sendBySms} onCheckedChange={checked => handleSettingChange('notifications', { ...settings.notifications, oneLiners: { ...settings.notifications.oneLiners, sendBySms: !!checked } })}/>
+                                <Label htmlFor="sms-delivery" className="flex items-center gap-2"><Smartphone /> Text Message (SMS)</Label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="space-y-4">
+                        <Label className="font-semibold">Target Audience</Label>
+                        <RadioGroup value={settings.notifications.oneLiners.audience} onValueChange={value => handleSettingChange('notifications', { ...settings.notifications, oneLiners: { ...settings.notifications.oneLiners, audience: value as any } })}>
+                            <div className="flex items-center space-x-2">
+                                <RadioGroupItem value="all" id="r1" />
+                                <Label htmlFor="r1">All Users</Label>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                                <RadioGroupItem value="members_and_regulars" id="r2" />
+                                <Label htmlFor="r2">Members & Regular Attenders</Label>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                                <RadioGroupItem value="members_only" id="r3" />
+                                <Label htmlFor="r3">Members Only</Label>
+                            </div>
+                        </RadioGroup>
+                    </div>
+                </CardContent>
+            </Card>
 
             <Card>
                 <CardHeader>
@@ -152,7 +197,7 @@ export default function SettingsPage() {
                         <Checkbox 
                             id="odb" 
                             checked={settings.optionalServices.ourDailyBread}
-                            onCheckedChange={handleOdbChange}
+                            onCheckedChange={checked => handleSettingChange('optionalServices', { ...settings.optionalServices, ourDailyBread: !!checked })}
                         />
                         <Label htmlFor="odb" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
                            Our Daily Bread podcast
@@ -163,20 +208,20 @@ export default function SettingsPage() {
             
             <Card>
                 <CardHeader>
-                    <CardTitle>Notifications</CardTitle>
-                    <CardDescription>Manage email notifications for your congregation.</CardDescription>
+                    <CardTitle>Global Notification Settings</CardTitle>
+                    <CardDescription>Manage global email settings for your congregation.</CardDescription>
                 </CardHeader>
                 <CardContent>
                      <div className="flex items-center space-x-4 rounded-md border p-4">
                         <div className="flex-1 space-y-1">
                             <p className="text-sm font-medium leading-none">
-                            Suspend notifications during backfills
+                            Suspend all notifications during backfills
                             </p>
                             <p className="text-sm text-muted-foreground">
                             Temporarily pause all automated emails while you are uploading and processing a large number of past sermons.
                             </p>
                         </div>
-                        <Switch />
+                        <Switch checked={settings.notifications.suspendDuringBackfill} onCheckedChange={checked => handleSettingChange('notifications', { ...settings.notifications, suspendDuringBackfill: checked })} />
                     </div>
                 </CardContent>
             </Card>

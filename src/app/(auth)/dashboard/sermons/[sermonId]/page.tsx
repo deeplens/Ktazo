@@ -60,6 +60,8 @@ export default function SermonDetailPage() {
             language: langCode,
             summaryShort: generated.summaryShort,
             summaryLong: generated.summaryLong,
+            oneLiners: generated.oneLiners,
+            sendOneLiners: true, // Default to true
             devotionals: [
                 { day: 'Monday', content: generated.devotionals.monday },
                 { day: 'Tuesday', content: generated.devotionals.tuesday },
