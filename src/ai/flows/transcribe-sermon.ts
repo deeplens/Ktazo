@@ -57,7 +57,8 @@ const transcribeSermonFlow = ai.defineFlow(
       return { transcript };
     } catch (error) {
         console.error('[[ERROR]] in transcribeSermonFlow:', error);
-        throw new Error('Failed to transcribe sermon due to a server-side AI error.');
+        // Re-throwing the original error to provide more specific details to the client.
+        throw error;
     }
   }
 );
