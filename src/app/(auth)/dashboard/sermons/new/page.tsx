@@ -246,6 +246,20 @@ export default function NewSermonPage() {
     e.preventDefault();
     e.stopPropagation();
   };
+  
+  const isProcessButtonDisabled = () => {
+    if (isLoading || !speaker) return true;
+    switch (uploadType) {
+        case 'url':
+            return !sermonUrl;
+        case 'audio':
+            return !audioFile;
+        case 'text':
+            return !textFile;
+        default:
+            return true;
+    }
+  };
 
   return (
     <div className="max-w-4xl mx-auto">
@@ -451,13 +465,7 @@ export default function NewSermonPage() {
           </Button>
           <Button
             type="submit"
-            disabled={
-              isLoading ||
-              !speaker ||
-              (uploadType === 'audio' && !audioFile) ||
-              (uploadType === 'text' && !textFile) ||
-              (uploadType === 'url' && !sermonUrl)
-            }
+            disabled={isProcessButtonDisabled()}
           >
             {isLoading ? (
               <>
