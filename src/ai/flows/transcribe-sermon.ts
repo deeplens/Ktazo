@@ -11,6 +11,7 @@
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 import { getUrlContent } from '../tools/get-url-content';
+import { extractTranscriptFromYouTube } from '@/lib/youtube-utils';
 
 const TranscribeSermonInputSchema = z.object({
   sermonUrl: z
@@ -36,7 +37,7 @@ const transcriptionAgent = ai.definePrompt({
     prompt: `You are an expert transcription agent. Your goal is to get a transcript from the provided sermonUrl.
     
     1. First, use the getUrlContent tool to inspect the sermonUrl.
-    2. If the tool returns a media file (like audio or video), or if the URL is a known video platform like YouTube, you have the direct media URL.
+    2. If the tool returns a media file (like audio or video), you have the direct media URL.
     3. If the tool returns HTML content, you must find the audio download link within the HTML. Look for '<a>' tags with 'href' attributes pointing to '.mp3' files.
     4. Once you have the direct media URL (either from the start or by finding it in the HTML), your final output should be ONLY the following text:
     
@@ -64,6 +65,14 @@ const transcribeSermonFlow = ai.defineFlow(
     try {
       console.log('[[DEBUG]] Starting transcribeSermonFlow for URL:', sermonUrl);
       
+      // Check if it's a YouTube URL first
+      if (sermonUrl.includes('youtube.com/') || sermonUrl.includes('youtu.be/')) {
+        console.log('[[DEBUG]] YouTube URL detected. Using youtube-transcript library.');
+        const transcript = await extractTranscriptFromYouTube(sermonUrl);
+        return { transcript };
+      }
+
+      // If not YouTube, proceed with the agent-based flow
       const agentResponse = await transcriptionAgent({ sermonUrl });
       const agentText = agentResponse.text.trim();
 
