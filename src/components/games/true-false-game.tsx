@@ -16,7 +16,8 @@ interface TrueFalseGameProps {
 export function TrueFalseGame({ data }: TrueFalseGameProps) {
   const [gameState, setGameState] = useState<'ready' | 'playing' | 'finished'>('ready');
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [score, setScore] = useState(0);
+  const [correctScore, setCorrectScore] = useState(0);
+  const [incorrectScore, setIncorrectScore] = useState(0);
   const [timeLeft, setTimeLeft] = useState(60);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -36,7 +37,8 @@ export function TrueFalseGame({ data }: TrueFalseGameProps) {
 
   const startGame = () => {
     setCurrentQuestionIndex(0);
-    setScore(0);
+    setCorrectScore(0);
+    setIncorrectScore(0);
     setTimeLeft(60);
     setGameState('playing');
   };
@@ -45,7 +47,9 @@ export function TrueFalseGame({ data }: TrueFalseGameProps) {
     if (gameState !== 'playing') return;
 
     if (data[currentQuestionIndex].isTrue === answer) {
-      setScore(prev => prev + 1);
+      setCorrectScore(prev => prev + 1);
+    } else {
+      setIncorrectScore(prev => prev + 1);
     }
 
     if (currentQuestionIndex < data.length - 1) {
@@ -88,27 +92,40 @@ export function TrueFalseGame({ data }: TrueFalseGameProps) {
         return (
           <div className="text-center">
             <h2 className="text-xl font-semibold">Game Over!</h2>
-            <p className="text-4xl font-bold my-4">Your Score: {score}</p>
-            <p className="text-muted-foreground">You correctly answered {score} out of {data.length} questions.</p>
+            <div className="my-4">
+              <p className="text-4xl font-bold">Final Score: {correctScore}</p>
+              <div className="flex justify-center gap-6 mt-2 text-muted-foreground">
+                <p><span className="font-bold text-green-600">{correctScore}</span> Correct</p>
+                <p><span className="font-bold text-red-600">{incorrectScore}</span> Incorrect</p>
+              </div>
+            </div>
+            <p className="text-muted-foreground">You attempted {correctScore + incorrectScore} out of {data.length} questions.</p>
             <Button onClick={startGame} className="mt-6">Play Again</Button>
           </div>
         );
     }
   };
   
-  const progressPercentage = (currentQuestionIndex / data.length) * 100;
+  const progressPercentage = ((currentQuestionIndex + 1) / data.length) * 100;
 
   return (
     <Card className="w-full">
       <CardHeader>
         <CardTitle>True/False Challenge</CardTitle>
-        <div className="flex justify-between items-center pt-2">
-            <div className='flex items-center gap-2 text-lg font-semibold'>
+        <div className="flex justify-between items-center pt-2 text-lg font-semibold">
+            <div className='flex items-center gap-2'>
                 <Timer className="h-5 w-5" />
                 <span>{timeLeft}s</span>
             </div>
-            <div className='flex items-center gap-2 text-lg font-semibold'>
-                <span>Score: {score}</span>
+            <div className='flex items-center gap-4'>
+                <div className='flex items-center gap-1 text-green-600'>
+                    <Check className="h-5 w-5" />
+                    <span>{correctScore}</span>
+                </div>
+                <div className='flex items-center gap-1 text-red-600'>
+                    <X className="h-5 w-5" />
+                    <span>{incorrectScore}</span>
+                </div>
             </div>
         </div>
          <Progress value={progressPercentage} className="mt-2" />
