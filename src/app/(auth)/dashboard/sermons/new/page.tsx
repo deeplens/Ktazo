@@ -40,15 +40,16 @@ export default function NewSermonPage() {
 
   const fileToDataURI = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => {
-            if (typeof reader.result !== 'string') {
-                return reject(new Error('FileReader did not return a string.'));
-            }
-            resolve(reader.result);
-        };
-        reader.onerror = (error) => reject(error);
-        reader.readAsDataURL(file);
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        if (event.target && typeof event.target.result === 'string') {
+          resolve(event.target.result);
+        } else {
+          reject(new Error('Failed to read file as a data URI.'));
+        }
+      };
+      reader.onerror = (error) => reject(error);
+      reader.readAsDataURL(file);
     });
   };
 
@@ -526,3 +527,5 @@ export default function NewSermonPage() {
     </div>
   );
 }
+
+    
