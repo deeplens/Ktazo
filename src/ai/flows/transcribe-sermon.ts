@@ -12,9 +12,9 @@ import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 
 const TranscribeSermonInputSchema = z.object({
-  mp3Url: z
+  sermonUrl: z
     .string()
-    .describe("The URL of the sermon MP3 file.  Must be a data URI that must include a MIME type and use Base64 encoding. Expected format: 'data:<mimetype>;base64,<encoded_data>'."),
+    .describe("The URL of the sermon audio file. This can be a public URL or a data URI with Base64 encoding. Expected data URI format: 'data:<mimetype>;base64,<encoded_data>'."),
 });
 export type TranscribeSermonInput = z.infer<typeof TranscribeSermonInputSchema>;
 
@@ -34,7 +34,7 @@ const transcribeSermonPrompt = ai.definePrompt({
   prompt: `You are an expert transcriptionist specializing in transcribing sermons.
 
   You will use this information to transcribe the sermon to text.
-  Sermon MP3 URL: {{media url=mp3Url}}`,
+  Sermon Audio URL: {{media url=sermonUrl}}`,
 });
 
 const transcribeSermonFlow = ai.defineFlow(

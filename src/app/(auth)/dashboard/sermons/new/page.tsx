@@ -1,3 +1,4 @@
+
 'use client';
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -5,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { UploadCloud, Loader2, FileText, Sparkles } from "lucide-react";
+import { UploadCloud, Loader2, FileText, Sparkles, Link as LinkIcon } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { addSermon } from "@/lib/mock-data";
 import { transcribeSermon } from "@/ai/flows/transcribe-sermon";
@@ -18,6 +19,7 @@ export default function NewSermonPage() {
   const [series, setSeries] = useState('');
   const [speaker, setSpeaker] = useState('');
   const [date, setDate] = useState('');
+  const [sermonUrl, setSermonUrl] = useState('');
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const [audioBlobUrl, setAudioBlobUrl] = useState<string | null>(null);
   const [textFile, setTextFile] = useState<File | null>(null);
@@ -25,7 +27,7 @@ export default function NewSermonPage() {
   const [loadingMessage, setLoadingMessage] = useState('Transcribing...');
   const [transcript, setTranscript] = useState('');
   const [showTranscriptDialog, setShowTranscriptDialog] = useState(false);
-  const [uploadType, setUploadType] = useState<'audio' | 'text'>('audio');
+  const [uploadType, setUploadType] = useState<'url' | 'audio' | 'text'>('url');
   const router = useRouter();
   const { toast } = useToast();
 
@@ -71,7 +73,7 @@ export default function NewSermonPage() {
     }
   };
 
-  const handleConfirmSermon = (finalTranscript: string, source: 'audio' | 'text') => {
+  const handleConfirmSermon = (finalTranscript: string, sourceUrl: string) => {
     const newSermon = {
       id: `sermon-${Date.now()}`,
       tenantId: 'tenant-1',
@@ -79,7 +81,7 @@ export default function NewSermonPage() {
       series,
       speaker,
       date,
-      mp3Url: source === 'audio' && audioBlobUrl ? audioBlobUrl : '',
+      mp3Url: sourceUrl,
       transcript: finalTranscript,
       status: 'READY_FOR_REVIEW' as const,
       languages: ['en'],
@@ -111,7 +113,39 @@ export default function NewSermonPage() {
 
     setIsLoading(true);
 
-    if (uploadType === 'audio') {
+    if (uploadType === 'url') {
+        if (!sermonUrl) {
+            toast({
+              variant: 'destructive',
+              title: "Missing URL",
+              description: "Please provide a sermon URL.",
+            });
+            setIsLoading(false);
+            return;
+        }
+        try {
+            setLoadingMessage('Transcribing...');
+            const transcriptionResult = await transcribeSermon({ sermonUrl });
+            const currentTranscript = transcriptionResult.transcript;
+            setTranscript(currentTranscript);
+    
+            if (!title) {
+              setLoadingMessage('Suggesting title...');
+              const titleResult = await suggestSermonTitle({ transcript: currentTranscript });
+              setTitle(titleResult.suggestedTitle);
+            }
+    
+            setShowTranscriptDialog(true);
+        } catch (error) {
+            console.error("Transcription or Title Suggestion failed", error);
+            toast({
+              variant: 'destructive',
+              title: "Processing Failed",
+              description: (error as Error).message || "There was an error processing your URL. Please check if it's a valid audio link.",
+            });
+            setIsLoading(false);
+        }
+    } else if (uploadType === 'audio') {
       if (!audioFile) {
         toast({
           variant: 'destructive',
@@ -124,7 +158,7 @@ export default function NewSermonPage() {
       try {
         setLoadingMessage('Transcribing...');
         const audioDataUrl = await fileToDataURI(audioFile);
-        const transcriptionResult = await transcribeSermon({ mp3Url: audioDataUrl });
+        const transcriptionResult = await transcribeSermon({ sermonUrl: audioDataUrl });
         const currentTranscript = transcriptionResult.transcript;
         setTranscript(currentTranscript);
 
@@ -144,8 +178,7 @@ export default function NewSermonPage() {
         });
         setIsLoading(false);
       }
-    } else {
-      // Text tab
+    } else { // Text tab
       if (!textFile) {
         toast({
           variant: 'destructive',
@@ -219,7 +252,7 @@ export default function NewSermonPage() {
       <div>
         <h1 className="text-3xl font-bold tracking-tight font-headline">Upload New Sermon</h1>
         <p className="text-muted-foreground">
-          Add a new sermon to your congregation&apos;s library by uploading an audio or transcript file.
+          Add a new sermon to your congregation&apos;s library by providing a URL or uploading a file.
         </p>
       </div>
 
@@ -286,7 +319,16 @@ export default function NewSermonPage() {
 
             <div className="space-y-4 pt-2">
               <Label>Sermon Source</Label>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-3 gap-2">
+                <Button
+                  type="button"
+                  variant={uploadType === 'url' ? 'default' : 'outline'}
+                  onClick={() => setUploadType('url')}
+                  disabled={isLoading}
+                >
+                  <LinkIcon className="mr-2 h-4 w-4" />
+                  URL
+                </Button>
                 <Button
                   type="button"
                   variant={uploadType === 'audio' ? 'default' : 'outline'}
@@ -294,7 +336,7 @@ export default function NewSermonPage() {
                   disabled={isLoading}
                 >
                   <UploadCloud className="mr-2 h-4 w-4" />
-                  Upload Audio
+                  Audio File
                 </Button>
                 <Button
                   type="button"
@@ -303,11 +345,24 @@ export default function NewSermonPage() {
                   disabled={isLoading}
                 >
                   <FileText className="mr-2 h-4 w-4" />
-                  Upload Transcript
+                  Transcript
                 </Button>
               </div>
 
-              {uploadType === 'audio' ? (
+              {uploadType === 'url' && (
+                 <div className="space-y-2">
+                    <Label htmlFor="sermon-url">Sermon Audio URL</Label>
+                    <Input 
+                        id="sermon-url"
+                        placeholder="https://example.com/sermon.mp3"
+                        value={sermonUrl}
+                        onChange={(e) => setSermonUrl(e.target.value)}
+                        disabled={isLoading}
+                    />
+                 </div>
+              )}
+
+              {uploadType === 'audio' && (
                 <div className="space-y-2">
                   <Label htmlFor="audio-file">Audio File (MP3)</Label>
                   <div className="flex items-center justify-center w-full">
@@ -349,7 +404,9 @@ export default function NewSermonPage() {
                     </div>
                   )}
                 </div>
-              ) : (
+              )}
+
+              {uploadType === 'text' && (
                 <div className="space-y-2">
                   <Label htmlFor="text-file">Transcript File</Label>
                   <div className="flex items-center justify-center w-full">
@@ -398,7 +455,8 @@ export default function NewSermonPage() {
               isLoading ||
               !speaker ||
               (uploadType === 'audio' && !audioFile) ||
-              (uploadType === 'text' && !textFile)
+              (uploadType === 'text' && !textFile) ||
+              (uploadType === 'url' && !sermonUrl)
             }
           >
             {isLoading ? (
@@ -407,7 +465,7 @@ export default function NewSermonPage() {
                 {loadingMessage}
               </>
             ) : (
-              uploadType === 'audio' ? 'Upload and Process' : 'Add Sermon'
+              'Process Sermon'
             )}
           </Button>
         </CardFooter>
@@ -443,7 +501,10 @@ export default function NewSermonPage() {
             >
               Cancel
             </Button>
-            <AlertDialogAction onClick={() => handleConfirmSermon(transcript, uploadType)}>
+            <AlertDialogAction onClick={() => {
+                const sourceUrl = uploadType === 'url' ? sermonUrl : (uploadType === 'audio' && audioBlobUrl ? audioBlobUrl : '');
+                handleConfirmSermon(transcript, sourceUrl);
+            }}>
               Confirm and Add Sermon
             </AlertDialogAction>
           </AlertDialogFooter>
