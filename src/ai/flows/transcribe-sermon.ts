@@ -65,6 +65,18 @@ const transcribeSermonFlow = ai.defineFlow(
     try {
       console.log('[[DEBUG]] Starting transcribeSermonFlow for URL:', sermonUrl);
       
+      // If it's a data URI, transcribe it directly.
+      if (sermonUrl.startsWith('data:')) {
+          console.log('[[DEBUG]] Data URI detected. Transcribing directly.');
+          const transcriptionResponse = await transcribeFinalMediaPrompt({ mediaUrl: sermonUrl });
+          const transcript = transcriptionResponse.text;
+          if (!transcript) {
+              throw new Error('AI transcription failed: No text was returned from the model for the data URI.');
+          }
+          console.log('[[DEBUG]] Finishing transcribeSermonFlow for data URI.');
+          return { transcript };
+      }
+
       // Check if it's a YouTube URL first
       if (sermonUrl.includes('youtube.com/') || sermonUrl.includes('youtu.be/')) {
         console.log('[[DEBUG]] YouTube URL detected. Attempting to use youtube-transcript library.');
