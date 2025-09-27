@@ -18,6 +18,7 @@ import { GamePlayer } from "@/components/games/game-player";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/lib/auth";
 import { MemoryVerseCard } from "@/components/sermons/memory-verse-card";
+import { PrayerWall } from "@/components/sermons/prayer-wall";
 
 export default function WeeklyPage() {
   const params = useParams();
@@ -375,6 +376,8 @@ function WeeklyPageContent({ sermon, weeklyContent, answers, setAnswers, availab
               <Button onClick={handleSaveAnswers}>Save Answers</Button>
           </CardFooter>
       </Card>
+
+      <PrayerWall sermonId={sermon.id} />
     </div>
   );
 }

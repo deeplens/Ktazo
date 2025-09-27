@@ -165,4 +165,14 @@ export interface Missionary {
     summary: string;
     prayerRequests: string[];
 }
+
+export interface PrayerRequest {
+    id: string;
+    userId: string;
+    userName: string;
+    userPhotoUrl?: string;
+    sermonId: string;
+    requestText: string;
+    createdAt: string;
+}
     

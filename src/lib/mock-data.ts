@@ -1,14 +1,14 @@
 
 
-import type { Sermon, User, WeeklyContent, ReflectionAnswer, TenantSettings } from './types';
+import type { Sermon, User, WeeklyContent, ReflectionAnswer, TenantSettings, PrayerRequest } from './types';
 
 export const mockUsers: User[] = [
   { id: 'user-master-1', tenantId: 'tenant-1', authId: 'auth-master-1', role: 'MASTER', name: 'Master User', email: 'master@ktazo.com', lastLoginAt: new Date().toISOString(), points: 0 },
   { id: 'user-admin-1', tenantId: 'tenant-1', authId: 'auth-admin-1', role: 'ADMIN', name: 'Admin User', email: 'admin@ktazo.com', lastLoginAt: new Date().toISOString(), points: 120 },
   { id: 'user-pastor-1', tenantId: 'tenant-1', authId: 'auth-pastor-1', role: 'PASTOR', name: 'Pastor User', email: 'pastor@ktazo.com', lastLoginAt: new Date().toISOString(), points: 50 },
   { id: 'user-member-1', tenantId: 'tenant-1', authId: 'auth-member-1', role: 'MEMBER', name: 'Member User 1', email: 'member1@ktazo.com', lastLoginAt: new Date().toISOString(), points: 800 },
-  { id: 'user-member-2', tenantId: 'tenant-1', authId: 'auth-member-2', role: 'MEMBER', name: 'Member User 2', email: 'member2@ktazo.com', lastLoginAt: new Date(Date.now() - 86400000 * 2).toISOString(), points: 450 },
-  { id: 'user-member-3', tenantId: 'tenant-1', authId: 'auth-member-3', role: 'MEMBER', name: 'Member User 3', email: 'member3@ktazo.com', lastLoginAt: new Date(Date.now() - 86400000 * 5).toISOString(), points: 210 },
+  { id: 'user-member-2', tenantId: 'tenant-1', authId: 'auth-member-2', role: 'MEMBER', name: 'Member User 2', email: 'member2@ktazo.com', lastLoginAt: new Date(Date.now() - 86400000 * 2).toISOString(), points: 450, photoUrl: 'https://avatar.vercel.sh/member2@ktazo.com.png' },
+  { id: 'user-member-3', tenantId: 'tenant-1', authId: 'auth-member-3', role: 'MEMBER', name: 'Member User 3', email: 'member3@ktazo.com', lastLoginAt: new Date(Date.now() - 86400000 * 5).toISOString(), points: 210, photoUrl: 'https://avatar.vercel.sh/member3@ktazo.com.png' },
 ];
 
 const initialSermons: Sermon[] = [
@@ -663,6 +663,83 @@ export const saveTenantSettings = (tenantId: string, settings: TenantSettings) =
   }
 };
 
+const PRAYER_REQUESTS_KEY = 'ktazo-prayer-requests';
+const initialPrayerRequests: PrayerRequest[] = [
+    {
+        id: 'pr-1',
+        userId: 'user-member-2',
+        userName: 'Member User 2',
+        userPhotoUrl: 'https://avatar.vercel.sh/member2@ktazo.com.png',
+        sermonId: 'sermon-1',
+        requestText: 'Please pray for my family as we navigate a difficult season. We need wisdom and peace.',
+        createdAt: new Date(Date.now() - 86400000 * 1).toISOString(),
+    },
+    {
+        id: 'pr-2',
+        userId: 'user-member-3',
+        userName: 'Member User 3',
+        userPhotoUrl: 'https://avatar.vercel.sh/member3@ktazo.com.png',
+        sermonId: 'sermon-1',
+        requestText: 'Pray for my upcoming job interview, that God would give me favor and clarity on His will for my career.',
+        createdAt: new Date(Date.now() - 86400000 * 2).toISOString(),
+    }
+];
+
+export const getMockPrayerRequests = (): PrayerRequest[] => {
+    if (typeof window !== 'undefined') {
+        const stored = sessionStorage.getItem(PRAYER_REQUESTS_KEY);
+        if (stored) {
+            try {
+                return JSON.parse(stored);
+            } catch (e) {
+                return initialPrayerRequests;
+            }
+        } else {
+            sessionStorage.setItem(PRAYER_REQUESTS_KEY, JSON.stringify(initialPrayerRequests));
+            return initialPrayerRequests;
+        }
+    }
+    return initialPrayerRequests;
+}
+
+export const getPrayerRequestsForSermon = (sermonId: string): PrayerRequest[] => {
+    return getMockPrayerRequests()
+        .filter(pr => pr.sermonId === sermonId)
+        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+}
+
+export const addPrayerRequest = (request: Omit<PrayerRequest, 'id' | 'createdAt'>) => {
+    if (typeof window !== 'undefined') {
+        const allRequests = getMockPrayerRequests();
+        const newRequest: PrayerRequest = {
+            ...request,
+            id: `pr-${Date.now()}`,
+            createdAt: new Date().toISOString(),
+        };
+        const updatedRequests = [...allRequests, newRequest];
+        sessionStorage.setItem(PRAYER_REQUESTS_KEY, JSON.stringify(updatedRequests));
+        return newRequest;
+    }
+    return null;
+}
+
+export const updatePrayerRequest = (requestId: string, requestText: string) => {
+     if (typeof window !== 'undefined') {
+        const allRequests = getMockPrayerRequests();
+        const updatedRequests = allRequests.map(pr => 
+            pr.id === requestId ? { ...pr, requestText } : pr
+        );
+        sessionStorage.setItem(PRAYER_REQUESTS_KEY, JSON.stringify(updatedRequests));
+    }
+}
+
+export const deletePrayerRequest = (requestId: string) => {
+    if (typeof window !== 'undefined') {
+        const allRequests = getMockPrayerRequests();
+        const updatedRequests = allRequests.filter(pr => pr.id !== requestId);
+        sessionStorage.setItem(PRAYER_REQUESTS_KEY, JSON.stringify(updatedRequests));
+    }
+}
 
 // For initial load, we still need this export for components that use it directly
 export const mockWeeklyContent = getMockWeeklyContent();
