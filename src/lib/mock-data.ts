@@ -345,7 +345,7 @@ const initialWeeklyContent: WeeklyContent[] = [
         ],
         spiritualPractices: [
             { "title": "Practice Gratitude", "description": "Keep a journal for a week. Each day, write down three specific things you are thankful for, reflecting on God's provision in your life." },
-            { "title": "Practice Hospitality", "description": "Prepare a 'table' for someone this week. Invite a neighbor, coworker, or friend for a meal, coffee, or a simple conversation, showing them unexpected kindness." },
+            { "title": "Practice Hospitality", "description": "Prepare a 'table' for someone this week. Invite a neighbor, coworker, or a friend for a meal, coffee, or a simple conversation, showing them unexpected kindness." },
             { "title": "Find Your 'Green Pasture'", "description": "Intentionally schedule 20 minutes of uninterrupted quiet time this week. Go to a park, a quiet room, or any place you can be still and rest in God's presence without distractions." }
         ],
         outwardFocus: {

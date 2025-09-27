@@ -68,6 +68,8 @@ export default function WeeklyPage() {
         language: 'en',
         summaryShort: 'Summary not available.',
         summaryLong: 'Devotional guide not available.',
+        oneLiners: { tuesday: '', thursday: '' },
+        sendOneLiners: false,
         devotionals: [],
         reflectionQuestions: [],
         games: [],
