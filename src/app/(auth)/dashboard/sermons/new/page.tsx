@@ -118,100 +118,65 @@ export default function NewSermonPage() {
     }
 
     setIsLoading(true);
+    let sourceForSermon = '';
+    let transcriptSource = '';
 
-    if (uploadType === 'url') {
-        if (!sermonUrl) {
-            toast({
-              variant: 'destructive',
-              title: "Missing URL",
-              description: "Please provide a sermon URL.",
-            });
-            setIsLoading(false);
-            return;
-        }
-        try {
-            setLoadingMessage('Transcribing...');
-            const transcriptionResult = await transcribeSermon({ sermonUrl });
-            const currentTranscript = transcriptionResult.transcript;
-            setTranscript(currentTranscript);
-    
-            if (!title) {
-              setLoadingMessage('Suggesting title...');
-              const titleResult = await suggestSermonTitle({ transcript: currentTranscript });
-              setTitle(titleResult.suggestedTitle);
+    try {
+        if (uploadType === 'url') {
+            if (!sermonUrl) {
+                toast({ variant: 'destructive', title: "Missing URL", description: "Please provide a sermon URL." });
+                setIsLoading(false);
+                return;
             }
-    
+            sourceForSermon = sermonUrl;
+            transcriptSource = sermonUrl;
+        } else if (uploadType === 'audio') {
+            if (!audioFile) {
+                toast({ variant: 'destructive', title: "Missing File", description: "Please select an MP3 file to upload." });
+                setIsLoading(false);
+                return;
+            }
+            const audioDataUrl = await fileToDataURI(audioFile);
+            sourceForSermon = audioBlobUrl || audioDataUrl; // Use blob for playback, data for processing
+            transcriptSource = audioDataUrl;
+        } else { // Text tab
+            if (!textFile) {
+                toast({ variant: 'destructive', title: "Missing Transcript File", description: "Please upload a text file for the transcript." });
+                setIsLoading(false);
+                return;
+            }
+            const textContent = await fileToText(textFile);
+            setTranscript(textContent);
+            setLoadingMessage('Suggesting title...');
+            if (!title) {
+                const titleResult = await suggestSermonTitle({ transcript: textContent });
+                setTitle(titleResult.suggestedTitle);
+            }
             setShowTranscriptDialog(true);
-        } catch (error) {
-            console.error("Transcription or Title Suggestion failed", error);
-            toast({
-              variant: 'destructive',
-              title: "Processing Failed",
-              description: (error as Error).message || "There was an error processing your URL. Please check if it's a valid audio link.",
-            });
-            setIsLoading(false);
+            return; // Skip transcription
         }
-    } else if (uploadType === 'audio') {
-      if (!audioFile) {
-        toast({
-          variant: 'destructive',
-          title: "Missing File",
-          description: "Please select an MP3 file to upload.",
-        });
-        setIsLoading(false);
-        return;
-      }
-      try {
+
         setLoadingMessage('Transcribing...');
-        const audioDataUrl = await fileToDataURI(audioFile);
-        const transcriptionResult = await transcribeSermon({ sermonUrl: audioDataUrl });
+        const transcriptionResult = await transcribeSermon({ sermonUrl: transcriptSource });
         const currentTranscript = transcriptionResult.transcript;
         setTranscript(currentTranscript);
 
         if (!title) {
-          setLoadingMessage('Suggesting title...');
-          const titleResult = await suggestSermonTitle({ transcript: currentTranscript });
-          setTitle(titleResult.suggestedTitle);
+            setLoadingMessage('Suggesting title...');
+            const titleResult = await suggestSermonTitle({ transcript: currentTranscript });
+            setTitle(titleResult.suggestedTitle);
         }
 
         setShowTranscriptDialog(true);
-      } catch (error) {
-        console.error("Transcription or Title Suggestion failed", error);
+
+    } catch (error) {
+        console.error("Processing failed", error);
         toast({
-          variant: 'destructive',
-          title: "Processing Failed",
-          description: (error as Error).message || "There was an error processing your audio file. Please try again.",
+            variant: 'destructive',
+            title: "Processing Failed",
+            description: (error as Error).message || "An unexpected error occurred.",
         });
         setIsLoading(false);
-      }
-    } else { // Text tab
-      if (!textFile) {
-        toast({
-          variant: 'destructive',
-          title: "Missing Transcript File",
-          description: "Please upload a text file for the transcript.",
-        });
-        setIsLoading(false);
-        return;
-      }
-      try {
-        const textContent = await fileToText(textFile);
-        setTranscript(textContent);
-        if (!title) {
-          setLoadingMessage('Suggesting title...');
-          const titleResult = await suggestSermonTitle({ transcript: textContent });
-          setTitle(titleResult.suggestedTitle);
-        }
-        setShowTranscriptDialog(true);
-      } catch (error) {
-        console.error("File read or Title Suggestion failed", error);
-        toast({
-          variant: 'destructive',
-          title: "Processing Failed",
-          description: (error as Error).message || "There was an error processing the transcript file.",
-        });
-        setIsLoading(false);
-      }
     }
   };
 
@@ -254,10 +219,11 @@ export default function NewSermonPage() {
   };
   
   const isProcessButtonDisabled = () => {
-    if (isLoading || !speaker) return true;
+    if (isLoading) return true;
+    if (!speaker.trim()) return true;
     switch (uploadType) {
         case 'url':
-            return !sermonUrl;
+            return !sermonUrl.trim();
         case 'audio':
             return !audioFile;
         case 'text':
@@ -374,7 +340,7 @@ export default function NewSermonPage() {
                     <Label htmlFor="sermon-url">Sermon Audio URL</Label>
                     <Input 
                         id="sermon-url"
-                        placeholder="https://example.com/sermon.mp3"
+                        placeholder="https://example.com/sermon.mp3 or YouTube URL"
                         value={sermonUrl}
                         onChange={(e) => setSermonUrl(e.target.value)}
                         disabled={isLoading}
@@ -527,5 +493,7 @@ export default function NewSermonPage() {
     </div>
   );
 }
+
+    
 
     
