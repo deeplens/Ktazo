@@ -3,10 +3,11 @@
 
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Bookmark, BrainCircuit } from "lucide-react";
+import { Bookmark, BrainCircuit, Building } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "../ui/dialog";
 import { GamePlayer } from "../games/game-player";
 import { Game } from "@/lib/types";
+import { VerseMemoryBuilderGame } from "../games/verse-memory-builder";
 
 interface MemoryVerseCardProps {
     verse: string;
@@ -29,7 +30,7 @@ export function MemoryVerseCard({ verse, reference, game }: MemoryVerseCardProps
           <footer className="text-sm text-muted-foreground">{reference}</footer>
         </blockquote>
       </CardContent>
-      <CardFooter>
+      <CardFooter className="grid grid-cols-2 gap-2">
         <Dialog>
           <DialogTrigger asChild>
             <Button variant="secondary" className="w-full">
@@ -44,6 +45,21 @@ export function MemoryVerseCard({ verse, reference, game }: MemoryVerseCardProps
               </DialogHeader>
               <GamePlayer game={game} />
           </DialogContent>
+        </Dialog>
+        <Dialog>
+            <DialogTrigger asChild>
+                <Button variant="secondary" className="w-full">
+                    <Building className="mr-2 h-4 w-4" />
+                    Memory Builder
+                </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-4xl">
+                <DialogHeader>
+                    <DialogTitle>Verse Memory Builder</DialogTitle>
+                    <DialogDescription>Gradually recall the verse from memory.</DialogDescription>
+                </DialogHeader>
+                <VerseMemoryBuilderGame verse={verse} reference={reference} />
+            </DialogContent>
         </Dialog>
       </CardFooter>
     </Card>
