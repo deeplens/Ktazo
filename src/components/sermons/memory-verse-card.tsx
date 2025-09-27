@@ -30,7 +30,7 @@ export function MemoryVerseCard({ verse, reference, game }: MemoryVerseCardProps
           <footer className="text-sm text-muted-foreground">{reference}</footer>
         </blockquote>
       </CardContent>
-      <CardFooter className="grid grid-cols-2 gap-2">
+      <CardFooter className="grid gap-2">
         <Dialog>
           <DialogTrigger asChild>
             <Button variant="secondary" className="w-full">
