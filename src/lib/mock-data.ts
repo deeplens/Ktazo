@@ -345,6 +345,33 @@ const initialWeeklyContent: WeeklyContent[] = [
                     { id: 3, term: 'Anoints my head', definition: 'With oil' },
                     { id: 4, term: 'Dwell in the house', definition: 'Of the Lord forever' },
                 ]
+            },
+            {
+                type: 'True/False',
+                title: 'Timed True/False',
+                audience: 'Adults',
+                data: [
+                    { statement: 'The psalmist says he will want for many things.', isTrue: false },
+                    { statement: 'God prepares a table in the presence of enemies.', isTrue: true },
+                    { statement: 'The psalmist fears evil in the dark valley.', isTrue: false },
+                    { statement: 'The sermon was about the story of David and Goliath.', isTrue: false },
+                    { statement: 'A shepherd\'s staff is used for guidance.', isTrue: true },
+                    { statement: 'The psalmist\'s cup is empty.', isTrue: false },
+                    { statement: 'Goodness and mercy follow the psalmist.', isTrue: true },
+                    { statement: 'The psalm is primarily about self-reliance.', isTrue: false },
+                    { statement: 'The Lord restores the psalmist\'s soul.', isTrue: true },
+                    { statement: 'The setting of the psalm is a bustling city.', isTrue: false },
+                    { statement: 'The psalmist will dwell in the house of the Lord temporarily.', isTrue: false },
+                    { statement: 'The head is anointed with water.', isTrue: false },
+                    { statement: 'The speaker of the psalm feels alone.', isTrue: false },
+                    { statement: 'Still waters represent chaos.', isTrue: false },
+                    { statement: 'Righteousness is a key theme.', isTrue: true },
+                    { statement: 'This psalm is found in the book of Proverbs.', isTrue: false },
+                    { statement: 'The "rod" is for protection.', isTrue: true },
+                    { statement: 'The psalm expresses a feeling of deep trust.', isTrue: true },
+                    { statement: 'The psalmist is led on crooked paths.', isTrue: false },
+                    { statement: 'The main figure is a shepherd.', isTrue: true },
+                ]
             }
         ],
         bibleReadingPlan: [
