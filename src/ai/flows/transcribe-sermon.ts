@@ -67,12 +67,20 @@ const transcribeSermonFlow = ai.defineFlow(
       
       // Check if it's a YouTube URL first
       if (sermonUrl.includes('youtube.com/') || sermonUrl.includes('youtu.be/')) {
-        console.log('[[DEBUG]] YouTube URL detected. Using youtube-transcript library.');
-        const transcript = await extractTranscriptFromYouTube(sermonUrl);
-        return { transcript };
+        console.log('[[DEBUG]] YouTube URL detected. Attempting to use youtube-transcript library.');
+        try {
+            const transcript = await extractTranscriptFromYouTube(sermonUrl);
+            console.log('[[DEBUG]] Successfully extracted transcript from YouTube library.');
+            return { transcript };
+        } catch (youtubeError) {
+             // If transcripts are disabled, youtube-transcript throws an error.
+             // We catch it and fall back to the agent-based method.
+             console.warn('[[WARN]] YouTube transcript library failed. Error:', (youtubeError as Error).message);
+             console.log('[[DEBUG]] Falling back to agent-based transcription for YouTube URL.');
+        }
       }
 
-      // If not YouTube, proceed with the agent-based flow
+      // Fallback for non-YouTube URLs or if YouTube library fails
       const agentResponse = await transcriptionAgent({ sermonUrl });
       const agentText = agentResponse.text.trim();
 
