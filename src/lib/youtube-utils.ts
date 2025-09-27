@@ -30,6 +30,7 @@ export async function extractTranscriptFromYouTube(youtubeUrl: string): Promise<
             throw new Error("Could not retrieve transcript because subtitles are disabled for this video.");
         }
         
-        throw new Error("An unexpected error occurred while fetching the YouTube transcript.");
+        // Re-throw the original error to get more specific details on the client.
+        throw error;
     }
 }
