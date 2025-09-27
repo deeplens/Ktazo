@@ -272,6 +272,19 @@ function WeeklyPageContent({ sermon, weeklyContent, answers, setAnswers, availab
                     </Button>
                 </CardContent>
             </Card>
+            <Card>
+                <CardHeader>
+                    <CardTitle className="font-headline flex items-center gap-2"><HeartHandshake /> Prayer Requests</CardTitle>
+                    <CardDescription>Join our community in prayer. View requests or share your own.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <Button asChild className="w-full">
+                        <a href="#prayer-wall">
+                            Go to Prayer Wall
+                        </a>
+                    </Button>
+                </CardContent>
+            </Card>
         </div>
       </div>
 
