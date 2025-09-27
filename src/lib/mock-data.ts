@@ -324,6 +324,27 @@ const initialWeeklyContent: WeeklyContent[] = [
                 data: {
                     word: 'GRACE'
                 }
+            },
+            {
+                type: 'Quiz',
+                title: 'Psalm 23 Quiz',
+                audience: 'Youth',
+                data: [
+                    { question: 'What does the shepherd use to comfort the sheep?', options: ['A hug', 'A song', 'A rod and staff', 'A blanket'], correctAnswer: 'A rod and staff' },
+                    { question: 'What does the psalmist say "shall not want" mean?', options: ['He will have no desires', 'He will have everything he needs', 'He will not be wanted by others', 'He will not want to leave'], correctAnswer: 'He will have everything he needs' },
+                    { question: 'Where does the Lord lead the psalmist?', options: ['Through a desert', 'To a big city', 'Beside still waters', 'Over a mountain'], correctAnswer: 'Beside still waters' },
+                ]
+            },
+            {
+                type: 'Matching',
+                title: 'Feelings and Actions',
+                audience: 'Youth',
+                data: [
+                    { id: 1, term: 'Fear no evil', definition: 'Because God is with me' },
+                    { id: 2, term: 'Lie down', definition: 'In green pastures' },
+                    { id: 3, term: 'Anoints my head', definition: 'With oil' },
+                    { id: 4, term: 'Dwell in the house', definition: 'Of the Lord forever' },
+                ]
             }
         ],
         bibleReadingPlan: [
