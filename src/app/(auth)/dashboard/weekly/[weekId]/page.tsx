@@ -1,5 +1,4 @@
 
-
 'use client';
 import { notFound, useParams } from "next/navigation";
 import Image from "next/image";
@@ -7,7 +6,7 @@ import { getMockSermons, getMockWeeklyContent, getAnswersForSermon, saveAnswersF
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
-import { Gamepad2, Headphones, MessageCircleQuestion, Users, User, HeartHandshake, MessageSquare, MicVocal, Languages, BookOpen, HandHeart, Sparkles, Globe, Target, Briefcase } from "lucide-react";
+import { Gamepad2, Headphones, MessageCircleQuestion, Users, User, HeartHandshake, MessageSquare, MicVocal, Languages, BookOpen, HandHeart, Sparkles, Globe, Target, Briefcase, Flower } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Sermon, WeeklyContent, Game, VerseScrambleItem, BibleReadingPlanItem, SpiritualPractice, OutwardFocusItem } from "@/lib/types";
@@ -285,6 +284,17 @@ function WeeklyPageContent({ sermon, weeklyContent, answers, setAnswers, availab
                     </Button>
                 </CardContent>
             </Card>
+            <Card>
+                <CardHeader>
+                    <CardTitle className="font-headline flex items-center gap-2"><Flower /> Self-Assessment</CardTitle>
+                    <CardDescription>Reflect on your spiritual growth and well-being.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <Button className="w-full" disabled>
+                        Flourishing
+                    </Button>
+                </CardContent>
+            </Card>
         </div>
       </div>
 
@@ -394,3 +404,5 @@ function WeeklyPageContent({ sermon, weeklyContent, answers, setAnswers, availab
     </div>
   );
 }
+
+    
