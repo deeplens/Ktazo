@@ -10,6 +10,7 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
+import { getUrlContent } from '../tools/get-url-content';
 
 const TranscribeSermonInputSchema = z.object({
   sermonUrl: z
@@ -27,15 +28,31 @@ export async function transcribeSermon(input: TranscribeSermonInput): Promise<Tr
   return transcribeSermonFlow(input);
 }
 
-const transcribeSermonPrompt = ai.definePrompt({
-  name: 'transcribeSermonPrompt',
-  input: {schema: TranscribeSermonInputSchema},
-  output: {format: 'text'},
-  prompt: `You are an expert transcriptionist specializing in transcribing sermons.
-
-  You will use this information to transcribe the sermon to text.
-  Sermon Audio/Video URL: {{media url=sermonUrl}}`,
+const transcriptionAgent = ai.definePrompt({
+    name: 'transcriptionAgent',
+    input: { schema: z.object({ sermonUrl: z.string() }) },
+    output: { format: 'text' },
+    tools: [getUrlContent],
+    prompt: `You are an expert transcription agent. Your goal is to get a transcript from the provided sermonUrl.
+    
+    1. First, use the getUrlContent tool to inspect the sermonUrl.
+    2. If the tool returns a media file (like audio or video), or if the URL is a known video platform like YouTube, you have the direct media URL.
+    3. If the tool returns HTML content, you must find the audio download link within the HTML. Look for '<a>' tags with 'href' attributes pointing to '.mp3' files.
+    4. Once you have the direct media URL (either from the start or by finding it in the HTML), your final output should be ONLY the following text:
+    
+    MEDIA_URL::[the direct media url]
+    
+    Do not add any other text, explanation, or formatting.
+    `,
 });
+
+const transcribeFinalMediaPrompt = ai.definePrompt({
+    name: 'transcribeFinalMediaPrompt',
+    input: { schema: z.object({ mediaUrl: z.string() }) },
+    output: { format: 'text' },
+    prompt: 'Transcribe the following audio: {{media url=mediaUrl}}',
+});
+
 
 const transcribeSermonFlow = ai.defineFlow(
   {
@@ -43,11 +60,27 @@ const transcribeSermonFlow = ai.defineFlow(
     inputSchema: TranscribeSermonInputSchema,
     outputSchema: TranscribeSermonOutputSchema,
   },
-  async input => {
+  async ({ sermonUrl }) => {
     try {
-      console.log('[[DEBUG]] Starting transcribeSermonFlow');
-      const response = await transcribeSermonPrompt(input);
-      const transcript = response.text;
+      console.log('[[DEBUG]] Starting transcribeSermonFlow for URL:', sermonUrl);
+      
+      const agentResponse = await transcriptionAgent({ sermonUrl });
+      const agentText = agentResponse.text.trim();
+
+      let mediaUrl;
+      if (agentText.startsWith('MEDIA_URL::')) {
+          mediaUrl = agentText.substring('MEDIA_URL::'.length);
+      } else {
+          // If the agent fails to find the URL, it might be a direct link it didn't use the tool for.
+          // We'll try to use the original URL as a fallback.
+          console.warn('[[WARN]] Transcription agent did not return a media URL. Falling back to original URL.');
+          mediaUrl = sermonUrl;
+      }
+
+      console.log('[[DEBUG]] Final media URL for transcription:', mediaUrl);
+
+      const transcriptionResponse = await transcribeFinalMediaPrompt({ mediaUrl });
+      const transcript = transcriptionResponse.text;
 
       if (!transcript) {
         throw new Error('AI transcription failed: No text was returned from the model.');
