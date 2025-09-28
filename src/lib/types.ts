@@ -1,6 +1,7 @@
 
 
 
+
 export type UserRole = 'MASTER' | 'ADMIN' | 'PASTOR' | 'MEMBER';
 
 export interface User {
@@ -93,7 +94,7 @@ export interface TrueFalseQuestion {
 }
 
 export interface Game {
-    type: 'Quiz' | 'Word Search' | 'Fill in the Blank' | 'Matching' | 'Word Guess' | 'Wordle' | 'Jeopardy' | 'Verse Scramble' | 'True/False' | 'Word Cloud Hunt';
+    type: 'Quiz' | 'Word Search' | 'Fill in the Blank' | 'Matching' | 'Word Guess' | 'Wordle' | 'Jeopardy' | 'Verse Scramble' | 'True/False' | 'Word Cloud Hunt' | 'Reflection Roulette';
     title: string;
     audience: 'Youth' | 'Adults';
     data: GameQuestion[] | { words: string[] } | FillInTheBlankItem[] | MatchingGameItem[] | WordGuessItem[] | WordleItem | JeopardyCategory[] | VerseScrambleItem | TrueFalseQuestion[] | {};
@@ -176,6 +177,5 @@ export interface PrayerRequest {
     requestText: string;
     createdAt: string;
 }
-    
 
     
