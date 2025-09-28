@@ -211,11 +211,25 @@ const generateWeeklyContentFlow = ai.defineFlow(
 
         console.log('[[DEBUG]] Finishing generateWeeklyContentFlow.');
         return validatedOutput;
-    } catch (error) {
+    } catch (error: any) {
         console.error('[[ERROR]] in generateWeeklyContentFlow:', error);
-        // Re-throwing the error to be handled by the calling Server Action and the client.
-        // This ensures the client is aware of the failure.
-        throw error;
+        
+        // Create a more specific and serializable error message.
+        // This helps prevent generic "unexpected response" errors on the client.
+        const errorMessage = error.message || 'An unknown error occurred during content generation.';
+        let finalMessage = 'AI content generation failed. ';
+
+        if (error.constructor.name === 'ZodError') {
+             finalMessage += 'The AI returned data in an unexpected format. Please try again.';
+        } else if (errorMessage.includes('400 Bad Request')) {
+             finalMessage += 'The AI model received a malformed request. Please check the inputs and try again.';
+        } else if (errorMessage.includes('500') || errorMessage.includes('503')) {
+             finalMessage += 'The AI service is temporarily unavailable. Please try again in a few moments.';
+        } else {
+            finalMessage += errorMessage;
+        }
+
+        throw new Error(finalMessage);
     }
   }
 );
