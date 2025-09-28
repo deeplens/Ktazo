@@ -82,19 +82,7 @@ const GameSchema = z.object({
     type: z.enum(['Quiz', 'Word Search', 'Fill in the Blank', 'Matching', 'Word Guess', 'Wordle', 'Jeopardy', 'Verse Scramble', 'True/False', 'Word Cloud Hunt', 'Two Truths and a Lie']),
     title: z.string(),
     audience: z.enum(['Youth', 'Adults']),
-    data: z.union([
-        z.array(GameQuestionSchema),
-        z.object({ words: z.array(z.string()) }),
-        z.array(FillInTheBlankItemSchema).describe('An array of 4 key sentences with an important word missing.'),
-        z.array(MatchingGameItemSchema).describe('An array of 4-6 pairs for a matching game.'),
-        z.array(WordGuessItemSchema).describe('An array of 4 key words from the sermon, each with a hint.'),
-        WordleItemSchema,
-        z.array(JeopardyCategorySchema).describe('An array of 2-3 categories for a Jeopardy game. Each category should have 3 questions.'),
-        VerseScrambleItemSchema.describe('A key bible verse from the sermon to be used in a word scramble game.'),
-        z.array(TrueFalseQuestionSchema).describe('An array of exactly 20 true or false statements.'),
-        z.object({ words: z.array(z.string()).describe("A list of 15-20 single-word keywords from the sermon for the Word Cloud Hunt.") }),
-        z.array(TwoTruthsAndALieItemSchema).describe('An array of 3-5 sets of statements for the "Two Truths and a Lie" game.'),
-    ]),
+    data: z.any().describe("The data for the game, which varies by type. See prompt for specific structures."),
 });
 
 const BibleReadingPlanItemSchema = z.object({
@@ -170,23 +158,30 @@ const generateWeeklyContentPrompt = ai.definePrompt({
   - An object containing five daily devotionals for Monday (monday), Tuesday (tuesday), Wednesday (wednesday), Thursday (thursday), and Friday (friday). Each devotional should be substantial, around 200 words long.
   - Reflection questions for four audiences: Individuals, Families, Small Groups, and Youth. Each audience should have its own group with 3-4 questions.
   - An array of up to 12 interactive games based on the sermon's content. If the sermon material is not substantial enough to create 12 high-quality, distinct games, generate fewer. 
-    - One of these games MUST be a 'Jeopardy' game. For the Jeopardy game, the 'answer' field MUST be in the form of a question (e.g., "What is..."). Create 2-3 categories, each with 3 questions having point values of 200, 400, and 600.
-    - One of the games must be a 'Verse Scramble' game based on a key bible verse from the sermon. 
-    - One of the games must be a 'True/False' game. It must contain exactly 20 questions.
-    - One of the games must be a 'Word Cloud Hunt'. For this game, provide a list of 15-20 important, single-word keywords from the sermon in the 'words' field of the 'data' object.
+    - One of these games MUST be a 'Jeopardy' game. 
+    - One of the games must be a 'Verse Scramble' game.
+    - One of the games must be a 'True/False' game with exactly 20 questions.
+    - One of the games must be a 'Word Cloud Hunt'.
     - Fill the remaining slots with a mix of other game types like 'Quiz', 'Word Search', 'Fill in the Blank', 'Matching', 'Word Guess', 'Wordle', or 'Two Truths and a Lie'. 
-    - For Quizzes, provide 3-4 questions with 4 multiple-choice options each. 
-    - For Matching games, provide 4-6 pairs of terms and definitions. 
-    - For Fill in the Blank, provide four key sentences with an important word missing. 
-    - For Word Guess, provide four key words from the sermon, each with a hint for it. 
-    - For Wordle, provide one significant 5-letter word from the sermon.
-    - For 'Two Truths and a Lie', generate 3-5 rounds. Each round must contain two statements that are true to the sermon and one statement that is a subtle, believable lie.
   - A Bible Reading Plan (bibleReadingPlan): Generate 2-3 thematic reading connections based on the sermon. For each theme, provide 2-3 relevant Bible passages (cross-references, Old/New Testament echoes) and a brief explanation for each passage's connection to the sermon.
   - A list of 2-3 Spiritual Practice Challenges (spiritualPractices): Generate small, practical challenges that are thematically related to the sermon. Examples include fasting one meal, practicing hospitality by inviting someone over, or keeping a gratitude journal for a week.
   - An Outward Focus section (outwardFocus):
     - Mission Focus: Spotlight a real or exemplary missionary/ministry, connecting their work to the sermon's theme.
     - Service Challenge: Create a tangible, actionable service challenge for the week.
     - Cultural Engagement: Pose a thought-provoking question or resource about applying the sermon in modern culture (work, media, etc.).
+
+  Game Data Structures:
+  - For 'Quiz' games, the data field should be an array of objects, each with 'question' (string), 'options' (array of 4 strings), and 'correctAnswer' (string). Generate 3-4 questions.
+  - For 'Word Search' games, the data field should be an object: { "words": ["ARRAY", "OF", "STRINGS"] }.
+  - For 'Fill in the Blank' games, the data field should be an array of 4 objects, each with 'sentence' (string with '___') and 'blank' (string).
+  - For 'Matching' games, the data field should be an array of 4-6 objects, each with 'id' (number), 'term' (string), and 'definition' (string).
+  - For 'Word Guess' games, the data field should be an array of 4 objects, each with 'word' (string) and 'hint' (string).
+  - For 'Wordle' games, the data field should be an object with a single 5-letter 'word' (string).
+  - For 'Jeopardy' games, the data field should be an array of 2-3 category objects. Each category has a 'title' (string) and 'questions' (an array of 3 question objects). Each question has 'question' (string), 'answer' (string, must be a question), and 'points' (number: 200, 400, 600).
+  - For 'Verse Scramble' games, the data field should be an object with 'verse' (string) and 'reference' (string).
+  - For 'True/False' games, the data field should be an array of exactly 20 objects, each with 'statement' (string) and 'isTrue' (boolean).
+  - For 'Word Cloud Hunt' games, the data field should be an object with a 'words' field containing an array of 15-20 single-word keywords from the sermon.
+  - For 'Two Truths and a Lie' games, the data field should be an array of 3-5 objects, each with 'truth1' (string), 'truth2' (string), and 'lie' (string).
   `,
 });
 
