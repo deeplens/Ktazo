@@ -16,6 +16,7 @@ import { WordleGame } from "./wordle-game";
 import { JeopardyGame } from "./jeopardy-game";
 import { VerseScrambleGame } from "./verse-scramble";
 import { TrueFalseGame } from "./true-false-game";
+import { WordCloudHunt } from "./word-cloud-hunt";
 
 interface GamePlayerProps {
     game: Game;
@@ -134,6 +135,8 @@ export function GamePlayer({ game }: GamePlayerProps) {
             return <VerseScrambleGame data={game.data as VerseScrambleItem} />;
         case "True/False":
             return <TrueFalseGame data={game.data as TrueFalseQuestion[]} />;
+        case "Word Cloud Hunt":
+            return <WordCloudHunt words={(game.data as { words: string[] }).words} />;
         default:
             return <p>Unknown game type</p>;
     }

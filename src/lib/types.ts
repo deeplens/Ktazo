@@ -92,7 +92,7 @@ export interface TrueFalseQuestion {
 }
 
 export interface Game {
-    type: 'Quiz' | 'Word Search' | 'Fill in the Blank' | 'Matching' | 'Word Guess' | 'Wordle' | 'Jeopardy' | 'Verse Scramble' | 'True/False';
+    type: 'Quiz' | 'Word Search' | 'Fill in the Blank' | 'Matching' | 'Word Guess' | 'Wordle' | 'Jeopardy' | 'Verse Scramble' | 'True/False' | 'Word Cloud Hunt';
     title: string;
     audience: 'Youth' | 'Adults';
     data: GameQuestion[] | { words: string[] } | FillInTheBlankItem[] | MatchingGameItem[] | WordGuessItem[] | WordleItem | JeopardyCategory[] | VerseScrambleItem | TrueFalseQuestion[];
