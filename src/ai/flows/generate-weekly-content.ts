@@ -206,7 +206,7 @@ const generateWeeklyContentFlow = ai.defineFlow(
         console.error('[[ERROR]] in generateWeeklyContentFlow:', error);
         // Re-throwing the error to be handled by the calling Server Action and the client.
         // This ensures the client is aware of the failure.
-        throw new Error('Failed to generate weekly content due to a server-side AI error.');
+        throw error;
     }
   }
 );
