@@ -18,7 +18,6 @@ import { VerseScrambleGame } from "./verse-scramble";
 import { TrueFalseGame } from "./true-false-game";
 import { WordCloudHunt } from "./word-cloud-hunt";
 import { getMockWeeklyContent } from "@/lib/mock-data";
-import { ReflectionRoulette } from "./reflection-roulette";
 
 interface GamePlayerProps {
     game: Game;
@@ -139,11 +138,6 @@ export function GamePlayer({ game }: GamePlayerProps) {
             return <TrueFalseGame data={game.data as TrueFalseQuestion[]} />;
         case "Word Cloud Hunt":
             return <WordCloudHunt words={(game.data as { words: string[] }).words} />;
-        case "Reflection Roulette": {
-            const weeklyContent = getMockWeeklyContent();
-            const reflectionQuestions = weeklyContent.flatMap(c => c.reflectionQuestions).flatMap(g => g.questions);
-            return <ReflectionRoulette questions={reflectionQuestions} />;
-        }
         default:
             return <p>Unknown game type</p>;
     }
