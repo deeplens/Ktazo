@@ -27,7 +27,7 @@ export default function NewSermonPage() {
   const [loadingMessage, setLoadingMessage] = useState('Transcribing...');
   const [transcript, setTranscript] = useState('');
   const [showTranscriptDialog, setShowTranscriptDialog] = useState(false);
-  const [uploadType, setUploadType] = useState<'url' | 'audio' | 'text'>('url');
+  const [uploadType, setUploadType] = useState<'url' | 'audio' | 'text'>('audio');
   const router = useRouter();
   const { toast } = useToast();
 
@@ -40,18 +40,12 @@ export default function NewSermonPage() {
 
   const fileToDataURI = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        if (event.target && typeof event.target.result === 'string') {
-          resolve(event.target.result);
-        } else {
-          reject(new Error('Failed to read file as a data URI.'));
-        }
-      };
-      reader.onerror = (error) => reject(error);
-      reader.readAsDataURL(file);
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
     });
-  };
+  }
 
   const fileToText = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
@@ -305,16 +299,7 @@ export default function NewSermonPage() {
 
             <div className="space-y-4 pt-2">
               <Label>Sermon Source</Label>
-              <div className="grid grid-cols-3 gap-2">
-                <Button
-                  type="button"
-                  variant={uploadType === 'url' ? 'default' : 'outline'}
-                  onClick={() => setUploadType('url')}
-                  disabled={isLoading}
-                >
-                  <LinkIcon className="mr-2 h-4 w-4" />
-                  URL
-                </Button>
+              <div className="grid grid-cols-2 gap-2">
                 <Button
                   type="button"
                   variant={uploadType === 'audio' ? 'default' : 'outline'}
@@ -493,6 +478,8 @@ export default function NewSermonPage() {
     </div>
   );
 }
+
+    
 
     
 
