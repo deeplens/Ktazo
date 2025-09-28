@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
@@ -8,6 +9,8 @@ import { RefreshCcw } from 'lucide-react';
 
 interface WordCloudHuntProps {
   words: string[];
+  onScoreChange: (score: number) => void;
+  initialScore: number;
 }
 
 interface CloudWord {
@@ -26,65 +29,54 @@ const fillerWords = [
     'mercy', 'cross', 'save', 'king', 'lord', 'word', 'give', 'seek', 'find'
 ];
 
-export function WordCloudHunt({ words }: WordCloudHuntProps) {
+export function WordCloudHunt({ words, onScoreChange, initialScore }: WordCloudHuntProps) {
     const [cloudWords, setCloudWords] = useState<CloudWord[]>([]);
     const [foundWords, setFoundWords] = useState<string[]>([]);
 
     const keyWords = useMemo(() => words.map(w => w.toUpperCase()), [words]);
+    const POINTS_PER_WORD = Math.floor(100 / (keyWords.length || 1));
+
+    const generateCloud = () => {
+        const allWords = [...new Set([...words.map(w => w.toUpperCase()), ...fillerWords.map(w => w.toUpperCase())])];
+        const shuffled = allWords.sort(() => 0.5 - Math.random());
+        
+        const newCloudWords: CloudWord[] = shuffled.slice(0, 50).map(word => ({
+            text: word,
+            size: Math.floor(Math.random() * 6) + 3, // font size scale
+            rotation: Math.random() > 0.7 ? 90 : 0,
+            isKeyWord: keyWords.includes(word),
+            isFound: false,
+            // These are placeholder positions, a real library would calculate this
+            x: Math.random() * 80 + 10,
+            y: Math.random() * 80 + 10,
+        }));
+
+        setCloudWords(newCloudWords);
+        setFoundWords([]);
+        onScoreChange(0);
+    };
 
     useEffect(() => {
-        const generateCloud = () => {
-            const allWords = [...new Set([...words.map(w => w.toUpperCase()), ...fillerWords.map(w => w.toUpperCase())])];
-            const shuffled = allWords.sort(() => 0.5 - Math.random());
-            
-            const newCloudWords: CloudWord[] = shuffled.slice(0, 50).map(word => ({
-                text: word,
-                size: Math.floor(Math.random() * 6) + 3, // font size scale
-                rotation: Math.random() > 0.7 ? 90 : 0,
-                isKeyWord: keyWords.includes(word),
-                isFound: false,
-                // These are placeholder positions, a real library would calculate this
-                x: Math.random() * 80 + 10,
-                y: Math.random() * 80 + 10,
-            }));
-
-            setCloudWords(newCloudWords);
-            setFoundWords([]);
-        };
-
         generateCloud();
-    }, [words, keyWords]);
+    }, [words]);
 
     const handleWordClick = (word: CloudWord) => {
         if (word.isKeyWord && !word.isFound) {
-            setFoundWords(prev => [...prev, word.text]);
+            const newFoundWords = [...foundWords, word.text];
+            setFoundWords(newFoundWords);
+            
             setCloudWords(prev =>
                 prev.map(w =>
                     w.text === word.text ? { ...w, isFound: true } : w
                 )
             );
+            
+            const newScore = newFoundWords.length * POINTS_PER_WORD;
+            onScoreChange(newScore);
         }
     };
     
     const handleRestart = () => {
-         const generateCloud = () => {
-            const allWords = [...new Set([...words.map(w => w.toUpperCase()), ...fillerWords.map(w => w.toUpperCase())])];
-            const shuffled = allWords.sort(() => 0.5 - Math.random());
-            
-            const newCloudWords: CloudWord[] = shuffled.slice(0, 50).map(word => ({
-                text: word,
-                size: Math.floor(Math.random() * 6) + 3, // font size scale
-                rotation: Math.random() > 0.7 ? 90 : 0,
-                isKeyWord: keyWords.includes(word),
-                isFound: false,
-                x: Math.random() * 80 + 10,
-                y: Math.random() * 80 + 10,
-            }));
-
-            setCloudWords(newCloudWords);
-            setFoundWords([]);
-        };
-
         generateCloud();
     }
 
