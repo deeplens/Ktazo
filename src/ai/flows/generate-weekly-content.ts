@@ -139,9 +139,9 @@ export async function generateWeeklyContent(input: GenerateWeeklyContentInput): 
 const generateWeeklyContentPrompt = ai.definePrompt({
   name: 'generateWeeklyContentPrompt',
   input: {schema: GenerateWeeklyContentInputSchema},
-  output: {schema: GenerateWeeklyContentOutputSchema},
-  prompt: `You are an AI assistant designed to generate weekly content for a church, based on a given sermon.
-  
+  output: {format: 'text'},
+  prompt: `You are an AI assistant designed to generate weekly content for a church, based on a given sermon. You MUST return a single, valid JSON object that conforms to the schema described below. Do not add any extra text, formatting, or code fences around the JSON.
+
   {{#if targetLanguage}}
   IMPORTANT: All generated text content MUST be in {{targetLanguage}}.
   {{else}}
@@ -150,38 +150,35 @@ const generateWeeklyContentPrompt = ai.definePrompt({
 
   Sermon Transcript: {{{sermonTranscript}}}
 
-  Generate the following content in {{targetLanguage}}:
+  Generate a valid JSON object with the following fields:
 
-  - A short summary (summaryShort).
-  - A longer devotional guide summary (summaryLong).
-  - Two one-liner reminders (oneLiners): one for Tuesday and one for Thursday. These should be concise, memorable, and impactful quotes or thoughts directly from the sermon.
-  - An object containing five daily devotionals for Monday (monday), Tuesday (tuesday), Wednesday (wednesday), Thursday (thursday), and Friday (friday). Each devotional should be substantial, around 200 words long.
-  - Reflection questions for four audiences: Individuals, Families, Small Groups, and Youth. Each audience should have its own group with 3-4 questions.
-  - An array of up to 12 interactive games based on the sermon's content. If the sermon material is not substantial enough to create 12 high-quality, distinct games, generate fewer. 
-    - One of these games MUST be a 'Jeopardy' game. 
-    - One of the games must be a 'Verse Scramble' game.
-    - One of the games must be a 'True/False' game with exactly 20 questions.
-    - One of the games must be a 'Word Cloud Hunt'.
-    - Fill the remaining slots with a mix of other game types like 'Quiz', 'Word Search', 'Fill in the Blank', 'Matching', 'Word Guess', 'Wordle', or 'Two Truths and a Lie'. 
-  - A Bible Reading Plan (bibleReadingPlan): Generate 2-3 thematic reading connections based on the sermon. For each theme, provide 2-3 relevant Bible passages (cross-references, Old/New Testament echoes) and a brief explanation for each passage's connection to the sermon.
-  - A list of 2-3 Spiritual Practice Challenges (spiritualPractices): Generate small, practical challenges that are thematically related to the sermon. Examples include fasting one meal, practicing hospitality by inviting someone over, or keeping a gratitude journal for a week.
-  - An Outward Focus section (outwardFocus):
-    - Mission Focus: Spotlight a real or exemplary missionary/ministry, connecting their work to the sermon's theme.
-    - Service Challenge: Create a tangible, actionable service challenge for the week.
-    - Cultural Engagement: Pose a thought-provoking question or resource about applying the sermon in modern culture (work, media, etc.).
+  - summaryShort: A short summary of the sermon.
+  - summaryLong: A longer devotional guide summary of the sermon.
+  - oneLiners: An object with two fields, 'tuesday' and 'thursday', containing concise, impactful one-liner quotes from the sermon.
+  - devotionals: An object with five fields (monday, tuesday, wednesday, thursday, friday), each containing a devotional of around 200 words.
+  - reflectionQuestions: An array of question groups for four audiences: 'Individuals', 'Families', 'Small Groups', and 'Youth'. Each group should have a 'questions' array with 3-4 questions.
+  - games: An array of up to 12 interactive games. If the sermon material is not substantial enough to create 12 high-quality, distinct games, generate fewer.
+    - One game MUST be 'Jeopardy'.
+    - One game MUST be 'Verse Scramble'.
+    - One game MUST be 'True/False' with exactly 20 questions.
+    - One game MUST be 'Word Cloud Hunt'.
+    - Fill the remaining slots with a mix of 'Quiz', 'Word Search', 'Fill in the Blank', 'Matching', 'Word Guess', 'Wordle', or 'Two Truths and a Lie'.
+  - bibleReadingPlan: An array of 2-3 thematic reading connections. Each theme should have 2-3 relevant Bible passages with explanations.
+  - spiritualPractices: An array of 2-3 small, practical spiritual practice challenges related to the sermon.
+  - outwardFocus: An object with three fields: 'missionFocus', 'serviceChallenge', and 'culturalEngagement'. Each should be an object with 'title', 'description', and 'details' fields.
 
-  Game Data Structures:
-  - For 'Quiz' games, the data field should be an array of objects, each with 'question' (string), 'options' (array of 4 strings), and 'correctAnswer' (string). Generate 3-4 questions.
-  - For 'Word Search' games, the data field should be an object: { "words": ["ARRAY", "OF", "STRINGS"] }.
-  - For 'Fill in the Blank' games, the data field should be an array of 4 objects, each with 'sentence' (string with '___') and 'blank' (string).
-  - For 'Matching' games, the data field should be an array of 4-6 objects, each with 'id' (number), 'term' (string), and 'definition' (string).
-  - For 'Word Guess' games, the data field should be an array of 4 objects, each with 'word' (string) and 'hint' (string).
-  - For 'Wordle' games, the data field should be an object with a single 5-letter 'word' (string).
-  - For 'Jeopardy' games, the data field should be an array of 2-3 category objects. Each category has a 'title' (string) and 'questions' (an array of 3 question objects). Each question has 'question' (string), 'answer' (string, must be a question), and 'points' (number: 200, 400, 600).
-  - For 'Verse Scramble' games, the data field should be an object with 'verse' (string) and 'reference' (string).
-  - For 'True/False' games, the data field should be an array of exactly 20 objects, each with 'statement' (string) and 'isTrue' (boolean).
-  - For 'Word Cloud Hunt' games, the data field should be an object with a 'words' field containing an array of 15-20 single-word keywords from the sermon.
-  - For 'Two Truths and a Lie' games, the data field should be an array of 3-5 objects, each with 'truth1' (string), 'truth2' (string), and 'lie' (string).
+  Game Data Structures (for the 'data' field within each game object):
+  - For 'Quiz': An array of objects, each with 'question' (string), 'options' (array of 4 strings), and 'correctAnswer' (string). Generate 3-4 questions.
+  - For 'Word Search': An object like { "words": ["ARRAY", "OF", "STRINGS"] }.
+  - For 'Fill in the Blank': An array of 4 objects, each with 'sentence' (string with '___') and 'blank' (string).
+  - For 'Matching': An array of 4-6 objects, each with 'id' (number), 'term' (string), and 'definition' (string).
+  - For 'Word Guess': An array of 4 objects, each with 'word' (string) and 'hint' (string).
+  - For 'Wordle': An object with a single 5-letter 'word' (string).
+  - For 'Jeopardy': An array of 2-3 category objects. Each category has 'title' and 'questions' (an array of 3 objects with 'question', 'answer' [must be a question], and 'points').
+  - For 'Verse Scramble': An object with 'verse' (string) and 'reference' (string).
+  - For 'True/False': An array of exactly 20 objects, each with 'statement' (string) and 'isTrue' (boolean).
+  - For 'Word Cloud Hunt': An object with a 'words' field containing an array of 15-20 single-word keywords.
+  - For 'Two Truths and a Lie': An array of 3-5 objects, each with 'truth1', 'truth2', and 'lie' (all strings).
   `,
 });
 
@@ -196,14 +193,24 @@ const generateWeeklyContentFlow = ai.defineFlow(
     try {
         console.log('[[DEBUG]] Starting generateWeeklyContentFlow');
         
-        const { output } = await generateWeeklyContentPrompt(input);
+        const response = await generateWeeklyContentPrompt(input);
+        
+        const jsonText = response.text
+          .replace(/^```json/, '')
+          .replace(/```$/, '')
+          .trim();
+
+        const output = JSON.parse(jsonText);
 
         if (!output) {
             throw new Error('AI content generation failed: No output was returned from the model.');
         }
 
+        // Validate the parsed output against the Zod schema
+        const validatedOutput = GenerateWeeklyContentOutputSchema.parse(output);
+
         console.log('[[DEBUG]] Finishing generateWeeklyContentFlow.');
-        return output;
+        return validatedOutput;
     } catch (error) {
         console.error('[[ERROR]] in generateWeeklyContentFlow:', error);
         // Re-throwing the error to be handled by the calling Server Action and the client.
