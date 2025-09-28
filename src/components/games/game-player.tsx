@@ -1,7 +1,7 @@
 
 'use client';
 
-import { Game, GameQuestion, MatchingGameItem, FillInTheBlankItem, WordGuessItem, WordleItem, JeopardyCategory, VerseScrambleItem, TrueFalseQuestion, ReflectionQuestionGroup, TwoTruthsAndALieItem } from "@/lib/types";
+import { Game, GameQuestion, MatchingGameItem, FillInTheBlankItem, WordGuessItem, WordleItem, JeopardyCategory, VerseScrambleItem, TrueFalseQuestion, ReflectionQuestionGroup } from "@/lib/types";
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../ui/card";
 import { Button } from "../ui/button";
@@ -19,7 +19,6 @@ import { TrueFalseGame } from "./true-false-game";
 import { WordCloudHunt } from "./word-cloud-hunt";
 import { ReflectionRoulette } from "./reflection-roulette";
 import { getMockWeeklyContent } from "@/lib/mock-data";
-import { TwoTruthsAndALieGame } from "./two-truths-and-a-lie";
 
 interface GamePlayerProps {
     game: Game;
@@ -145,9 +144,9 @@ export function GamePlayer({ game }: GamePlayerProps) {
             const questions = weeklyContent ? weeklyContent.reflectionQuestions.flatMap(qg => qg.questions) : [];
             return <ReflectionRoulette questions={questions} />;
         }
-        case "Two Truths and a Lie":
-            return <TwoTruthsAndALieGame data={game.data as TwoTruthsAndALieItem[]} />;
         default:
             return <p>Unknown game type</p>;
     }
 }
+
+    
