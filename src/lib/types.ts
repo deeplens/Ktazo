@@ -197,3 +197,13 @@ export interface PrayerRequest {
     requestText: string;
     createdAt: string;
 }
+
+export interface ServiceRequest {
+    id: string;
+    userId: string;
+    userName: string;
+    userPhotoUrl?: string;
+    sermonId: string;
+    requestText: string;
+    createdAt: string;
+}

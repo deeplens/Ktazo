@@ -1,6 +1,6 @@
 
 
-import type { Sermon, User, WeeklyContent, ReflectionAnswer, TenantSettings, PrayerRequest, GameScore } from './types';
+import type { Sermon, User, WeeklyContent, ReflectionAnswer, TenantSettings, PrayerRequest, GameScore, ServiceRequest } from './types';
 
 export const mockUsers: User[] = [
   { id: 'user-master-1', tenantId: 'tenant-1', authId: 'auth-master-1', role: 'MASTER', name: 'Master User', email: 'master@ktazo.com', lastLoginAt: new Date().toISOString(), points: 0 },
@@ -782,6 +782,84 @@ export const saveGameScore = (userId: string, sermonId: string, gameId: string, 
         sessionStorage.setItem(GAME_SCORES_KEY, JSON.stringify(allScores));
     }
 };
+
+const SERVICE_REQUESTS_KEY = 'ktazo-service-requests';
+const initialServiceRequests: ServiceRequest[] = [
+    {
+        id: 'sr-1',
+        userId: 'user-member-1',
+        userName: 'Member User 1',
+        userPhotoUrl: 'https://avatar.vercel.sh/member1@ktazo.com.png',
+        sermonId: 'sermon-1',
+        requestText: 'I need a ride to the grocery store this week.',
+        createdAt: new Date(Date.now() - 86400000 * 3).toISOString(),
+    },
+     {
+        id: 'sr-2',
+        userId: 'user-member-2',
+        userName: 'Member User 2',
+        userPhotoUrl: 'https://avatar.vercel.sh/member2@ktazo.com.png',
+        sermonId: 'sermon-1',
+        requestText: 'I can offer to help with yard work for anyone who needs it.',
+        createdAt: new Date(Date.now() - 86400000 * 1).toISOString(),
+    }
+];
+
+export const getMockServiceRequests = (): ServiceRequest[] => {
+    if (typeof window !== 'undefined') {
+        const stored = sessionStorage.getItem(SERVICE_REQUESTS_KEY);
+        if (stored) {
+            try {
+                return JSON.parse(stored);
+            } catch (e) {
+                return initialServiceRequests;
+            }
+        } else {
+            sessionStorage.setItem(SERVICE_REQUESTS_KEY, JSON.stringify(initialServiceRequests));
+            return initialServiceRequests;
+        }
+    }
+    return initialServiceRequests;
+}
+
+export const getServiceRequestsForSermon = (sermonId: string): ServiceRequest[] => {
+    return getMockServiceRequests()
+        .filter(sr => sr.sermonId === sermonId)
+        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+}
+
+export const addServiceRequest = (request: Omit<ServiceRequest, 'id' | 'createdAt'>) => {
+    if (typeof window !== 'undefined') {
+        const allRequests = getMockServiceRequests();
+        const newRequest: ServiceRequest = {
+            ...request,
+            id: `sr-${Date.now()}`,
+            createdAt: new Date().toISOString(),
+        };
+        const updatedRequests = [...allRequests, newRequest];
+        sessionStorage.setItem(SERVICE_REQUESTS_KEY, JSON.stringify(updatedRequests));
+        return newRequest;
+    }
+    return null;
+}
+
+export const updateServiceRequest = (requestId: string, requestText: string) => {
+     if (typeof window !== 'undefined') {
+        const allRequests = getMockServiceRequests();
+        const updatedRequests = allRequests.map(sr => 
+            sr.id === requestId ? { ...sr, requestText } : sr
+        );
+        sessionStorage.setItem(SERVICE_REQUESTS_KEY, JSON.stringify(updatedRequests));
+    }
+}
+
+export const deleteServiceRequest = (requestId: string) => {
+    if (typeof window !== 'undefined') {
+        const allRequests = getMockServiceRequests();
+        const updatedRequests = allRequests.filter(sr => sr.id !== requestId);
+        sessionStorage.setItem(SERVICE_REQUESTS_KEY, JSON.stringify(updatedRequests));
+    }
+}
 
 
 // For initial load, we still need this export for components that use it directly

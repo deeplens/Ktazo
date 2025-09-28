@@ -7,7 +7,7 @@ import { getMockSermons, getMockWeeklyContent, getAnswersForSermon, saveAnswersF
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
-import { Gamepad2, Headphones, MessageCircleQuestion, Users, User, HeartHandshake, MessageSquare, MicVocal, Languages, BookOpen, HandHeart, Sparkles, Globe, Target, Briefcase, Flower, Puzzle, Search, Brackets, Binary, WholeWord, KeyRound, Type, CheckSquare, Brain, Quote, ListChecks, Star } from "lucide-react";
+import { Gamepad2, Headphones, MessageCircleQuestion, Users, User, HeartHandshake, MessageSquare, MicVocal, Languages, BookOpen, HandHeart, Sparkles, Globe, Target, Briefcase, Flower, Puzzle, Search, Brackets, Binary, WholeWord, KeyRound, Type, CheckSquare, Brain, Quote, ListChecks, Star, Wrench } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Sermon, WeeklyContent, Game, VerseScrambleItem, BibleReadingPlanItem, SpiritualPractice, OutwardFocusItem } from "@/lib/types";
@@ -21,6 +21,7 @@ import { MemoryVerseCard } from "@/components/sermons/memory-verse-card";
 import { PrayerWall } from "@/components/sermons/prayer-wall";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
+import { ServiceWall } from "@/components/sermons/service-wall";
 
 export default function WeeklyPage() {
   const params = useParams();
@@ -318,6 +319,19 @@ function WeeklyPageContent({ sermon, weeklyContent, answers, setAnswers, gameSco
                     </Button>
                 </CardContent>
             </Card>
+             <Card>
+                <CardHeader>
+                    <CardTitle className="font-headline flex items-center gap-2"><Wrench /> Service Wall</CardTitle>
+                    <CardDescription>Offer or request help from your church community.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <Button asChild className="w-full">
+                        <a href="#service-wall">
+                            Go to Service Wall
+                        </a>
+                    </Button>
+                </CardContent>
+            </Card>
             <Card>
                 <CardHeader>
                     <CardTitle className="font-headline flex items-center gap-2"><Flower /> Self-Assessment</CardTitle>
@@ -443,7 +457,10 @@ function WeeklyPageContent({ sermon, weeklyContent, answers, setAnswers, gameSco
           </CardFooter>
       </Card>
 
-      <PrayerWall sermonId={sermon.id} />
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <PrayerWall sermonId={sermon.id} />
+        <ServiceWall sermonId={sermon.id} />
+      </div>
     </div>
   );
 }
