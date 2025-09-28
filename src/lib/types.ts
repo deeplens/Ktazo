@@ -96,11 +96,20 @@ export interface TwoTruthsAndALieItem {
     lie: string;
 }
 
+export interface SermonEscapeRoomPuzzle {
+    type: 'Multiple Choice' | 'Text Answer' | 'Verse Code';
+    prompt: string;
+    options?: string[];
+    answer: string;
+    feedback: string;
+}
+
+
 export interface Game {
-    type: 'Quiz' | 'Word Search' | 'Fill in the Blank' | 'Matching' | 'Word Guess' | 'Wordle' | 'Jeopardy' | 'Verse Scramble' | 'True/False' | 'Word Cloud Hunt' | 'Two Truths and a Lie';
+    type: 'Quiz' | 'Word Search' | 'Fill in the Blank' | 'Matching' | 'Word Guess' | 'Wordle' | 'Jeopardy' | 'Verse Scramble' | 'True/False' | 'Word Cloud Hunt' | 'Two Truths and a Lie' | 'Sermon Escape Room';
     title: string;
     audience: 'Youth' | 'Adults';
-    data: GameQuestion[] | { words: string[] } | FillInTheBlankItem[] | MatchingGameItem[] | WordGuessItem[] | WordleItem | JeopardyCategory[] | VerseScrambleItem | TrueFalseQuestion[] | TwoTruthsAndALieItem[] | {};
+    data: GameQuestion[] | { words: string[] } | FillInTheBlankItem[] | MatchingGameItem[] | WordGuessItem[] | WordleItem | JeopardyCategory[] | VerseScrambleItem | TrueFalseQuestion[] | TwoTruthsAndALieItem[] | SermonEscapeRoomPuzzle[] | {};
 }
 
 export interface BibleReadingPlanItem {

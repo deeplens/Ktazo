@@ -78,8 +78,17 @@ const TwoTruthsAndALieItemSchema = z.object({
     lie: z.string().describe('The false statement that is subtly incorrect.'),
 });
 
+const SermonEscapeRoomPuzzleSchema = z.object({
+    type: z.enum(['Multiple Choice', 'Text Answer', 'Verse Code']),
+    prompt: z.string().describe('The question or puzzle to solve.'),
+    options: z.array(z.string()).optional().describe('Options for Multiple Choice questions.'),
+    answer: z.string().describe('The correct answer or solution to the puzzle.'),
+    feedback: z.string().describe('A piece of the story or a clue revealed upon solving the puzzle.'),
+});
+
+
 const GameSchema = z.object({
-    type: z.enum(['Quiz', 'Word Search', 'Fill in the Blank', 'Matching', 'Word Guess', 'Wordle', 'Jeopardy', 'Verse Scramble', 'True/False', 'Word Cloud Hunt', 'Two Truths and a Lie']),
+    type: z.enum(['Quiz', 'Word Search', 'Fill in the Blank', 'Matching', 'Word Guess', 'Wordle', 'Jeopardy', 'Verse Scramble', 'True/False', 'Word Cloud Hunt', 'Two Truths and a Lie', 'Sermon Escape Room']),
     title: z.string(),
     audience: z.enum(['Youth', 'Adults']),
     data: z.any().describe("The data for the game, which varies by type. See prompt for specific structures."),
@@ -120,7 +129,7 @@ const GenerateWeeklyContentOutputSchema = z.object({
       friday: z.string().describe('A devotional for Friday, approximately 200 words.'),
   }).describe('An object containing five daily devotionals for Mon-Fri.'),
   reflectionQuestions: z.array(ReflectionQuestionGroupSchema).describe('An array of reflection question groups for different audiences.'),
-  games: z.array(GameSchema).max(12).describe("An array of interactive games based on the sermon. If the sermon material is not substantial enough to create 12 high-quality, distinct games, generate fewer. One game MUST be a 'Jeopardy' game. One game MUST be a 'Verse Scramble' game. One game MUST be a 'True/False' game with exactly 20 questions. One game MUST be a 'Word Cloud Hunt' with 15-20 key words. Include a mix of other types like Quiz, Word Search, Fill in the Blank, Matching, Word Guess, Wordle, or 'Two Truths and a Lie'. For Quizzes, provide 3-4 questions with 4 multiple-choice options each. For Matching games, provide 4-6 pairs of terms and definitions. For Fill in the Blank, provide four key sentences with an important word missing. For Word Guess, provide four key words from the sermon, each with a hint. For Wordle, provide a single, relevant 5-letter word from the sermon. For the required Jeopardy game, create 2-3 categories with 3 questions each, with point values of 200, 400, and 600. For 'Two Truths and a Lie', generate 3-5 rounds, where each round has two true statements and one subtle lie based on the sermon."),
+  games: z.array(GameSchema).max(12).describe("An array of interactive games based on the sermon. If the sermon material is not substantial enough to create 12 high-quality, distinct games, generate fewer. One game MUST be a 'Jeopardy' game. One game MUST be a 'Verse Scramble' game. One game MUST be a 'True/False' game with exactly 20 questions. One game MUST be a 'Word Cloud Hunt' with 15-20 key words. Include a mix of other types like Quiz, Word Search, Fill in the Blank, Matching, Word Guess, Wordle, 'Two Truths and a Lie', or 'Sermon Escape Room'. For Quizzes, provide 3-4 questions with 4 multiple-choice options each. For Matching games, provide 4-6 pairs of terms and definitions. For Fill in the Blank, provide four key sentences with an important word missing. For Word Guess, provide four key words from the sermon, each with a hint. For Wordle, provide a single, relevant 5-letter word from the sermon. For the required Jeopardy game, create 2-3 categories with 3 questions each, with point values of 200, 400, and 600. For 'Two Truths and a Lie', generate 3-5 rounds, where each round has two true statements and one subtle lie based on the sermon."),
   bibleReadingPlan: z.array(BibleReadingPlanItemSchema).describe('An array of 2-3 thematic Bible reading connections based on the sermon, including cross-references and Old/New Testament echoes.'),
   spiritualPractices: z.array(SpiritualPracticeSchema).describe('An array of 2-3 small, practical spiritual practice challenges related to the sermon theme (e.g., fasting one meal, practicing hospitality, journaling gratitude).'),
   outwardFocus: z.object({
@@ -162,7 +171,7 @@ const generateWeeklyContentPrompt = ai.definePrompt({
     - One game MUST be 'Verse Scramble'.
     - One game MUST be 'True/False' with exactly 20 questions.
     - One game MUST be 'Word Cloud Hunt'.
-    - Fill the remaining slots with a mix of 'Quiz', 'Word Search', 'Fill in the Blank', 'Matching', 'Word Guess', 'Wordle', or 'Two Truths and a Lie'.
+    - Fill the remaining slots with a mix of 'Quiz', 'Word Search', 'Fill in the Blank', 'Matching', 'Word Guess', 'Wordle', 'Two Truths and a Lie', or 'Sermon Escape Room'.
   - bibleReadingPlan: An array of 2-3 thematic reading connections. Each theme should have 2-3 relevant Bible passages with explanations.
   - spiritualPractices: An array of 2-3 small, practical spiritual practice challenges related to the sermon.
   - outwardFocus: An object with three fields: 'missionFocus', 'serviceChallenge', and 'culturalEngagement'. Each should be an object with 'title', 'description', and 'details' fields.
@@ -179,6 +188,7 @@ const generateWeeklyContentPrompt = ai.definePrompt({
   - For 'True/False': An array of exactly 20 objects, each with 'statement' (string) and 'isTrue' (boolean).
   - For 'Word Cloud Hunt': An object with a 'words' field containing an array of 15-20 single-word keywords.
   - For 'Two Truths and a Lie': An array of 3-5 objects, each with 'truth1', 'truth2', and 'lie' (all strings).
+  - For 'Sermon Escape Room': An array of 3-5 puzzle objects, forming a short narrative. Each object must have a 'type' (one of 'Multiple Choice', 'Text Answer', 'Verse Code'), a 'prompt' (the puzzle question), an 'answer' (the solution), and 'feedback' (a piece of the story or a clue revealed upon solving). For 'Verse Code', the answer should be a number derived from a Bible verse. For 'Multiple Choice', include an 'options' array of 4 strings.
   `,
 });
 
@@ -216,17 +226,16 @@ const generateWeeklyContentFlow = ai.defineFlow(
         
         // Create a more specific and serializable error message.
         // This helps prevent generic "unexpected response" errors on the client.
-        const errorMessage = error.message || 'An unknown error occurred during content generation.';
         let finalMessage = 'AI content generation failed. ';
 
-        if (error.constructor.name === 'ZodError') {
-             finalMessage += 'The AI returned data in an unexpected format. Please try again.';
-        } else if (errorMessage.includes('400 Bad Request')) {
-             finalMessage += 'The AI model received a malformed request. Please check the inputs and try again.';
-        } else if (errorMessage.includes('500') || errorMessage.includes('503')) {
-             finalMessage += 'The AI service is temporarily unavailable. Please try again in a few moments.';
+        if (error instanceof z.ZodError) {
+             finalMessage += 'The AI returned data in an unexpected format. Please try again. Details: ' + error.errors.map(e => `${e.path.join('.')} - ${e.message}`).join(', ');
+        } else if (error instanceof SyntaxError) {
+             finalMessage += `The AI returned malformed JSON. Details: ${error.message}`;
+        } else if (error.message) {
+             finalMessage += error.message;
         } else {
-            finalMessage += errorMessage;
+            finalMessage += 'An unknown error occurred during content generation.';
         }
 
         throw new Error(finalMessage);
