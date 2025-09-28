@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
@@ -11,15 +12,19 @@ import { cn } from '@/lib/utils';
 
 interface TrueFalseGameProps {
   data: TrueFalseQuestion[];
+  onScoreChange: (score: number) => void;
+  initialScore: number;
 }
 
-export function TrueFalseGame({ data }: TrueFalseGameProps) {
+export function TrueFalseGame({ data, onScoreChange, initialScore }: TrueFalseGameProps) {
   const [gameState, setGameState] = useState<'ready' | 'playing' | 'finished'>('ready');
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [correctScore, setCorrectScore] = useState(0);
   const [incorrectScore, setIncorrectScore] = useState(0);
   const [timeLeft, setTimeLeft] = useState(60);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
+
+  const POINTS_PER_CORRECT = 5;
 
   useEffect(() => {
     if (gameState === 'playing' && timeLeft > 0) {
@@ -41,13 +46,16 @@ export function TrueFalseGame({ data }: TrueFalseGameProps) {
     setIncorrectScore(0);
     setTimeLeft(60);
     setGameState('playing');
+    onScoreChange(0);
   };
 
   const handleAnswer = (answer: boolean) => {
     if (gameState !== 'playing') return;
 
     if (data[currentQuestionIndex].isTrue === answer) {
-      setCorrectScore(prev => prev + 1);
+        const newCorrectCount = correctScore + 1;
+        setCorrectScore(newCorrectCount);
+        onScoreChange(newCorrectCount * POINTS_PER_CORRECT);
     } else {
       setIncorrectScore(prev => prev + 1);
     }
@@ -66,7 +74,7 @@ export function TrueFalseGame({ data }: TrueFalseGameProps) {
         return (
           <div className="text-center">
             <h2 className="text-xl font-semibold">Timed True/False Challenge</h2>
-            <p className="text-muted-foreground mt-2">You have 60 seconds to answer 20 questions.</p>
+            <p className="text-muted-foreground mt-2">You have 60 seconds to answer 20 questions. Each correct answer is worth {POINTS_PER_CORRECT} points.</p>
             <Button onClick={startGame} className="mt-6">Start Game</Button>
           </div>
         );
@@ -93,7 +101,7 @@ export function TrueFalseGame({ data }: TrueFalseGameProps) {
           <div className="text-center">
             <h2 className="text-xl font-semibold">Game Over!</h2>
             <div className="my-4">
-              <p className="text-4xl font-bold">Final Score: {correctScore}</p>
+              <p className="text-4xl font-bold">Final Score: {correctScore * POINTS_PER_CORRECT}</p>
               <div className="flex justify-center gap-6 mt-2 text-muted-foreground">
                 <p><span className="font-bold text-green-600">{correctScore}</span> Correct</p>
                 <p><span className="font-bold text-red-600">{incorrectScore}</span> Incorrect</p>

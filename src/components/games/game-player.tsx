@@ -154,23 +154,23 @@ export function GamePlayer({ game, onScoreChange, initialScore }: GamePlayerProp
                     case "Matching":
                         return <MatchingGame items={game.data as MatchingGameItem[]} onScoreChange={onScoreChange} initialScore={initialScore} />;
                     case "Fill in the Blank":
-                        return <FillInTheBlankGame data={game.data as FillInTheBlankItem[]} onScoreChange={onScoreChange} initialScore={initialScore} />;
+                        return <FillInTheBlankGame data={game.data as FillInTheBlankItem[]} />;
                     case "Word Guess":
-                        return <WordGuessGame data={game.data as WordGuessItem[]} onScoreChange={onScoreChange} initialScore={initialScore} />;
+                        return <WordGuessGame data={game.data as WordGuessItem[]} />;
                     case "Wordle":
-                        return <WordleGame data={game.data as WordleItem} onScoreChange={onScoreChange} initialScore={initialScore} />;
+                        return <WordleGame data={game.data as WordleItem} />;
                     case "Jeopardy":
                         return <JeopardyGame data={game.data as JeopardyCategory[]} onScoreChange={onScoreChange} initialScore={initialScore} />;
                     case "Verse Scramble":
-                        return <VerseScrambleGame data={game.data as VerseScrambleItem} onScoreChange={onScoreChange} initialScore={initialScore} />;
+                        return <VerseScrambleGame data={game.data as VerseScrambleItem} />;
                     case "True/False":
                         return <TrueFalseGame data={game.data as TrueFalseQuestion[]} onScoreChange={onScoreChange} initialScore={initialScore} />;
                     case "Word Cloud Hunt":
                         return <WordCloudHunt words={(game.data as { words: string[] }).words} onScoreChange={onScoreChange} initialScore={initialScore} />;
                     case "Two Truths and a Lie":
-                        return <TwoTruthsAndALieGame data={game.data as TwoTruthsAndALieItem[]} onScoreChange={onScoreChange} initialScore={initialScore} />;
+                        return <TwoTruthsAndALieGame data={game.data as TwoTruthsAndALieItem[]} />;
                     case "Sermon Escape Room":
-                        return <SermonEscapeRoomGame data={game.data as SermonEscapeRoomPuzzle[]} onScoreChange={onScoreChange} initialScore={initialScore} />;
+                        return <SermonEscapeRoomGame data={game.data as SermonEscapeRoomPuzzle[]} />;
                     default:
                         return <p>Unknown game type</p>;
                 }
