@@ -39,9 +39,9 @@ export default function Dashboard() {
                 <h1 className="text-3xl font-bold tracking-tight font-headline">{greeting}</h1>
                 <p className="text-muted-foreground">Here's what's happening in your congregation.</p>
             </div>
-            {isAdmin && (
-                <div className="text-right">
-                    <div className="flex items-center justify-end gap-4">
+            <div className="text-right">
+                <div className="flex items-center justify-end gap-4">
+                    {isAdmin && (
                         <div className="flex items-center gap-2 text-sm">
                             <Users className="h-5 w-5 text-muted-foreground" />
                             <div>
@@ -49,19 +49,19 @@ export default function Dashboard() {
                                 <span className="text-muted-foreground"> Registered</span>
                             </div>
                         </div>
-                         <div className="flex items-center gap-2 text-sm">
-                            <Wifi className="h-5 w-5 text-green-500" />
-                             <div>
-                                <span className="font-bold">{onlineUsers}</span>
-                                <span className="text-muted-foreground"> Online</span>
-                            </div>
+                    )}
+                     <div className="flex items-center gap-2 text-sm">
+                        <Wifi className="h-5 w-5 text-green-500" />
+                         <div>
+                            <span className="font-bold">{onlineUsers}</span>
+                            <span className="text-muted-foreground"> Online</span>
                         </div>
                     </div>
-                    <Button variant="link" className="h-auto p-0 mt-1" asChild>
-                        <Link href="/dashboard/admin/members">See Who is Online</Link>
-                    </Button>
                 </div>
-            )}
+                <Button variant="link" className="h-auto p-0 mt-1" asChild>
+                    <Link href="/dashboard/admin/members">See Who is Online</Link>
+                </Button>
+            </div>
         </div>
         
         { isAdmin ? (
