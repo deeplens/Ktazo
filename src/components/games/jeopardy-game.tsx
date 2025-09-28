@@ -6,16 +6,21 @@ import { JeopardyCategory, JeopardyQuestion } from '@/lib/types';
 import { Button } from '../ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '../ui/dialog';
 import { cn } from '@/lib/utils';
-import { RefreshCcw } from 'lucide-react';
+import { RefreshCcw, CheckSquare } from 'lucide-react';
 
 interface JeopardyGameProps {
   data: JeopardyCategory[];
+  onScoreChange: (score: number) => void;
+  initialScore: number;
 }
 
-export function JeopardyGame({ data }: JeopardyGameProps) {
+export function JeopardyGame({ data, onScoreChange, initialScore }: JeopardyGameProps) {
   const [answered, setAnswered] = useState<Record<string, boolean>>({});
   const [currentQuestion, setCurrentQuestion] = useState<{ category: string, question: JeopardyQuestion } | null>(null);
   const [showAnswer, setShowAnswer] = useState(false);
+  const [score, setScore] = useState(initialScore);
+  const [awardedPoints, setAwardedPoints] = useState<Record<string, boolean>>({});
+
 
   const handleSelectQuestion = (category: string, question: JeopardyQuestion) => {
     setCurrentQuestion({ category, question });
@@ -30,15 +35,31 @@ export function JeopardyGame({ data }: JeopardyGameProps) {
       setCurrentQuestion(null);
       setShowAnswer(false);
   }
+  
+  const handleAwardPoints = () => {
+    if (!currentQuestion) return;
+    const key = `${currentQuestion.category}-${currentQuestion.question.points}`;
+    if (awardedPoints[key]) return; // Don't award points twice
+
+    const newScore = score + currentQuestion.question.points;
+    setScore(newScore);
+    onScoreChange(newScore);
+    setAwardedPoints(prev => ({...prev, [key]: true}));
+  }
 
   const handleRestart = () => {
     setAnswered({});
     setCurrentQuestion(null);
     setShowAnswer(false);
+    setScore(0);
+    onScoreChange(0);
+    setAwardedPoints({});
   };
   
   const allAnswered = data.flatMap(c => c.questions).length === Object.keys(answered).length;
   const numRows = data[0]?.questions.length || 0;
+  
+  const isCurrentQuestionAwarded = currentQuestion ? !!awardedPoints[`${currentQuestion.category}-${currentQuestion.question.points}`] : false;
 
 
   return (
@@ -96,9 +117,21 @@ export function JeopardyGame({ data }: JeopardyGameProps) {
                         </div>
                     )}
                 </div>
-                <div className='flex justify-end gap-2'>
+                <div className='flex justify-between items-center gap-2'>
                     <Button variant="outline" onClick={handleCloseDialog}>Close</Button>
-                    <Button onClick={() => setShowAnswer(true)} disabled={showAnswer}>Show Answer</Button>
+                    {showAnswer ? (
+                        <Button 
+                            onClick={handleAwardPoints} 
+                            disabled={isCurrentQuestionAwarded}
+                            variant={isCurrentQuestionAwarded ? "secondary" : "default"}
+                            className="bg-green-600 hover:bg-green-700"
+                        >
+                            <CheckSquare className="mr-2" />
+                            {isCurrentQuestionAwarded ? 'Points Awarded' : 'I got it right!'}
+                        </Button>
+                    ) : (
+                        <Button onClick={() => setShowAnswer(true)} disabled={showAnswer}>Show Answer</Button>
+                    )}
                 </div>
             </DialogContent>
          </Dialog>
