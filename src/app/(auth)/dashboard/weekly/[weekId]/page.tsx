@@ -19,6 +19,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/lib/auth";
 import { MemoryVerseCard } from "@/components/sermons/memory-verse-card";
 import { PrayerWall } from "@/components/sermons/prayer-wall";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function WeeklyPage() {
   const params = useParams();
@@ -331,38 +332,36 @@ function WeeklyPageContent({ sermon, weeklyContent, answers, setAnswers, gameSco
       </div>
 
        {weeklyContent.outwardFocus && (
-        <div id="outward-focus">
-            <h2 className="text-2xl font-bold tracking-tight font-headline flex items-center gap-3 mb-4"><Globe /> Outward Focus</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <Card className="flex flex-col">
-                    <CardHeader>
-                        <CardTitle className="flex items-center gap-2 text-xl"><Target /> {weeklyContent.outwardFocus.missionFocus.title}</CardTitle>
-                        <CardDescription>{weeklyContent.outwardFocus.missionFocus.description}</CardDescription>
-                    </CardHeader>
-                    <CardContent className="flex-grow">
+        <Card id="outward-focus">
+            <CardHeader>
+                <CardTitle className="font-headline flex items-center gap-2"><Globe /> Outward Focus</CardTitle>
+                <CardDescription>Apply the sermon's message beyond the church walls.</CardDescription>
+            </CardHeader>
+            <CardContent>
+                <Tabs defaultValue="mission" className="w-full">
+                    <TabsList className="grid w-full grid-cols-3">
+                        <TabsTrigger value="mission"><Target className="w-4 h-4 mr-2"/>Mission</TabsTrigger>
+                        <TabsTrigger value="service"><HeartHandshake className="w-4 h-4 mr-2"/>Service</TabsTrigger>
+                        <TabsTrigger value="culture"><Briefcase className="w-4 h-4 mr-2"/>Culture</TabsTrigger>
+                    </TabsList>
+                    <TabsContent value="mission" className="mt-4 prose prose-stone dark:prose-invert max-w-none">
+                        <h3 className="font-bold">{weeklyContent.outwardFocus.missionFocus.title}</h3>
+                        <p className="text-sm">{weeklyContent.outwardFocus.missionFocus.description}</p>
                         <p className="text-sm text-muted-foreground">{weeklyContent.outwardFocus.missionFocus.details}</p>
-                    </CardContent>
-                </Card>
-                <Card className="flex flex-col">
-                    <CardHeader>
-                        <CardTitle className="flex items-center gap-2 text-xl"><HeartHandshake /> {weeklyContent.outwardFocus.serviceChallenge.title}</CardTitle>
-                        <CardDescription>{weeklyContent.outwardFocus.serviceChallenge.description}</CardDescription>
-                    </CardHeader>
-                    <CardContent className="flex-grow">
+                    </TabsContent>
+                    <TabsContent value="service" className="mt-4 prose prose-stone dark:prose-invert max-w-none">
+                        <h3 className="font-bold">{weeklyContent.outwardFocus.serviceChallenge.title}</h3>
+                         <p className="text-sm">{weeklyContent.outwardFocus.serviceChallenge.description}</p>
                         <p className="text-sm text-muted-foreground">{weeklyContent.outwardFocus.serviceChallenge.details}</p>
-                    </CardContent>
-                </Card>
-                <Card className="flex flex-col">
-                    <CardHeader>
-                        <CardTitle className="flex items-center gap-2 text-xl"><Briefcase /> {weeklyContent.outwardFocus.culturalEngagement.title}</CardTitle>
-                        <CardDescription>{weeklyContent.outwardFocus.culturalEngagement.description}</CardDescription>
-                    </CardHeader>
-                    <CardContent className="flex-grow">
+                    </TabsContent>
+                    <TabsContent value="culture" className="mt-4 prose prose-stone dark:prose-invert max-w-none">
+                        <h3 className="font-bold">{weeklyContent.outwardFocus.culturalEngagement.title}</h3>
+                         <p className="text-sm">{weeklyContent.outwardFocus.culturalEngagement.description}</p>
                         <p className="text-sm text-muted-foreground">{weeklyContent.outwardFocus.culturalEngagement.details}</p>
-                    </CardContent>
-                </Card>
-            </div>
-        </div>
+                    </TabsContent>
+                </Tabs>
+            </CardContent>
+        </Card>
        )}
 
       <Card id="games">
