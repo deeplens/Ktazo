@@ -158,7 +158,7 @@ export function GamePlayer({ game, onScoreChange, initialScore }: GamePlayerProp
                     case "Word Guess":
                         return <WordGuessGame data={game.data as WordGuessItem[]} />;
                     case "Wordle":
-                        return <WordleGame data={game.data as WordleItem} />;
+                        return <WordleGame data={game.data as WordleItem} onScoreChange={onScoreChange} initialScore={initialScore} />;
                     case "Jeopardy":
                         return <JeopardyGame data={game.data as JeopardyCategory[]} onScoreChange={onScoreChange} initialScore={initialScore} />;
                     case "Verse Scramble":

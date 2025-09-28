@@ -11,6 +11,8 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '..
 
 interface WordleGameProps {
   data: WordleItem;
+  onScoreChange: (score: number) => void;
+  initialScore: number;
 }
 
 const WORD_LENGTH = 5;
@@ -23,7 +25,19 @@ const KEYBOARD_LAYOUT = [
 
 type TileStatus = 'correct' | 'present' | 'absent' | 'empty';
 
-export function WordleGame({ data }: WordleGameProps) {
+const getPointsForGuess = (guessIndex: number): number => {
+    switch (guessIndex) {
+        case 0: return 100;
+        case 1: return 80;
+        case 2: return 60;
+        case 3: return 40;
+        case 4: return 20;
+        case 5: return 10;
+        default: return 0;
+    }
+}
+
+export function WordleGame({ data, onScoreChange, initialScore }: WordleGameProps) {
   const [solution, setSolution] = useState('');
   const [guesses, setGuesses] = useState<string[]>(Array(MAX_GUESSES).fill(''));
   const [currentGuessIndex, setCurrentGuessIndex] = useState(0);
@@ -34,11 +48,7 @@ export function WordleGame({ data }: WordleGameProps) {
   useEffect(() => {
     setSolution(data.word.toUpperCase());
     // Reset game state when a new word is provided
-    setGuesses(Array(MAX_GUESSES).fill(''));
-    setCurrentGuessIndex(0);
-    setCurrentGuess('');
-    setGameState('playing');
-    setKeyStatuses({});
+    handleRestart();
   }, [data]);
 
   const handleKeyPress = (key: string) => {
@@ -66,7 +76,6 @@ export function WordleGame({ data }: WordleGameProps) {
     newGuesses[currentGuessIndex] = currentGuess;
     setGuesses(newGuesses);
     
-    // Update keyboard statuses
     const newKeyStatuses = {...keyStatuses};
     currentGuess.split('').forEach((letter, index) => {
       if (solution[index] === letter) {
@@ -83,8 +92,11 @@ export function WordleGame({ data }: WordleGameProps) {
 
     if (currentGuess === solution) {
       setGameState('won');
+      const points = getPointsForGuess(currentGuessIndex);
+      onScoreChange(points);
     } else if (currentGuessIndex === MAX_GUESSES - 1) {
       setGameState('lost');
+      onScoreChange(0);
     } else {
       setCurrentGuessIndex(prev => prev + 1);
       setCurrentGuess('');
@@ -98,9 +110,9 @@ export function WordleGame({ data }: WordleGameProps) {
     setCurrentGuess('');
     setGameState('playing');
     setKeyStatuses({});
+    onScoreChange(0);
   }
 
-  // Effect for physical keyboard input
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Enter') {
@@ -189,7 +201,7 @@ export function WordleGame({ data }: WordleGameProps) {
       {gameState !== 'playing' && (
         <Alert variant={gameState === 'won' ? 'default' : 'destructive'} className="w-full max-w-sm my-4">
           {gameState === 'won' ? <CheckCircle className="h-4 w-4" /> : <XCircle className="h-4 w-4" />}
-          <AlertTitle>{gameState === 'won' ? 'You Won!' : 'Game Over'}</AlertTitle>
+          <AlertTitle>{gameState === 'won' ? `You Won! +${getPointsForGuess(currentGuessIndex)} points` : 'Game Over'}</AlertTitle>
           <AlertDescription>
             {gameState === 'won' ? 'Congratulations!' : `The word was "${solution}".`}
           </AlertDescription>
