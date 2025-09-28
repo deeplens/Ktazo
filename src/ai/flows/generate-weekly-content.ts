@@ -140,7 +140,7 @@ const generateWeeklyContentPrompt = ai.definePrompt({
   name: 'generateWeeklyContentPrompt',
   input: {schema: GenerateWeeklyContentInputSchema},
   output: {format: 'text'},
-  prompt: `You are an AI assistant designed to generate weekly content for a church, based on a given sermon. You MUST return a single, valid JSON object that conforms to the schema described below. Do not add any extra text, formatting, or code fences around the JSON.
+  prompt: `You are an AI assistant designed to generate weekly content for a church, based on a given sermon. You MUST return a single, valid JSON object that conforms to the schema described below. All property names (keys) in the JSON object MUST be enclosed in double quotes. Do not add any extra text, formatting, or code fences around the JSON.
 
   {{#if targetLanguage}}
   IMPORTANT: All generated text content MUST be in {{targetLanguage}}.
