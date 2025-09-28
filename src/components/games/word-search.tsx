@@ -7,6 +7,8 @@ import { Button } from '../ui/button';
 
 interface WordSearchGameProps {
   words: string[];
+  onScoreChange: (score: number) => void;
+  initialScore: number;
 }
 
 const gridSize = 12; // 12x12 grid
@@ -22,10 +24,11 @@ const generateGrid = (words: string[]): { grid: Grid, wordPositions: Map<string,
         { x: 0, y: 1 }, // Vertical
         { x: 1, y: 1 }, // Diagonal down-right
         { x: -1, y: 1 }, // Diagonal up-right
-        { x: -1, y: 0 }, // Horizontal-reverse
-        { x: 0, y: -1 }, // Vertical-reverse
-        { x: -1, y: -1}, // Diagonal up-left
-        { x: 1, y: -1}, // Diagonal down-left
+        // For simplicity, let's stick to forward directions for now
+        // { x: -1, y: 0 }, // Horizontal-reverse
+        // { x: 0, y: -1 }, // Vertical-reverse
+        // { x: -1, y: -1}, // Diagonal up-left
+        // { x: 1, y: -1}, // Diagonal down-left
     ];
 
     const placeWord = (word: string): boolean => {
@@ -85,13 +88,15 @@ const generateGrid = (words: string[]): { grid: Grid, wordPositions: Map<string,
 };
 
 
-export function WordSearchGame({ words }: WordSearchGameProps) {
+export function WordSearchGame({ words, onScoreChange, initialScore }: WordSearchGameProps) {
     const [grid, setGrid] = useState<Grid>([]);
     const [wordPositions, setWordPositions] = useState<Map<string, Position[]>>(new Map());
     const [foundWords, setFoundWords] = useState<string[]>([]);
     const [startPosition, setStartPosition] = useState<Position | null>(null);
     const [foundCells, setFoundCells] = useState<Set<string>>(new Set());
     
+    const POINTS_PER_WORD = Math.floor(100 / words.length);
+
     const initializeGame = () => {
         const { grid: newGrid, wordPositions: newWordPositions } = generateGrid(words);
         setGrid(newGrid);
@@ -99,6 +104,7 @@ export function WordSearchGame({ words }: WordSearchGameProps) {
         setFoundWords([]);
         setStartPosition(null);
         setFoundCells(new Set());
+        onScoreChange(0);
     }
 
     useEffect(() => {
@@ -126,10 +132,14 @@ export function WordSearchGame({ words }: WordSearchGameProps) {
                 );
 
                 if(isMatch){
-                    setFoundWords(prev => [...prev, words.find(w => w.toUpperCase() === word)!]);
+                    const newFoundWords = [...foundWords, words.find(w => w.toUpperCase() === word)!];
+                    setFoundWords(newFoundWords);
+                    
                     const newFoundCells = new Set(foundCells);
                     positions.forEach(p => newFoundCells.add(`${p.row}-${p.col}`));
                     setFoundCells(newFoundCells);
+                    
+                    onScoreChange(newFoundWords.length * POINTS_PER_WORD);
                     break; 
                 }
             }
