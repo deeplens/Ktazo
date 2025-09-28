@@ -86,7 +86,8 @@ const GameSchema = z.object({
         z.array(JeopardyCategorySchema).describe('An array of 2-3 categories for a Jeopardy game. Each category should have 3 questions.'),
         VerseScrambleItemSchema.describe('A key bible verse from the sermon to be used in a word scramble game.'),
         z.array(TrueFalseQuestionSchema).describe('An array of exactly 20 true or false statements.'),
-        z.object({}).nullable().describe("For 'Word Cloud Hunt' or 'Reflection Roulette', this field is not used as the data is derived from other parts of the content.")
+        z.object({ words: z.array(z.string()).describe("A list of 15-20 single-word keywords from the sermon for the Word Cloud Hunt.") }),
+        z.object({}).nullable().describe("For 'Reflection Roulette', this field is not used as the data is derived from other parts of the content.")
     ]),
 });
 
