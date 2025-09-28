@@ -12,30 +12,44 @@ import { Progress } from '../ui/progress';
 
 interface FillInTheBlankGameProps {
   data: FillInTheBlankItem[];
+  onScoreChange: (score: number) => void;
+  initialScore: number;
 }
 
-export function FillInTheBlankGame({ data }: FillInTheBlankGameProps) {
+export function FillInTheBlankGame({ data, onScoreChange, initialScore }: FillInTheBlankGameProps) {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<number, { guess: string; isCorrect: boolean | null }>>({});
   const [isFinished, setIsFinished] = useState(false);
+  const [score, setScore] = useState(initialScore > 0 ? initialScore / (100 / data.length) : 0);
+
+  const POINTS_PER_QUESTION = 100 / (data.length || 4);
+  const totalQuestions = data.length;
 
   const currentItem = data[currentQuestionIndex];
   const currentAnswer = answers[currentQuestionIndex] || { guess: '', isCorrect: null };
   const isSubmitted = currentAnswer.isCorrect !== null;
-  const totalQuestions = data.length;
   
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (isSubmitted) return;
     const newAnswers = { ...answers };
     newAnswers[currentQuestionIndex] = { ...currentAnswer, guess: e.target.value };
     setAnswers(newAnswers);
   }
 
   const handleSubmit = () => {
-    if (!currentAnswer.guess.trim()) return;
+    if (!currentAnswer.guess.trim() || isSubmitted) return;
+    
     const isCorrect = currentAnswer.guess.trim().toLowerCase() === currentItem.blank.toLowerCase();
+    
     const newAnswers = { ...answers };
     newAnswers[currentQuestionIndex] = { ...currentAnswer, isCorrect: isCorrect };
     setAnswers(newAnswers);
+
+    if (isCorrect) {
+        const newScore = score + 1;
+        setScore(newScore);
+        onScoreChange(Math.round(newScore * POINTS_PER_QUESTION));
+    }
   };
 
   const handleNext = () => {
@@ -56,11 +70,12 @@ export function FillInTheBlankGame({ data }: FillInTheBlankGameProps) {
     setCurrentQuestionIndex(0);
     setAnswers({});
     setIsFinished(false);
+    setScore(0);
+    onScoreChange(0);
   }
 
-  const score = Object.values(answers).filter(a => a.isCorrect).length;
-
   if (isFinished) {
+    const finalScore = Math.round(score * POINTS_PER_QUESTION);
     return (
         <Card className="w-full">
             <CardHeader>
@@ -68,7 +83,8 @@ export function FillInTheBlankGame({ data }: FillInTheBlankGameProps) {
                 <CardDescription>You've answered all the questions.</CardDescription>
             </CardHeader>
             <CardContent>
-                <p className="text-2xl font-bold text-center">Your Score: {score} / {totalQuestions}</p>
+                <p className="text-2xl font-bold text-center">Your Score: {finalScore}</p>
+                 <p className="text-center text-muted-foreground">{score} / {totalQuestions} correct</p>
             </CardContent>
             <CardFooter>
                 <Button onClick={handleRestart} className="w-full">Play Again</Button>
@@ -78,7 +94,6 @@ export function FillInTheBlankGame({ data }: FillInTheBlankGameProps) {
   }
   
   if (!currentItem) {
-    // This can happen briefly when the game finishes before the `isFinished` state update renders.
     return null;
   }
 
@@ -101,6 +116,7 @@ export function FillInTheBlankGame({ data }: FillInTheBlankGameProps) {
             type="text"
             value={currentAnswer.guess}
             onChange={handleInputChange}
+            onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
             disabled={isSubmitted}
             className="inline-block w-32 md:w-48 h-10 text-center text-lg bg-background"
             style={{ minWidth: `${(currentItem.blank.length || 10) * 0.9}ch` }}
@@ -112,7 +128,7 @@ export function FillInTheBlankGame({ data }: FillInTheBlankGameProps) {
           <Alert variant={currentAnswer.isCorrect ? 'default' : 'destructive'} className={currentAnswer.isCorrect ? 'border-green-500' : ''}>
              {currentAnswer.isCorrect ? <CheckCircle className="h-4 w-4" /> : <XCircle className="h-4 w-4" />}
             <AlertDescription className="font-semibold">
-              {currentAnswer.isCorrect ? 'Correct! Well done.' : `Not quite. The correct answer is "${currentItem.blank}".`}
+              {currentAnswer.isCorrect ? `Correct! +${Math.round(POINTS_PER_QUESTION)} points.` : `Not quite. The correct answer is "${currentItem.blank}".`}
             </AlertDescription>
           </Alert>
         )}

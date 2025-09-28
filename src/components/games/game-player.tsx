@@ -154,7 +154,7 @@ export function GamePlayer({ game, onScoreChange, initialScore }: GamePlayerProp
                     case "Matching":
                         return <MatchingGame items={game.data as MatchingGameItem[]} onScoreChange={onScoreChange} initialScore={initialScore} />;
                     case "Fill in the Blank":
-                        return <FillInTheBlankGame data={game.data as FillInTheBlankItem[]} />;
+                        return <FillInTheBlankGame data={game.data as FillInTheBlankItem[]} onScoreChange={onScoreChange} initialScore={initialScore} />;
                     case "Word Guess":
                         return <WordGuessGame data={game.data as WordGuessItem[]} />;
                     case "Wordle":
