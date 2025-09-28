@@ -15,23 +15,34 @@ import { Label } from '../ui/label';
 
 interface SermonEscapeRoomGameProps {
   data: SermonEscapeRoomPuzzle[];
+  onScoreChange: (score: number) => void;
+  initialScore: number;
 }
 
-export function SermonEscapeRoomGame({ data }: SermonEscapeRoomGameProps) {
+export function SermonEscapeRoomGame({ data, onScoreChange, initialScore }: SermonEscapeRoomGameProps) {
   const [currentStep, setCurrentStep] = useState(0);
   const [userInput, setUserInput] = useState('');
   const [feedback, setFeedback] = useState<string | null>(null);
   const [isLocked, setIsLocked] = useState(true);
   const [isFinished, setIsFinished] = useState(false);
+  const [score, setScore] = useState(initialScore);
 
   const totalSteps = data.length;
   const currentPuzzle = data[currentStep];
+  const POINTS_PER_STEP = Math.round(100 / (totalSteps || 1));
 
   const checkAnswer = () => {
     const isCorrect = userInput.trim().toLowerCase() === currentPuzzle.answer.toLowerCase();
     if (isCorrect) {
       setFeedback(currentPuzzle.feedback);
       setIsLocked(false);
+      
+      // Award points only if this step hasn't been scored yet
+      const newPotentialScore = (currentStep + 1) * POINTS_PER_STEP;
+      if (score < newPotentialScore) {
+          setScore(newPotentialScore);
+          onScoreChange(newPotentialScore);
+      }
     } else {
       setFeedback("That's not quite right. Try looking at the hint again or thinking about the sermon in a different way.");
     }
@@ -54,6 +65,8 @@ export function SermonEscapeRoomGame({ data }: SermonEscapeRoomGameProps) {
     setFeedback(null);
     setUserInput('');
     setIsFinished(false);
+    setScore(0);
+    onScoreChange(0);
   }
 
   if (isFinished) {
@@ -65,6 +78,7 @@ export function SermonEscapeRoomGame({ data }: SermonEscapeRoomGameProps) {
                 <CardDescription>You've successfully completed the Sermon Escape Room.</CardDescription>
             </CardHeader>
             <CardContent>
+                <p className="text-2xl font-bold text-center">Final Score: {score}</p>
                 <p className="text-muted-foreground text-center">You've shown great attentiveness to the sermon's message. Well done!</p>
             </CardContent>
             <CardFooter>
@@ -128,7 +142,7 @@ export function SermonEscapeRoomGame({ data }: SermonEscapeRoomGameProps) {
             {feedback && (
                 <Alert variant={isLocked ? 'destructive' : 'default'} className={cn(!isLocked && "border-green-500")}>
                     {isLocked ? <XCircle className="h-4 w-4" /> : <CheckCircle className="h-4 w-4" />}
-                    <AlertTitle>{isLocked ? 'Incorrect' : 'Correct!'}</AlertTitle>
+                    <AlertTitle>{isLocked ? 'Incorrect' : `Correct! +${POINTS_PER_STEP} points`}</AlertTitle>
                     <AlertDescription>
                         {feedback}
                     </AlertDescription>

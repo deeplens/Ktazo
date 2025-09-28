@@ -170,7 +170,7 @@ export function GamePlayer({ game, onScoreChange, initialScore }: GamePlayerProp
                     case "Two Truths and a Lie":
                         return <TwoTruthsAndALieGame data={game.data as TwoTruthsAndALieItem[]} />;
                     case "Sermon Escape Room":
-                        return <SermonEscapeRoomGame data={game.data as SermonEscapeRoomPuzzle[]} />;
+                        return <SermonEscapeRoomGame data={game.data as SermonEscapeRoomPuzzle[]} onScoreChange={onScoreChange} initialScore={initialScore} />;
                     default:
                         return <p>Unknown game type</p>;
                 }
