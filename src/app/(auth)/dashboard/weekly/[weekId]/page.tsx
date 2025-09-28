@@ -1,4 +1,5 @@
 
+
 'use client';
 import { notFound, useParams } from "next/navigation";
 import Image from "next/image";
@@ -6,7 +7,7 @@ import { getMockSermons, getMockWeeklyContent, getAnswersForSermon, saveAnswersF
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
-import { Gamepad2, Headphones, MessageCircleQuestion, Users, User, HeartHandshake, MessageSquare, MicVocal, Languages, BookOpen, HandHeart, Sparkles, Globe, Target, Briefcase, Flower } from "lucide-react";
+import { Gamepad2, Headphones, MessageCircleQuestion, Users, User, HeartHandshake, MessageSquare, MicVocal, Languages, BookOpen, HandHeart, Sparkles, Globe, Target, Briefcase, Flower, Puzzle, Search, Brackets, Binary, WholeWord, KeyRound, Type, CheckSquare, Brain, Quote, ListChecks } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Sermon, WeeklyContent, Game, VerseScrambleItem, BibleReadingPlanItem, SpiritualPractice, OutwardFocusItem } from "@/lib/types";
@@ -129,6 +130,24 @@ function WeeklyPageContent({ sermon, weeklyContent, answers, setAnswers, availab
         default: return <Users className="h-4 w-4" />;
     }
   };
+
+  const getIconForGame = (gameType: Game['type']) => {
+    switch (gameType) {
+        case 'Quiz': return <ListChecks className="w-8 h-8 text-primary" />;
+        case 'Word Search': return <Search className="w-8 h-8 text-primary" />;
+        case 'Fill in the Blank': return <Brackets className="w-8 h-8 text-primary" />;
+        case 'Matching': return <Puzzle className="w-8 h-8 text-primary" />;
+        case 'Word Guess': return <Brain className="w-8 h-8 text-primary" />;
+        case 'Wordle': return <WholeWord className="w-8 h-8 text-primary" />;
+        case 'Jeopardy': return <Binary className="w-8 h-8 text-primary" />;
+        case 'Verse Scramble': return <Type className="w-8 h-8 text-primary" />;
+        case 'True/False': return <CheckSquare className="w-8 h-8 text-primary" />;
+        case 'Word Cloud Hunt': return <Quote className="w-8 h-8 text-primary" />;
+        case 'Two Truths and a Lie': return <Puzzle className="w-8 h-8 text-primary" />;
+        case 'Sermon Escape Room': return <KeyRound className="w-8 h-8 text-primary" />;
+        default: return <Gamepad2 className="w-8 h-8 text-primary" />;
+    }
+  }
 
   if (!weeklyContent) {
     return <div>No content available for this week.</div>
@@ -344,8 +363,13 @@ function WeeklyPageContent({ sermon, weeklyContent, answers, setAnswers, availab
                       <DialogTrigger asChild>
                           <Card className="hover:bg-accent/50 cursor-pointer transition-colors flex flex-col h-full">
                               <CardHeader className="flex-grow">
-                                  <CardTitle className="text-lg">{game.title}</CardTitle>
-                                  <CardDescription>Game Type: {game.type}</CardDescription>
+                                <div className="flex justify-between items-start gap-4">
+                                  <div>
+                                    <CardTitle className="text-lg">{game.title}</CardTitle>
+                                    <CardDescription>Game Type: {game.type}</CardDescription>
+                                  </div>
+                                  {getIconForGame(game.type)}
+                                </div>
                               </CardHeader>
                               <CardFooter>
                                 <Badge variant="secondary" className="w-fit">{game.audience}</Badge>
@@ -404,5 +428,7 @@ function WeeklyPageContent({ sermon, weeklyContent, answers, setAnswers, availab
     </div>
   );
 }
+
+    
 
     
