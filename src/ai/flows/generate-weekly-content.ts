@@ -73,7 +73,7 @@ const TrueFalseQuestionSchema = z.object({
 });
 
 const GameSchema = z.object({
-    type: z.enum(['Quiz', 'Word Search', 'Fill in the Blank', 'Matching', 'Word Guess', 'Wordle', 'Jeopardy', 'Verse Scramble', 'True/False', 'Word Cloud Hunt']),
+    type: z.enum(['Quiz', 'Word Search', 'Fill in the Blank', 'Matching', 'Word Guess', 'Wordle', 'Jeopardy', 'Verse Scramble', 'True/False', 'Word Cloud Hunt', 'Reflection Roulette']),
     title: z.string(),
     audience: z.enum(['Youth', 'Adults']),
     data: z.union([
@@ -86,6 +86,7 @@ const GameSchema = z.object({
         z.array(JeopardyCategorySchema).describe('An array of 2-3 categories for a Jeopardy game. Each category should have 3 questions.'),
         VerseScrambleItemSchema.describe('A key bible verse from the sermon to be used in a word scramble game.'),
         z.array(TrueFalseQuestionSchema).describe('An array of exactly 20 true or false statements.'),
+        z.object({}).describe("An empty object, as this game uses the main reflection questions.")
     ]),
 });
 
@@ -124,7 +125,7 @@ const GenerateWeeklyContentOutputSchema = z.object({
       friday: z.string().describe('A devotional for Friday, approximately 200 words.'),
   }).describe('An object containing five daily devotionals for Mon-Fri.'),
   reflectionQuestions: z.array(ReflectionQuestionGroupSchema).describe('An array of reflection question groups for different audiences.'),
-  games: z.array(GameSchema).describe("An array of 11 interactive games based on the sermon. One game MUST be a 'Jeopardy' game. One game MUST be a 'Verse Scramble' game. One game MUST be a 'True/False' game with exactly 20 questions. One game MUST be a 'Word Cloud Hunt' with 15-20 key words. Include a mix of other types like Quiz, Word Search, Fill in the Blank, Matching, Word Guess, or Wordle. For Quizzes, provide 3-4 questions with 4 multiple-choice options each. For Matching games, provide 4-6 pairs of terms and definitions. For Fill in the Blank, provide four key sentences with an important word missing. For Word Guess, provide four key words from the sermon, each with a hint. For Wordle, provide a single, relevant 5-letter word from the sermon. For the required Jeopardy game, create 2-3 categories with 3 questions each, with point values of 200, 400, and 600."),
+  games: z.array(GameSchema).describe("An array of 12 interactive games based on the sermon. One game MUST be a 'Jeopardy' game. One game MUST be a 'Verse Scramble' game. One game MUST be a 'True/False' game with exactly 20 questions. One game MUST be a 'Word Cloud Hunt' with 15-20 key words. One game MUST be a 'Reflection Roulette' game. Include a mix of other types like Quiz, Word Search, Fill in the Blank, Matching, Word Guess, or Wordle. For Quizzes, provide 3-4 questions with 4 multiple-choice options each. For Matching games, provide 4-6 pairs of terms and definitions. For Fill in the Blank, provide four key sentences with an important word missing. For Word Guess, provide four key words from the sermon, each with a hint. For Wordle, provide a single, relevant 5-letter word from the sermon. For the required Jeopardy game, create 2-3 categories with 3 questions each, with point values of 200, 400, and 600. For Reflection Roulette, the data object can be empty."),
   bibleReadingPlan: z.array(BibleReadingPlanItemSchema).describe('An array of 2-3 thematic Bible reading connections based on the sermon, including cross-references and Old/New Testament echoes.'),
   spiritualPractices: z.array(SpiritualPracticeSchema).describe('An array of 2-3 small, practical spiritual practice challenges related to the sermon theme (e.g., fasting one meal, practicing hospitality, journaling gratitude).'),
   outwardFocus: z.object({
@@ -161,11 +162,12 @@ const generateWeeklyContentPrompt = ai.definePrompt({
   - Two one-liner reminders (oneLiners): one for Tuesday and one for Thursday. These should be concise, memorable, and impactful quotes or thoughts directly from the sermon.
   - An object containing five daily devotionals for Monday (monday), Tuesday (tuesday), Wednesday (wednesday), Thursday (thursday), and Friday (friday). Each devotional should be substantial, around 200 words long.
   - Reflection questions for four audiences: Individuals, Families, Small Groups, and Youth. Each audience should have its own group with 3-4 questions.
-  - An array of exactly 11 interactive games based on the sermon's content. 
+  - An array of exactly 12 interactive games based on the sermon's content. 
     - One of these games MUST be a 'Jeopardy' game. For the Jeopardy game, the 'answer' field MUST be in the form of a question (e.g., "What is..."). Create 2-3 categories, each with 3 questions having point values of 200, 400, and 600.
     - One of the games must be a 'Verse Scramble' game based on a key bible verse from the sermon. 
     - One of the games must be a 'True/False' game. It must contain exactly 20 questions.
     - One of the games must be a 'Word Cloud Hunt'. For this game, provide a list of 15-20 important, single-word keywords from the sermon.
+    - One of the games must be a 'Reflection Roulette' game. For this game, the data field should be an empty object, as it will use the main reflection questions.
     - Include a mix of other game types like 'Quiz', 'Word Search', 'Fill in the Blank', 'Matching', 'Word Guess', or 'Wordle'. 
     - For Quizzes, provide 3-4 questions with 4 multiple-choice options each. 
     - For Matching games, provide 4-6 pairs of terms and definitions. 

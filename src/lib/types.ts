@@ -92,10 +92,10 @@ export interface TrueFalseQuestion {
 }
 
 export interface Game {
-    type: 'Quiz' | 'Word Search' | 'Fill in the Blank' | 'Matching' | 'Word Guess' | 'Wordle' | 'Jeopardy' | 'Verse Scramble' | 'True/False' | 'Word Cloud Hunt';
+    type: 'Quiz' | 'Word Search' | 'Fill in the Blank' | 'Matching' | 'Word Guess' | 'Wordle' | 'Jeopardy' | 'Verse Scramble' | 'True/False' | 'Word Cloud Hunt' | 'Reflection Roulette';
     title: string;
     audience: 'Youth' | 'Adults';
-    data: GameQuestion[] | { words: string[] } | FillInTheBlankItem[] | MatchingGameItem[] | WordGuessItem[] | WordleItem | JeopardyCategory[] | VerseScrambleItem | TrueFalseQuestion[];
+    data: GameQuestion[] | { words: string[] } | FillInTheBlankItem[] | MatchingGameItem[] | WordGuessItem[] | WordleItem | JeopardyCategory[] | VerseScrambleItem | TrueFalseQuestion[] | {};
 }
 
 export interface BibleReadingPlanItem {

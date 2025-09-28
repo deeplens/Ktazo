@@ -1,7 +1,7 @@
 
 'use client';
 
-import { Game, GameQuestion, MatchingGameItem, FillInTheBlankItem, WordGuessItem, WordleItem, JeopardyCategory, VerseScrambleItem, TrueFalseQuestion } from "@/lib/types";
+import { Game, GameQuestion, MatchingGameItem, FillInTheBlankItem, WordGuessItem, WordleItem, JeopardyCategory, VerseScrambleItem, TrueFalseQuestion, ReflectionQuestionGroup } from "@/lib/types";
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../ui/card";
 import { Button } from "../ui/button";
@@ -17,6 +17,8 @@ import { JeopardyGame } from "./jeopardy-game";
 import { VerseScrambleGame } from "./verse-scramble";
 import { TrueFalseGame } from "./true-false-game";
 import { WordCloudHunt } from "./word-cloud-hunt";
+import { ReflectionRoulette } from "./reflection-roulette";
+import { getMockWeeklyContent } from "@/lib/mock-data";
 
 interface GamePlayerProps {
     game: Game;
@@ -137,6 +139,11 @@ export function GamePlayer({ game }: GamePlayerProps) {
             return <TrueFalseGame data={game.data as TrueFalseQuestion[]} />;
         case "Word Cloud Hunt":
             return <WordCloudHunt words={(game.data as { words: string[] }).words} />;
+        case "Reflection Roulette": {
+            const weeklyContent = getMockWeeklyContent().find(wc => wc.games.some(g => g.title === game.title));
+            const questions = weeklyContent ? weeklyContent.reflectionQuestions.flatMap(qg => qg.questions) : [];
+            return <ReflectionRoulette questions={questions} />;
+        }
         default:
             return <p>Unknown game type</p>;
     }
