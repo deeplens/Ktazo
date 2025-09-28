@@ -1,8 +1,4 @@
 
-
-
-
-
 export type UserRole = 'MASTER' | 'ADMIN' | 'PASTOR' | 'MEMBER';
 
 export interface User {
@@ -94,11 +90,17 @@ export interface TrueFalseQuestion {
     isTrue: boolean;
 }
 
+export interface TwoTruthsAndALieItem {
+    truth1: string;
+    truth2: string;
+    lie: string;
+}
+
 export interface Game {
-    type: 'Quiz' | 'Word Search' | 'Fill in the Blank' | 'Matching' | 'Word Guess' | 'Wordle' | 'Jeopardy' | 'Verse Scramble' | 'True/False' | 'Word Cloud Hunt';
+    type: 'Quiz' | 'Word Search' | 'Fill in the Blank' | 'Matching' | 'Word Guess' | 'Wordle' | 'Jeopardy' | 'Verse Scramble' | 'True/False' | 'Word Cloud Hunt' | 'Two Truths and a Lie';
     title: string;
     audience: 'Youth' | 'Adults';
-    data: GameQuestion[] | { words: string[] } | FillInTheBlankItem[] | MatchingGameItem[] | WordGuessItem[] | WordleItem | JeopardyCategory[] | VerseScrambleItem | TrueFalseQuestion[] | {};
+    data: GameQuestion[] | { words: string[] } | FillInTheBlankItem[] | MatchingGameItem[] | WordGuessItem[] | WordleItem | JeopardyCategory[] | VerseScrambleItem | TrueFalseQuestion[] | TwoTruthsAndALieItem[] | {};
 }
 
 export interface BibleReadingPlanItem {
@@ -178,5 +180,3 @@ export interface PrayerRequest {
     requestText: string;
     createdAt: string;
 }
-
-    

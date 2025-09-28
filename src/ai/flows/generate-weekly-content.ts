@@ -72,8 +72,14 @@ const TrueFalseQuestionSchema = z.object({
     isTrue: z.boolean().describe('Whether the statement is true or false.'),
 });
 
+const TwoTruthsAndALieItemSchema = z.object({
+    truth1: z.string().describe('The first true statement based on the sermon.'),
+    truth2: z.string().describe('The second true statement based on the sermon.'),
+    lie: z.string().describe('The false statement that is subtly incorrect.'),
+});
+
 const GameSchema = z.object({
-    type: z.enum(['Quiz', 'Word Search', 'Fill in the Blank', 'Matching', 'Word Guess', 'Wordle', 'Jeopardy', 'Verse Scramble', 'True/False', 'Word Cloud Hunt']),
+    type: z.enum(['Quiz', 'Word Search', 'Fill in the Blank', 'Matching', 'Word Guess', 'Wordle', 'Jeopardy', 'Verse Scramble', 'True/False', 'Word Cloud Hunt', 'Two Truths and a Lie']),
     title: z.string(),
     audience: z.enum(['Youth', 'Adults']),
     data: z.union([
@@ -87,6 +93,7 @@ const GameSchema = z.object({
         VerseScrambleItemSchema.describe('A key bible verse from the sermon to be used in a word scramble game.'),
         z.array(TrueFalseQuestionSchema).describe('An array of exactly 20 true or false statements.'),
         z.object({ words: z.array(z.string()).describe("A list of 15-20 single-word keywords from the sermon for the Word Cloud Hunt.") }),
+        z.array(TwoTruthsAndALieItemSchema).describe('An array of 3-5 sets of statements for the "Two Truths and a Lie" game.'),
     ]),
 });
 
@@ -125,7 +132,7 @@ const GenerateWeeklyContentOutputSchema = z.object({
       friday: z.string().describe('A devotional for Friday, approximately 200 words.'),
   }).describe('An object containing five daily devotionals for Mon-Fri.'),
   reflectionQuestions: z.array(ReflectionQuestionGroupSchema).describe('An array of reflection question groups for different audiences.'),
-  games: z.array(GameSchema).max(12).describe("An array of interactive games based on the sermon. If the sermon material is not substantial enough to create 12 high-quality, distinct games, generate fewer. One game MUST be a 'Jeopardy' game. One game MUST be a 'Verse Scramble' game. One game MUST be a 'True/False' game with exactly 20 questions. One game MUST be a 'Word Cloud Hunt' with 15-20 key words. Include a mix of other types like Quiz, Word Search, Fill in the Blank, Matching, Word Guess, or Wordle. For Quizzes, provide 3-4 questions with 4 multiple-choice options each. For Matching games, provide 4-6 pairs of terms and definitions. For Fill in the Blank, provide four key sentences with an important word missing. For Word Guess, provide four key words from the sermon, each with a hint. For Wordle, provide a single, relevant 5-letter word from the sermon. For the required Jeopardy game, create 2-3 categories with 3 questions each, with point values of 200, 400, and 600."),
+  games: z.array(GameSchema).max(12).describe("An array of interactive games based on the sermon. If the sermon material is not substantial enough to create 12 high-quality, distinct games, generate fewer. One game MUST be a 'Jeopardy' game. One game MUST be a 'Verse Scramble' game. One game MUST be a 'True/False' game with exactly 20 questions. One game MUST be a 'Word Cloud Hunt' with 15-20 key words. Include a mix of other types like Quiz, Word Search, Fill in the Blank, Matching, Word Guess, Wordle, or 'Two Truths and a Lie'. For Quizzes, provide 3-4 questions with 4 multiple-choice options each. For Matching games, provide 4-6 pairs of terms and definitions. For Fill in the Blank, provide four key sentences with an important word missing. For Word Guess, provide four key words from the sermon, each with a hint. For Wordle, provide a single, relevant 5-letter word from the sermon. For the required Jeopardy game, create 2-3 categories with 3 questions each, with point values of 200, 400, and 600. For 'Two Truths and a Lie', generate 3-5 rounds, where each round has two true statements and one subtle lie based on the sermon."),
   bibleReadingPlan: z.array(BibleReadingPlanItemSchema).describe('An array of 2-3 thematic Bible reading connections based on the sermon, including cross-references and Old/New Testament echoes.'),
   spiritualPractices: z.array(SpiritualPracticeSchema).describe('An array of 2-3 small, practical spiritual practice challenges related to the sermon theme (e.g., fasting one meal, practicing hospitality, journaling gratitude).'),
   outwardFocus: z.object({
@@ -167,12 +174,13 @@ const generateWeeklyContentPrompt = ai.definePrompt({
     - One of the games must be a 'Verse Scramble' game based on a key bible verse from the sermon. 
     - One of the games must be a 'True/False' game. It must contain exactly 20 questions.
     - One of the games must be a 'Word Cloud Hunt'. For this game, provide a list of 15-20 important, single-word keywords from the sermon in the 'words' field of the 'data' object.
-    - Fill the remaining slots with a mix of other game types like 'Quiz', 'Word Search', 'Fill in the Blank', 'Matching', 'Word Guess', or 'Wordle'. 
+    - Fill the remaining slots with a mix of other game types like 'Quiz', 'Word Search', 'Fill in the Blank', 'Matching', 'Word Guess', 'Wordle', or 'Two Truths and a Lie'. 
     - For Quizzes, provide 3-4 questions with 4 multiple-choice options each. 
     - For Matching games, provide 4-6 pairs of terms and definitions. 
     - For Fill in the Blank, provide four key sentences with an important word missing. 
     - For Word Guess, provide four key words from the sermon, each with a hint for it. 
     - For Wordle, provide one significant 5-letter word from the sermon.
+    - For 'Two Truths and a Lie', generate 3-5 rounds. Each round must contain two statements that are true to the sermon and one statement that is a subtle, believable lie.
   - A Bible Reading Plan (bibleReadingPlan): Generate 2-3 thematic reading connections based on the sermon. For each theme, provide 2-3 relevant Bible passages (cross-references, Old/New Testament echoes) and a brief explanation for each passage's connection to the sermon.
   - A list of 2-3 Spiritual Practice Challenges (spiritualPractices): Generate small, practical challenges that are thematically related to the sermon. Examples include fasting one meal, practicing hospitality by inviting someone over, or keeping a gratitude journal for a week.
   - An Outward Focus section (outwardFocus):
@@ -209,5 +217,3 @@ const generateWeeklyContentFlow = ai.defineFlow(
     }
   }
 );
-
-    

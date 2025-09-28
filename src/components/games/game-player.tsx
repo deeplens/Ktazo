@@ -1,7 +1,7 @@
 
 'use client';
 
-import { Game, GameQuestion, MatchingGameItem, FillInTheBlankItem, WordGuessItem, WordleItem, JeopardyCategory, VerseScrambleItem, TrueFalseQuestion, ReflectionQuestionGroup } from "@/lib/types";
+import { Game, GameQuestion, MatchingGameItem, FillInTheBlankItem, WordGuessItem, WordleItem, JeopardyCategory, VerseScrambleItem, TrueFalseQuestion, TwoTruthsAndALieItem } from "@/lib/types";
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../ui/card";
 import { Button } from "../ui/button";
@@ -17,6 +17,7 @@ import { JeopardyGame } from "./jeopardy-game";
 import { VerseScrambleGame } from "./verse-scramble";
 import { TrueFalseGame } from "./true-false-game";
 import { WordCloudHunt } from "./word-cloud-hunt";
+import { TwoTruthsAndALieGame } from "./two-truths-and-a-lie";
 import { getMockWeeklyContent } from "@/lib/mock-data";
 
 interface GamePlayerProps {
@@ -138,9 +139,9 @@ export function GamePlayer({ game }: GamePlayerProps) {
             return <TrueFalseGame data={game.data as TrueFalseQuestion[]} />;
         case "Word Cloud Hunt":
             return <WordCloudHunt words={(game.data as { words: string[] }).words} />;
+        case "Two Truths and a Lie":
+            return <TwoTruthsAndALieGame data={game.data as TwoTruthsAndALieItem[]} />;
         default:
             return <p>Unknown game type</p>;
     }
 }
-
-    
