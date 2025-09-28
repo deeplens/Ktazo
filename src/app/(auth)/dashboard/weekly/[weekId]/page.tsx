@@ -3,11 +3,11 @@
 'use client';
 import { notFound, useParams } from "next/navigation";
 import Image from "next/image";
-import { getMockSermons, getMockWeeklyContent, getAnswersForSermon, saveAnswersForSermon } from "@/lib/mock-data";
+import { getMockSermons, getMockWeeklyContent, getAnswersForSermon, saveAnswersForSermon, getGameScoresForSermon, saveGameScore } from "@/lib/mock-data";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
-import { Gamepad2, Headphones, MessageCircleQuestion, Users, User, HeartHandshake, MessageSquare, MicVocal, Languages, BookOpen, HandHeart, Sparkles, Globe, Target, Briefcase, Flower, Puzzle, Search, Brackets, Binary, WholeWord, KeyRound, Type, CheckSquare, Brain, Quote, ListChecks } from "lucide-react";
+import { Gamepad2, Headphones, MessageCircleQuestion, Users, User, HeartHandshake, MessageSquare, MicVocal, Languages, BookOpen, HandHeart, Sparkles, Globe, Target, Briefcase, Flower, Puzzle, Search, Brackets, Binary, WholeWord, KeyRound, Type, CheckSquare, Brain, Quote, ListChecks, Star } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Sermon, WeeklyContent, Game, VerseScrambleItem, BibleReadingPlanItem, SpiritualPractice, OutwardFocusItem } from "@/lib/types";
@@ -28,6 +28,7 @@ export default function WeeklyPage() {
   const [allContent, setAllContent] = useState<Record<string, WeeklyContent | undefined>>({});
   const [selectedLanguage, setSelectedLanguage] = useState('en');
   const [answers, setAnswers] = useState<Record<string, string>>({});
+  const [gameScores, setGameScores] = useState<Record<string, number>>({});
   
   const weeklyContent = allContent[selectedLanguage];
 
@@ -45,19 +46,20 @@ export default function WeeklyPage() {
                 contents[lang] = allMockContent.find(wc => wc.id === contentId);
             }
             setAllContent(contents);
-            // Default to 'en' or the first available language
             setSelectedLanguage(contents['en'] ? 'en' : Object.keys(contents)[0] || 'en');
         }
         
         if (user && weekId) {
             const savedAnswers = getAnswersForSermon(user.id, weekId);
             setAnswers(savedAnswers);
+            const savedGameScores = getGameScoresForSermon(user.id, weekId);
+            setGameScores(savedGameScores);
         }
     }
   }, [weekId, user]);
 
   if (sermon === undefined || Object.keys(allContent).length === 0) {
-    return <div>Loading...</div>; // Or a skeleton loader
+    return <div>Loading...</div>;
   }
 
   if (!sermon || !weeklyContent) {
@@ -82,7 +84,7 @@ export default function WeeklyPage() {
             culturalEngagement: { title: 'Not available', description: '', details: '' },
         },
     };
-    return <WeeklyPageContent sermon={placeholderSermon || {} as Sermon} weeklyContent={placeholderContent} answers={{}} setAnswers={setAnswers} availableLanguages={[]} selectedLanguage="en" onSelectLanguage={() => {}} />;
+    return <WeeklyPageContent sermon={placeholderSermon || {} as Sermon} weeklyContent={placeholderContent} answers={{}} setAnswers={setAnswers} gameScores={{}} setGameScores={() => {}} availableLanguages={[]} selectedLanguage="en" onSelectLanguage={() => {}} />;
   }
   
   return <WeeklyPageContent 
@@ -90,6 +92,8 @@ export default function WeeklyPage() {
     weeklyContent={weeklyContent} 
     answers={answers} 
     setAnswers={setAnswers} 
+    gameScores={gameScores}
+    setGameScores={setGameScores}
     availableLanguages={Object.keys(allContent)}
     selectedLanguage={selectedLanguage}
     onSelectLanguage={setSelectedLanguage}
@@ -97,7 +101,7 @@ export default function WeeklyPage() {
 }
 
 
-function WeeklyPageContent({ sermon, weeklyContent, answers, setAnswers, availableLanguages, selectedLanguage, onSelectLanguage }: { sermon: Sermon, weeklyContent: WeeklyContent, answers: Record<string, string>, setAnswers: React.Dispatch<React.SetStateAction<Record<string, string>>>, availableLanguages: string[], selectedLanguage: string, onSelectLanguage: (lang: string) => void }) {
+function WeeklyPageContent({ sermon, weeklyContent, answers, setAnswers, gameScores, setGameScores, availableLanguages, selectedLanguage, onSelectLanguage }: { sermon: Sermon, weeklyContent: WeeklyContent, answers: Record<string, string>, setAnswers: React.Dispatch<React.SetStateAction<Record<string, string>>>, gameScores: Record<string, number>, setGameScores: React.Dispatch<React.SetStateAction<Record<string, number>>>, availableLanguages: string[], selectedLanguage: string, onSelectLanguage: (lang: string) => void }) {
   const { user } = useAuth();
   const { toast } = useToast();
   
@@ -120,6 +124,15 @@ function WeeklyPageContent({ sermon, weeklyContent, answers, setAnswers, availab
         });
     }
   };
+
+  const handleGameScoreChange = (gameTitle: string, newScore: number) => {
+    if (user) {
+        setGameScores(prev => ({ ...prev, [gameTitle]: newScore }));
+        saveGameScore(user.id, sermon.id, gameTitle, newScore);
+    }
+  };
+
+  const totalPoints = Object.values(gameScores).reduce((sum, score) => sum + score, 0);
 
   const getIconForAudience = (audience: string) => {
     switch (audience) {
@@ -276,7 +289,7 @@ function WeeklyPageContent({ sermon, weeklyContent, answers, setAnswers, availab
         </div>
 
         <div className="space-y-8">
-            {verseData && verseScrambleGame && <MemoryVerseCard verse={verseData.verse} reference={verseData.reference} game={verseScrambleGame} />}
+            {verseData && verseScrambleGame && <MemoryVerseCard verse={verseData.verse} reference={verseData.reference} game={verseScrambleGame} onScoreChange={(score) => handleGameScoreChange('Verse Scramble', score)} initialScore={gameScores['Verse Scramble'] || 0} />}
             <Card>
                 <CardHeader>
                     <CardTitle className="font-headline flex items-center gap-2"><Sparkles /> God Stories</CardTitle>
@@ -354,12 +367,18 @@ function WeeklyPageContent({ sermon, weeklyContent, answers, setAnswers, availab
 
       <Card id="games">
           <CardHeader>
+            <div className="flex justify-between items-center">
               <CardTitle className="font-headline flex items-center gap-2"><Gamepad2 /> Interactive Games</CardTitle>
-              <CardDescription>Engage with the sermon in a fun new way.</CardDescription>
+              <div className="flex items-center gap-2 text-xl font-bold text-primary">
+                  <Star className="text-yellow-400 fill-yellow-400" />
+                  <span>{totalPoints} Points</span>
+              </div>
+            </div>
+            <CardDescription>Engage with the sermon in a fun new way and earn points!</CardDescription>
           </CardHeader>
           <CardContent className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {weeklyContent.games?.map((game: Game, index: number) => (
-                  <Dialog key={index}>
+                  <Dialog key={`${game.title}-${index}`}>
                       <DialogTrigger asChild>
                           <Card className="hover:bg-accent/50 cursor-pointer transition-colors flex flex-col h-full">
                               <CardHeader className="flex-grow">
@@ -371,19 +390,19 @@ function WeeklyPageContent({ sermon, weeklyContent, answers, setAnswers, availab
                                   {getIconForGame(game.type)}
                                 </div>
                               </CardHeader>
-                              <CardFooter>
+                              <CardFooter className="flex justify-between items-center">
                                 <Badge variant="secondary" className="w-fit">{game.audience}</Badge>
+                                {gameScores[game.title] > 0 && (
+                                    <div className="flex items-center gap-1 text-sm font-semibold text-yellow-500">
+                                        <Star className="h-4 w-4 fill-current" />
+                                        <span>{gameScores[game.title]}</span>
+                                    </div>
+                                )}
                               </CardFooter>
                           </Card>
                       </DialogTrigger>
                       <DialogContent className="max-w-4xl">
-                          <DialogHeader>
-                          <DialogTitle>{game.title}</DialogTitle>
-                          <DialogDescription>
-                              An interactive '{game.type}' game for {game.audience}.
-                          </DialogDescription>
-                          </DialogHeader>
-                          <GamePlayer game={game} />
+                          <GamePlayer game={game} onScoreChange={(score) => handleGameScoreChange(game.title, score)} initialScore={gameScores[game.title] || 0} />
                       </DialogContent>
                   </Dialog>
               ))}
@@ -428,7 +447,3 @@ function WeeklyPageContent({ sermon, weeklyContent, answers, setAnswers, availab
     </div>
   );
 }
-
-    
-
-    

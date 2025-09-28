@@ -1,6 +1,6 @@
 
 
-import type { Sermon, User, WeeklyContent, ReflectionAnswer, TenantSettings, PrayerRequest } from './types';
+import type { Sermon, User, WeeklyContent, ReflectionAnswer, TenantSettings, PrayerRequest, GameScore } from './types';
 
 export const mockUsers: User[] = [
   { id: 'user-master-1', tenantId: 'tenant-1', authId: 'auth-master-1', role: 'MASTER', name: 'Master User', email: 'master@ktazo.com', lastLoginAt: new Date().toISOString(), points: 0 },
@@ -740,6 +740,49 @@ export const deletePrayerRequest = (requestId: string) => {
         sessionStorage.setItem(PRAYER_REQUESTS_KEY, JSON.stringify(updatedRequests));
     }
 }
+
+
+const GAME_SCORES_KEY = 'ktazo-game-scores';
+const initialGameScores: GameScore[] = [];
+
+export const getMockGameScores = (): GameScore[] => {
+    if (typeof window !== 'undefined') {
+        const stored = sessionStorage.getItem(GAME_SCORES_KEY);
+        if (stored) {
+            try {
+                return JSON.parse(stored);
+            } catch (e) {
+                return initialGameScores;
+            }
+        }
+    }
+    return initialGameScores;
+};
+
+export const getGameScoresForSermon = (userId: string, sermonId: string): Record<string, number> => {
+    const allScores = getMockGameScores();
+    const userSermonScores = allScores.filter(s => s.userId === userId && s.sermonId === sermonId);
+    const scores: Record<string, number> = {};
+    userSermonScores.forEach(s => {
+        scores[s.gameId] = s.score;
+    });
+    return scores;
+};
+
+export const saveGameScore = (userId: string, sermonId: string, gameId: string, score: number) => {
+    if (typeof window !== 'undefined') {
+        let allScores = getMockGameScores();
+        const existingScoreIndex = allScores.findIndex(s => s.userId === userId && s.sermonId === sermonId && s.gameId === gameId);
+
+        if (existingScoreIndex > -1) {
+            allScores[existingScoreIndex].score = score;
+        } else {
+            allScores.push({ userId, sermonId, gameId, score });
+        }
+        sessionStorage.setItem(GAME_SCORES_KEY, JSON.stringify(allScores));
+    }
+};
+
 
 // For initial load, we still need this export for components that use it directly
 export const mockWeeklyContent = getMockWeeklyContent();

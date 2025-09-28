@@ -1,4 +1,5 @@
 
+
 export type UserRole = 'MASTER' | 'ADMIN' | 'PASTOR' | 'MEMBER';
 
 export interface User {
@@ -41,6 +42,13 @@ export interface ReflectionAnswer {
   userId: string;
   sermonId: string;
   answers: Record<string, string>;
+}
+
+export interface GameScore {
+    userId: string;
+    sermonId: string;
+    gameId: string;
+    score: number;
 }
 
 export interface GameQuestion {
@@ -127,7 +135,7 @@ export interface SpiritualPractice {
 
 export interface OutwardFocusItem {
     title: string;
-    description: string;
+    description:string;
     details: string;
 }
 

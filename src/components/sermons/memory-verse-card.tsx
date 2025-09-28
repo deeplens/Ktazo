@@ -13,9 +13,11 @@ interface MemoryVerseCardProps {
     verse: string;
     reference: string;
     game: Game;
+    onScoreChange: (score: number) => void;
+    initialScore: number;
 }
 
-export function MemoryVerseCard({ verse, reference, game }: MemoryVerseCardProps) {
+export function MemoryVerseCard({ verse, reference, game, onScoreChange, initialScore }: MemoryVerseCardProps) {
   return (
     <Card>
       <CardHeader>
@@ -39,11 +41,7 @@ export function MemoryVerseCard({ verse, reference, game }: MemoryVerseCardProps
             </Button>
           </DialogTrigger>
           <DialogContent className="max-w-4xl">
-              <DialogHeader>
-                  <DialogTitle>Practice the Memory Verse</DialogTitle>
-                  <DialogDescription>Unscramble the words to reconstruct the verse.</DialogDescription>
-              </DialogHeader>
-              <GamePlayer game={game} />
+              <GamePlayer game={game} onScoreChange={onScoreChange} initialScore={initialScore} />
           </DialogContent>
         </Dialog>
         <Dialog>

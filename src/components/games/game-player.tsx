@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { Game, GameQuestion, MatchingGameItem, FillInTheBlankItem, WordGuessItem, WordleItem, JeopardyCategory, VerseScrambleItem, TrueFalseQuestion, TwoTruthsAndALieItem, SermonEscapeRoomPuzzle } from "@/lib/types";
@@ -6,7 +7,7 @@ import { useState } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../ui/card";
 import { Button } from "../ui/button";
 import { cn } from "@/lib/utils";
-import { CheckCircle, XCircle, ArrowRight } from "lucide-react";
+import { CheckCircle, XCircle, ArrowRight, Star } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
 import { WordSearchGame } from "./word-search";
 import { MatchingGame } from "./matching-game";
@@ -19,17 +20,20 @@ import { TrueFalseGame } from "./true-false-game";
 import { WordCloudHunt } from "./word-cloud-hunt";
 import { TwoTruthsAndALieGame } from "./two-truths-and-a-lie";
 import { SermonEscapeRoomGame } from "./sermon-escape-room";
-import { getMockWeeklyContent } from "@/lib/mock-data";
 
 interface GamePlayerProps {
     game: Game;
+    onScoreChange: (score: number) => void;
+    initialScore: number;
 }
 
-const QuizGame = ({ data }: { data: GameQuestion[] }) => {
+const QuizGame = ({ data, onScoreChange, initialScore }: { data: GameQuestion[], onScoreChange: (score: number) => void, initialScore: number }) => {
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
     const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
     const [isAnswered, setIsAnswered] = useState(false);
-    const [score, setScore] = useState(0);
+    const [score, setScore] = useState(initialScore / 10);
+    
+    const POINTS_PER_QUESTION = 10;
 
     const currentQuestion = data[currentQuestionIndex];
     const isFinished = currentQuestionIndex >= data.length;
@@ -39,7 +43,9 @@ const QuizGame = ({ data }: { data: GameQuestion[] }) => {
         setSelectedAnswer(option);
         setIsAnswered(true);
         if (option === currentQuestion.correctAnswer) {
-            setScore(prev => prev + 1);
+            const newScore = score + 1;
+            setScore(newScore);
+            onScoreChange(newScore * POINTS_PER_QUESTION);
         }
     };
 
@@ -54,6 +60,7 @@ const QuizGame = ({ data }: { data: GameQuestion[] }) => {
         setSelectedAnswer(null);
         setIsAnswered(false);
         setScore(0);
+        onScoreChange(0);
     }
 
     if (isFinished) {
@@ -64,7 +71,8 @@ const QuizGame = ({ data }: { data: GameQuestion[] }) => {
                     <CardDescription>You've finished the quiz.</CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <p className="text-2xl font-bold text-center">Your Score: {score} / {data.length}</p>
+                    <p className="text-2xl font-bold text-center">Your Score: {score * POINTS_PER_QUESTION}</p>
+                    <p className="text-center text-muted-foreground">{score} / {data.length} correct</p>
                 </CardContent>
                 <CardFooter>
                     <Button onClick={handleRestart} className="w-full">Play Again</Button>
@@ -106,7 +114,10 @@ const QuizGame = ({ data }: { data: GameQuestion[] }) => {
                     })}
                 </CardContent>
                 {isAnswered && (
-                     <CardFooter className="flex justify-end">
+                     <CardFooter className="flex justify-between items-center">
+                        <div className="text-sm text-muted-foreground">
+                            {option === selectedAnswer && option === currentQuestion.correctAnswer && `+${POINTS_PER_QUESTION} points!`}
+                        </div>
                         <Button onClick={handleNextQuestion}>
                            {currentQuestionIndex === data.length - 1 ? 'Finish Quiz' : 'Next Question'}
                            <ArrowRight className="ml-2 h-4 w-4"/>
@@ -118,33 +129,52 @@ const QuizGame = ({ data }: { data: GameQuestion[] }) => {
     )
 }
 
-export function GamePlayer({ game }: GamePlayerProps) {
-    switch (game.type) {
-        case "Quiz":
-            return <QuizGame data={game.data as GameQuestion[]} />;
-        case "Word Search":
-             return <WordSearchGame words={(game.data as { words: string[] }).words} />;
-        case "Matching":
-            return <MatchingGame items={game.data as MatchingGameItem[]} />;
-        case "Fill in the Blank":
-             return <FillInTheBlankGame data={game.data as FillInTheBlankItem[]} />;
-        case "Word Guess":
-             return <WordGuessGame data={game.data as WordGuessItem[]} />;
-        case "Wordle":
-             return <WordleGame data={game.data as WordleItem} />;
-        case "Jeopardy":
-            return <JeopardyGame data={game.data as JeopardyCategory[]} />;
-        case "Verse Scramble":
-            return <VerseScrambleGame data={game.data as VerseScrambleItem} />;
-        case "True/False":
-            return <TrueFalseGame data={game.data as TrueFalseQuestion[]} />;
-        case "Word Cloud Hunt":
-            return <WordCloudHunt words={(game.data as { words: string[] }).words} />;
-        case "Two Truths and a Lie":
-            return <TwoTruthsAndALieGame data={game.data as TwoTruthsAndALieItem[]} />;
-        case "Sermon Escape Room":
-            return <SermonEscapeRoomGame data={game.data as SermonEscapeRoomPuzzle[]} />;
-        default:
-            return <p>Unknown game type</p>;
-    }
+export function GamePlayer({ game, onScoreChange, initialScore }: GamePlayerProps) {
+    const gamePoints = game.type === 'Jeopardy' ? (game.data as JeopardyCategory[]).flatMap(c => c.questions).reduce((sum, q) => sum + q.points, 0) : 100;
+    
+    return (
+        <div>
+            <div className="flex justify-between items-center mb-4">
+                <div>
+                    <h3 className="text-lg font-bold">{game.title}</h3>
+                    <p className="text-sm text-muted-foreground">An interactive '{game.type}' game for {game.audience}.</p>
+                </div>
+                <div className="flex items-center gap-2 text-lg font-bold text-primary">
+                    <Star className="text-yellow-400 fill-yellow-400" />
+                    <span>{initialScore} / {gamePoints} Points</span>
+                </div>
+            </div>
+            
+            {(() => {
+                switch (game.type) {
+                    case "Quiz":
+                        return <QuizGame data={game.data as GameQuestion[]} onScoreChange={onScoreChange} initialScore={initialScore} />;
+                    case "Word Search":
+                        return <WordSearchGame words={(game.data as { words: string[] }).words} onScoreChange={onScoreChange} initialScore={initialScore} />;
+                    case "Matching":
+                        return <MatchingGame items={game.data as MatchingGameItem[]} onScoreChange={onScoreChange} initialScore={initialScore} />;
+                    case "Fill in the Blank":
+                        return <FillInTheBlankGame data={game.data as FillInTheBlankItem[]} onScoreChange={onScoreChange} initialScore={initialScore} />;
+                    case "Word Guess":
+                        return <WordGuessGame data={game.data as WordGuessItem[]} onScoreChange={onScoreChange} initialScore={initialScore} />;
+                    case "Wordle":
+                        return <WordleGame data={game.data as WordleItem} onScoreChange={onScoreChange} initialScore={initialScore} />;
+                    case "Jeopardy":
+                        return <JeopardyGame data={game.data as JeopardyCategory[]} onScoreChange={onScoreChange} initialScore={initialScore} />;
+                    case "Verse Scramble":
+                        return <VerseScrambleGame data={game.data as VerseScrambleItem} onScoreChange={onScoreChange} initialScore={initialScore} />;
+                    case "True/False":
+                        return <TrueFalseGame data={game.data as TrueFalseQuestion[]} onScoreChange={onScoreChange} initialScore={initialScore} />;
+                    case "Word Cloud Hunt":
+                        return <WordCloudHunt words={(game.data as { words: string[] }).words} onScoreChange={onScoreChange} initialScore={initialScore} />;
+                    case "Two Truths and a Lie":
+                        return <TwoTruthsAndALieGame data={game.data as TwoTruthsAndALieItem[]} onScoreChange={onScoreChange} initialScore={initialScore} />;
+                    case "Sermon Escape Room":
+                        return <SermonEscapeRoomGame data={game.data as SermonEscapeRoomPuzzle[]} onScoreChange={onScoreChange} initialScore={initialScore} />;
+                    default:
+                        return <p>Unknown game type</p>;
+                }
+            })()}
+        </div>
+    )
 }
