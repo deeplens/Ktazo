@@ -14,13 +14,18 @@ type Grid = (string | null)[][];
 type Position = { row: number; col: number };
 
 // Helper function to generate the word search grid
-const generateGrid = (words: string[]): Grid => {
+const generateGrid = (words: string[]): { grid: Grid, wordPositions: Map<string, Position[]> } => {
     const grid: Grid = Array(gridSize).fill(null).map(() => Array(gridSize).fill(null));
+    const wordPositions = new Map<string, Position[]>();
     const directions = [
         { x: 1, y: 0 }, // Horizontal
         { x: 0, y: 1 }, // Vertical
         { x: 1, y: 1 }, // Diagonal down-right
         { x: -1, y: 1 }, // Diagonal up-right
+        { x: -1, y: 0 }, // Horizontal-reverse
+        { x: 0, y: -1 }, // Vertical-reverse
+        { x: -1, y: -1}, // Diagonal up-left
+        { x: 1, y: -1}, // Diagonal down-left
     ];
 
     const placeWord = (word: string): boolean => {
@@ -48,11 +53,14 @@ const generateGrid = (words: string[]): Grid => {
                 }
 
                 if (canPlace) {
+                    const positions: Position[] = [];
                     for (let j = 0; j < wordLength; j++) {
                         const row = startRow + j * direction.y;
                         const col = startCol + j * direction.x;
                         grid[row][col] = word[j];
+                        positions.push({ row, col });
                     }
+                    wordPositions.set(word, positions);
                     return true;
                 }
             }
@@ -73,81 +81,68 @@ const generateGrid = (words: string[]): Grid => {
         }
     }
 
-    return grid;
+    return { grid, wordPositions };
 };
 
 
 export function WordSearchGame({ words }: WordSearchGameProps) {
     const [grid, setGrid] = useState<Grid>([]);
+    const [wordPositions, setWordPositions] = useState<Map<string, Position[]>>(new Map());
     const [foundWords, setFoundWords] = useState<string[]>([]);
-    const [isSelecting, setIsSelecting] = useState(false);
-    const [selection, setSelection] = useState<Position[]>([]);
+    const [startPosition, setStartPosition] = useState<Position | null>(null);
+    const [foundCells, setFoundCells] = useState<Set<string>>(new Set());
     
-    useEffect(() => {
-        setGrid(generateGrid(words));
+    const initializeGame = () => {
+        const { grid: newGrid, wordPositions: newWordPositions } = generateGrid(words);
+        setGrid(newGrid);
+        setWordPositions(newWordPositions);
         setFoundWords([]);
+        setStartPosition(null);
+        setFoundCells(new Set());
+    }
+
+    useEffect(() => {
+        initializeGame();
     }, [words]);
 
-    const handleMouseDown = (row: number, col: number) => {
-        setIsSelecting(true);
-        setSelection([{ row, col }]);
-    };
+    const handleCellClick = (row: number, col: number) => {
+        const cellKey = `${row}-${col}`;
+        if (foundCells.has(cellKey)) return;
 
-    const handleMouseEnter = (row: number, col: number) => {
-        if (!isSelecting) return;
-        
-        const start = selection[0];
-        const end = { row, col };
-        const newSelection: Position[] = [];
+        if (!startPosition) {
+            setStartPosition({ row, col });
+        } else {
+            const endPosition = { row, col };
+            
+            for(const [word, positions] of wordPositions.entries()){
+                if (foundWords.includes(word.toLowerCase())) continue;
 
-        const dx = Math.sign(end.col - start.col);
-        const dy = Math.sign(end.row - start.row);
+                const firstLetterPos = positions[0];
+                const lastLetterPos = positions[positions.length - 1];
+                
+                const isMatch = (
+                    (startPosition.row === firstLetterPos.row && startPosition.col === firstLetterPos.col && endPosition.row === lastLetterPos.row && endPosition.col === lastLetterPos.col) ||
+                    (startPosition.row === lastLetterPos.row && startPosition.col === lastLetterPos.col && endPosition.row === firstLetterPos.row && endPosition.col === firstLetterPos.col)
+                );
 
-        // Allow only straight lines (horizontal, vertical, diagonal)
-        if (Math.abs(end.col - start.col) === Math.abs(end.row - start.row) || start.col === end.col || start.row === end.row) {
-            let curr = { ...start };
-            while (curr.row !== end.row || curr.col !== end.col) {
-                newSelection.push({ ...curr });
-                curr.row += dy;
-                curr.col += dx;
+                if(isMatch){
+                    setFoundWords(prev => [...prev, words.find(w => w.toUpperCase() === word)!]);
+                    const newFoundCells = new Set(foundCells);
+                    positions.forEach(p => newFoundCells.add(`${p.row}-${p.col}`));
+                    setFoundCells(newFoundCells);
+                    break; 
+                }
             }
-            newSelection.push(end);
-            setSelection(newSelection);
+            setStartPosition(null);
         }
     };
-    
-    const handleMouseUp = () => {
-        if (!isSelecting) return;
-        setIsSelecting(false);
-        
-        const selectedWord = selection.map(({ row, col }) => grid[row]?.[col]).join('');
-        const reversedSelectedWord = selectedWord.split('').reverse().join('');
-        const upperCaseWords = words.map(w => w.toUpperCase());
 
-        if (upperCaseWords.includes(selectedWord) || upperCaseWords.includes(reversedSelectedWord)) {
-            const foundWord = upperCaseWords.includes(selectedWord) ? selectedWord : reversedSelectedWord;
-            if (!foundWords.map(w => w.toUpperCase()).includes(foundWord)) {
-                 setFoundWords(prev => [...prev, words.find(w => w.toUpperCase() === foundWord)!]);
-            }
-        }
-
-        setSelection([]);
-    };
-
-    const isCellSelected = (row: number, col: number) => {
-        return selection.some(p => p.row === row && p.col === col);
-    };
+    const handleRestart = () => {
+        initializeGame();
+    }
 
     const isCellFound = (row: number, col: number) => {
-        // This is a simplified check. A full implementation would store the positions of found words.
-        // For now, we rely on the user seeing the struck-through word in the list.
-        return false;
-    };
-    
-    const handleRestart = () => {
-        setGrid(generateGrid(words));
-        setFoundWords([]);
-        setSelection([]);
+        return foundCells.has(`${row}-${col}`);
     }
 
     if (grid.length === 0) {
@@ -157,17 +152,18 @@ export function WordSearchGame({ words }: WordSearchGameProps) {
     const allWordsFound = foundWords.length === words.length;
 
     return (
-        <div className="flex flex-col md:flex-row gap-8 items-start justify-center" onMouseUp={handleMouseUp} onMouseLeave={handleMouseUp}>
+        <div className="flex flex-col md:flex-row gap-8 items-start justify-center">
             <div className="flex-shrink-0 grid grid-cols-12 gap-1 bg-card p-2 rounded-lg shadow-inner select-none">
                 {grid.map((row, rowIndex) =>
                     row.map((cell, colIndex) => (
                         <div
                             key={`${rowIndex}-${colIndex}`}
-                            onMouseDown={() => handleMouseDown(rowIndex, colIndex)}
-                            onMouseEnter={() => handleMouseEnter(rowIndex, colIndex)}
+                            onClick={() => handleCellClick(rowIndex, colIndex)}
                             className={cn(
                                 'w-8 h-8 md:w-10 md:h-10 flex items-center justify-center text-lg font-bold border rounded-md cursor-pointer transition-colors',
-                                isCellSelected(rowIndex, colIndex) ? 'bg-primary text-primary-foreground' : 'bg-muted/50'
+                                isCellFound(rowIndex, colIndex) ? 'bg-primary text-primary-foreground' : 'bg-muted/50',
+                                startPosition?.row === rowIndex && startPosition?.col === colIndex && 'ring-2 ring-primary ring-offset-2',
+                                !isCellFound(rowIndex, colIndex) && 'hover:bg-accent'
                             )}
                         >
                             {cell}
