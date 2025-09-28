@@ -20,6 +20,7 @@ import { useAuth } from "@/lib/auth";
 import { MemoryVerseCard } from "@/components/sermons/memory-verse-card";
 import { PrayerWall } from "@/components/sermons/prayer-wall";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { cn } from "@/lib/utils";
 
 export default function WeeklyPage() {
   const params = useParams();
@@ -340,21 +341,21 @@ function WeeklyPageContent({ sermon, weeklyContent, answers, setAnswers, gameSco
             <CardContent>
                 <Tabs defaultValue="mission" className="w-full">
                     <TabsList className="grid w-full grid-cols-3">
-                        <TabsTrigger value="mission"><Target className="w-4 h-4 mr-2"/>Mission</TabsTrigger>
-                        <TabsTrigger value="service"><HeartHandshake className="w-4 h-4 mr-2"/>Service</TabsTrigger>
-                        <TabsTrigger value="culture"><Briefcase className="w-4 h-4 mr-2"/>Culture</TabsTrigger>
+                        <TabsTrigger value="mission" className={cn('data-[state=active]:bg-gray-200 dark:data-[state=active]:bg-gray-700')}><Target className="w-4 h-4 mr-2"/>Mission</TabsTrigger>
+                        <TabsTrigger value="service" className={cn('data-[state=active]:bg-gray-200 dark:data-[state=active]:bg-gray-700')}><HeartHandshake className="w-4 h-4 mr-2"/>Service</TabsTrigger>
+                        <TabsTrigger value="culture" className={cn('data-[state=active]:bg-gray-200 dark:data-[state=active]:bg-gray-700')}><Briefcase className="w-4 h-4 mr-2"/>Culture</TabsTrigger>
                     </TabsList>
-                    <TabsContent value="mission" className="mt-4 prose prose-stone dark:prose-invert max-w-none p-4 border-t-4 border-red-500 rounded-b-lg">
+                    <TabsContent value="mission" className="mt-4 prose prose-stone dark:prose-invert max-w-none p-4 rounded-b-lg">
                         <h3 className="font-bold">{weeklyContent.outwardFocus.missionFocus.title}</h3>
                         <p className="text-sm">{weeklyContent.outwardFocus.missionFocus.description}</p>
                         <p className="text-sm text-muted-foreground">{weeklyContent.outwardFocus.missionFocus.details}</p>
                     </TabsContent>
-                    <TabsContent value="service" className="mt-4 prose prose-stone dark:prose-invert max-w-none p-4 border-t-4 border-pink-500 rounded-b-lg">
+                    <TabsContent value="service" className="mt-4 prose prose-stone dark:prose-invert max-w-none p-4 rounded-b-lg">
                         <h3 className="font-bold">{weeklyContent.outwardFocus.serviceChallenge.title}</h3>
                          <p className="text-sm">{weeklyContent.outwardFocus.serviceChallenge.description}</p>
                         <p className="text-sm text-muted-foreground">{weeklyContent.outwardFocus.serviceChallenge.details}</p>
                     </TabsContent>
-                    <TabsContent value="culture" className="mt-4 prose prose-stone dark:prose-invert max-w-none p-4 border-t-4 border-amber-600 rounded-b-lg">
+                    <TabsContent value="culture" className="mt-4 prose prose-stone dark:prose-invert max-w-none p-4 rounded-b-lg">
                         <h3 className="font-bold">{weeklyContent.outwardFocus.culturalEngagement.title}</h3>
                          <p className="text-sm">{weeklyContent.outwardFocus.culturalEngagement.description}</p>
                         <p className="text-sm text-muted-foreground">{weeklyContent.outwardFocus.culturalEngagement.details}</p>
