@@ -50,15 +50,15 @@ export default function Dashboard() {
                             </div>
                         </div>
                     )}
-                     <div className="flex items-center gap-2 text-sm">
+                     <div className="flex items-center gap-2 text-lg">
                         <Wifi className="h-5 w-5 text-green-500" />
                          <div>
                             <span className="font-bold">{onlineUsers}</span>
-                            <span className="text-muted-foreground"> Online</span>
+                            <span className="font-bold"> Online</span>
                         </div>
                     </div>
                 </div>
-                <Button variant="link" className="h-auto p-0 mt-1" asChild>
+                <Button variant="link" className="h-auto p-0 mt-1 text-lg" asChild>
                     <Link href="/dashboard/admin/members">See Who is Online</Link>
                 </Button>
             </div>
