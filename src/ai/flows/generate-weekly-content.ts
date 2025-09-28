@@ -157,7 +157,7 @@ const generateWeeklyContentPrompt = ai.definePrompt({
   - oneLiners: An object with two fields, 'tuesday' and 'thursday', containing concise, impactful one-liner quotes from the sermon.
   - devotionals: An object with five fields (monday, tuesday, wednesday, thursday, friday), each containing a devotional of around 200 words.
   - reflectionQuestions: An array of question group objects. Each object in the array MUST have an 'audience' field (one of 'Individuals', 'Families', 'Small Groups', 'Youth') and a 'questions' field (an array of 3-4 strings).
-  - games: An array of up to 12 interactive game objects. Each game object MUST have a 'type', 'title', 'audience', and 'data' field. If the sermon material is not substantial enough to create 12 high-quality, distinct games, generate fewer.
+  - games: An array of up to 12 interactive game objects. Each game object MUST have a 'type', 'title', 'audience', and 'data' field. The 'audience' for games MUST be either 'Youth' or 'Adults'. If the sermon material is not substantial enough to create 12 high-quality, distinct games, generate fewer.
     - One game MUST be 'Jeopardy'.
     - One game MUST be 'Verse Scramble'.
     - One game MUST be 'True/False' with exactly 20 questions.
