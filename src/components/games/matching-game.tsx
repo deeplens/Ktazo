@@ -6,9 +6,12 @@ import { MatchingGameItem } from '@/lib/types';
 import { Card, CardContent } from '../ui/card';
 import { Button } from '../ui/button';
 import { cn } from '@/lib/utils';
+import { RefreshCcw } from 'lucide-react';
 
 interface MatchingGameProps {
   items: MatchingGameItem[];
+  onScoreChange: (score: number) => void;
+  initialScore: number;
 }
 
 type BoardItem = {
@@ -22,15 +25,26 @@ const shuffleArray = (array: any[]) => {
   return array.sort(() => Math.random() - 0.5);
 };
 
-export function MatchingGame({ items }: MatchingGameProps) {
+export function MatchingGame({ items, onScoreChange, initialScore }: MatchingGameProps) {
   const [board, setBoard] = useState<BoardItem[]>([]);
   const [selectedCards, setSelectedCards] = useState<BoardItem[]>([]);
   const [isChecking, setIsChecking] = useState(false);
+  const [matchedPairs, setMatchedPairs] = useState(0);
 
-  useEffect(() => {
+  const POINTS_PER_MATCH = Math.floor(100 / (items.length || 1));
+
+  const initializeGame = () => {
     const terms: BoardItem[] = items.map(item => ({ type: 'term', id: item.id, content: item.term, isMatched: false }));
     const definitions: BoardItem[] = items.map(item => ({ type: 'definition', id: item.id, content: item.definition, isMatched: false }));
     setBoard(shuffleArray([...terms, ...definitions]));
+    setSelectedCards([]);
+    setIsChecking(false);
+    setMatchedPairs(0);
+    onScoreChange(0);
+  }
+
+  useEffect(() => {
+    initializeGame();
   }, [items]);
 
   const handleCardClick = (card: BoardItem) => {
@@ -47,6 +61,10 @@ export function MatchingGame({ items }: MatchingGameProps) {
 
       if (first.id === second.id && first.type !== second.type) {
         // Match found
+        const newMatchedCount = matchedPairs + 1;
+        setMatchedPairs(newMatchedCount);
+        onScoreChange(newMatchedCount * POINTS_PER_MATCH);
+
         setBoard(prevBoard =>
           prevBoard.map(item =>
             item.id === first.id ? { ...item, isMatched: true } : item
@@ -65,28 +83,27 @@ export function MatchingGame({ items }: MatchingGameProps) {
   };
   
   const handleRestart = () => {
-    const terms: BoardItem[] = items.map(item => ({ type: 'term', id: item.id, content: item.term, isMatched: false }));
-    const definitions: BoardItem[] = items.map(item => ({ type: 'definition', id: item.id, content: item.definition, isMatched: false }));
-    setBoard(shuffleArray([...terms, ...definitions]));
-    setSelectedCards([]);
-    setIsChecking(false);
+    initializeGame();
   }
 
-  const allMatched = board.every(item => item.isMatched);
+  const allMatched = board.length > 0 && board.every(item => item.isMatched);
 
-  if (allMatched && board.length > 0) {
+  if (allMatched) {
     return (
         <div className="text-center p-8">
             <h3 className="text-2xl font-bold mb-4">Congratulations!</h3>
-            <p className="text-muted-foreground mb-6">You've matched all the pairs.</p>
-            <Button onClick={handleRestart}>Play Again</Button>
+            <p className="text-muted-foreground mb-6">You've matched all the pairs and earned {matchedPairs * POINTS_PER_MATCH} points.</p>
+            <Button onClick={handleRestart}>
+                <RefreshCcw className="mr-2" />
+                Play Again
+            </Button>
         </div>
     )
   }
 
   return (
     <div className="flex flex-col items-center gap-4">
-        <p className="text-muted-foreground">Click two cards to see if they match.</p>
+        <p className="text-muted-foreground">Click two cards to see if they match. {matchedPairs} / {items.length} matched.</p>
         <div className="grid grid-cols-3 md:grid-cols-4 gap-4">
             {board.map((card, index) => (
                 <Card

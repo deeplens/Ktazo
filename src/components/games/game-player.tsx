@@ -116,7 +116,7 @@ const QuizGame = ({ data, onScoreChange, initialScore }: { data: GameQuestion[],
                 {isAnswered && (
                      <CardFooter className="flex justify-between items-center">
                         <div className="text-sm text-muted-foreground">
-                            {option === selectedAnswer && option === currentQuestion.correctAnswer && `+${POINTS_PER_QUESTION} points!`}
+                            {selectedAnswer === currentQuestion.correctAnswer ? `+${POINTS_PER_QUESTION} points!` : `The correct answer was: ${currentQuestion.correctAnswer}`}
                         </div>
                         <Button onClick={handleNextQuestion}>
                            {currentQuestionIndex === data.length - 1 ? 'Finish Quiz' : 'Next Question'}
