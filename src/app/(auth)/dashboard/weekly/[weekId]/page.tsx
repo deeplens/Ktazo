@@ -3,7 +3,7 @@
 'use client';
 import { notFound, useParams } from "next/navigation";
 import Image from "next/image";
-import { getMockSermons, getMockWeeklyContent, getAnswersForSermon, saveAnswersForSermon, getGameScoresForSermon, saveGameScore, getLeaderboardForSermon } from "@/lib/mock-data";
+import { getMockSermons, getMockWeeklyContent, getAnswersForSermon, saveAnswersForSermon, getGameScoresForSermon, saveGameScore, getGlobalLeaderboard } from "@/lib/mock-data";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
@@ -42,7 +42,7 @@ export default function WeeklyPage() {
         const sermons = getMockSermons();
         const currentSermon = sermons.find(s => s.id === weekId);
         setSermon(currentSermon);
-        setLeaderboard(getLeaderboardForSermon(weekId));
+        setLeaderboard(getGlobalLeaderboard());
 
         if (currentSermon?.weeklyContentIds) {
             const allMockContent = getMockWeeklyContent();
@@ -393,7 +393,7 @@ function WeeklyPageContent({ sermon, weeklyContent, answers, setAnswers, gameSco
               <div className="text-right space-y-2">
                 <div className="flex items-center gap-2 text-xl font-bold text-primary">
                     <Star className="text-yellow-400 fill-yellow-400" />
-                    <span>{totalPoints} Points</span>
+                    <span>{totalPoints} Points This Week</span>
                 </div>
                 <Dialog>
                     <DialogTrigger asChild>
@@ -404,8 +404,8 @@ function WeeklyPageContent({ sermon, weeklyContent, answers, setAnswers, gameSco
                     </DialogTrigger>
                     <DialogContent>
                         <DialogHeader>
-                            <DialogTitle>Weekly Leaderboard</DialogTitle>
-                            <DialogDescription>Top scores for &quot;{sermon.title}&quot;</DialogDescription>
+                            <DialogTitle>Overall Leaderboard</DialogTitle>
+                            <DialogDescription>Top scores from all weeks.</DialogDescription>
                         </DialogHeader>
                          <div className="space-y-4 pt-4">
                             {leaderboard.map((player, index) => (

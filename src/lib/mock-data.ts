@@ -767,8 +767,8 @@ export const getMockGameScores = (): GameScore[] => {
     return initialGameScores;
 };
 
-export const getLeaderboardForSermon = (sermonId: string): { userId: string, userName: string, userPhotoUrl?: string, totalScore: number }[] => {
-    const allScores = getMockGameScores().filter(s => s.sermonId === sermonId);
+export const getGlobalLeaderboard = (): { userId: string, userName: string, userPhotoUrl?: string, totalScore: number }[] => {
+    const allScores = getMockGameScores();
     const userTotals: Record<string, number> = {};
 
     allScores.forEach(score => {
