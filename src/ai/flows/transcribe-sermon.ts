@@ -10,13 +10,12 @@
 
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
-import { extractTranscriptFromYouTube } from '@/lib/youtube-utils';
 
 const TranscribeSermonInputSchema = z.object({
   sermonUrl: z
     .string()
     .describe(
-      "The URL of the sermon video file (YouTube only) or a data URI of an audio file. Expected data URI format: 'data:<mimetype>;base64,<encoded_data>'."
+      "A data URI of an audio file. Expected data URI format: 'data:<mimetype>;base64,<encoded_data>'."
     ),
 });
 export type TranscribeSermonInput = z.infer<typeof TranscribeSermonInputSchema>;
@@ -70,34 +69,8 @@ const transcribeSermonFlow = ai.defineFlow(
         console.log('[[DEBUG]] Finishing transcribeSermonFlow for data URI.');
         return { transcript: text };
       }
-
-      // YouTube: try transcript library first
-      if (sermonUrl.includes('youtube.com/') || sermonUrl.includes('youtu.be/')) {
-        console.log('[[DEBUG]] YouTube URL detected. Attempting to use youtube-transcript library.');
-        try {
-          const transcript = await extractTranscriptFromYouTube(sermonUrl);
-          console.log('[[DEBUG]] Successfully extracted transcript from YouTube library.');
-          return { transcript };
-        } catch (youtubeError) {
-          console.warn(
-            '[[WARN]] YouTube transcript library failed. Falling back to Gemini model. Error:',
-            (youtubeError as Error).message
-          );
-          // If the library fails, we can still try to have Gemini transcribe it.
-          const { text } = await ai.generate({
-            prompt: `Transcribe this YouTube video: ${sermonUrl}`,
-          });
-
-          if (!text) {
-            throw new Error('AI transcription failed for YouTube URL: No text was returned from the model.');
-          }
-
-          console.log('[[DEBUG]] Finishing transcribeSermonFlow for YouTube URL with Gemini fallback.');
-          return { transcript: text };
-        }
-      }
       
-      throw new Error(`Unsupported source for transcription. Please provide a YouTube URL or a direct file upload.`);
+      throw new Error(`Unsupported source for transcription. Please provide a direct file upload.`);
 
     } catch (error) {
       console.error('[[ERROR]] in transcribeSermonFlow:', error);
