@@ -3,11 +3,11 @@
 'use client';
 import { notFound, useParams } from "next/navigation";
 import Image from "next/image";
-import { getMockSermons, getMockWeeklyContent, getAnswersForSermon, saveAnswersForSermon, getGameScoresForSermon, saveGameScore } from "@/lib/mock-data";
+import { getMockSermons, getMockWeeklyContent, getAnswersForSermon, saveAnswersForSermon, getGameScoresForSermon, saveGameScore, getLeaderboardForSermon } from "@/lib/mock-data";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
-import { Gamepad2, Headphones, MessageCircleQuestion, Users, User, HeartHandshake, MessageSquare, MicVocal, Languages, BookOpen, HandHeart, Sparkles, Globe, Target, Briefcase, Flower, Puzzle, Search, Brackets, Binary, WholeWord, KeyRound, Type, CheckSquare, Brain, Quote, ListChecks, Star, Wrench } from "lucide-react";
+import { Gamepad2, Headphones, MessageCircleQuestion, Users, User, HeartHandshake, MessageSquare, MicVocal, Languages, BookOpen, HandHeart, Sparkles, Globe, Target, Briefcase, Flower, Puzzle, Search, Brackets, Binary, WholeWord, KeyRound, Type, CheckSquare, Brain, Quote, ListChecks, Star, Wrench, Trophy } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Sermon, WeeklyContent, Game, VerseScrambleItem, BibleReadingPlanItem, SpiritualPractice, OutwardFocusItem } from "@/lib/types";
@@ -22,6 +22,7 @@ import { PrayerWall } from "@/components/sermons/prayer-wall";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import { ServiceWall } from "@/components/sermons/service-wall";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export default function WeeklyPage() {
   const params = useParams();
@@ -32,6 +33,7 @@ export default function WeeklyPage() {
   const [selectedLanguage, setSelectedLanguage] = useState('en');
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [gameScores, setGameScores] = useState<Record<string, number>>({});
+  const [leaderboard, setLeaderboard] = useState<{ userId: string, userName: string, userPhotoUrl?: string, totalScore: number }[]>([]);
   
   const weeklyContent = allContent[selectedLanguage];
 
@@ -40,6 +42,7 @@ export default function WeeklyPage() {
         const sermons = getMockSermons();
         const currentSermon = sermons.find(s => s.id === weekId);
         setSermon(currentSermon);
+        setLeaderboard(getLeaderboardForSermon(weekId));
 
         if (currentSermon?.weeklyContentIds) {
             const allMockContent = getMockWeeklyContent();
@@ -87,7 +90,7 @@ export default function WeeklyPage() {
             culturalEngagement: { title: 'Not available', description: '', details: '' },
         },
     };
-    return <WeeklyPageContent sermon={placeholderSermon || {} as Sermon} weeklyContent={placeholderContent} answers={{}} setAnswers={setAnswers} gameScores={{}} setGameScores={() => {}} availableLanguages={[]} selectedLanguage="en" onSelectLanguage={() => {}} />;
+    return <WeeklyPageContent sermon={placeholderSermon || {} as Sermon} weeklyContent={placeholderContent} answers={{}} setAnswers={setAnswers} gameScores={{}} setGameScores={() => {}} availableLanguages={[]} selectedLanguage="en" onSelectLanguage={() => {}} leaderboard={[]} />;
   }
   
   return <WeeklyPageContent 
@@ -100,11 +103,12 @@ export default function WeeklyPage() {
     availableLanguages={Object.keys(allContent)}
     selectedLanguage={selectedLanguage}
     onSelectLanguage={setSelectedLanguage}
+    leaderboard={leaderboard}
     />;
 }
 
 
-function WeeklyPageContent({ sermon, weeklyContent, answers, setAnswers, gameScores, setGameScores, availableLanguages, selectedLanguage, onSelectLanguage }: { sermon: Sermon, weeklyContent: WeeklyContent, answers: Record<string, string>, setAnswers: React.Dispatch<React.SetStateAction<Record<string, string>>>, gameScores: Record<string, number>, setGameScores: React.Dispatch<React.SetStateAction<Record<string, number>>>, availableLanguages: string[], selectedLanguage: string, onSelectLanguage: (lang: string) => void }) {
+function WeeklyPageContent({ sermon, weeklyContent, answers, setAnswers, gameScores, setGameScores, availableLanguages, selectedLanguage, onSelectLanguage, leaderboard }: { sermon: Sermon, weeklyContent: WeeklyContent, answers: Record<string, string>, setAnswers: React.Dispatch<React.SetStateAction<Record<string, string>>>, gameScores: Record<string, number>, setGameScores: React.Dispatch<React.SetStateAction<Record<string, number>>>, availableLanguages: string[], selectedLanguage: string, onSelectLanguage: (lang: string) => void, leaderboard: { userId: string, userName: string, userPhotoUrl?: string, totalScore: number }[] }) {
   const { user } = useAuth();
   const { toast } = useToast();
   
@@ -381,49 +385,83 @@ function WeeklyPageContent({ sermon, weeklyContent, answers, setAnswers, gameSco
 
       <Card id="games">
           <CardHeader>
-            <div className="flex justify-between items-center">
-              <CardTitle className="font-headline flex items-center gap-2"><Gamepad2 /> Interactive Games</CardTitle>
-              <div className="flex items-center gap-2 text-xl font-bold text-primary">
-                  <Star className="text-yellow-400 fill-yellow-400" />
-                  <span>{totalPoints} Points</span>
+            <div className="flex justify-between items-start">
+              <div>
+                <CardTitle className="font-headline flex items-center gap-2"><Gamepad2 /> Interactive Games</CardTitle>
+                <CardDescription>Engage with the sermon in a fun new way and earn points!</CardDescription>
+              </div>
+              <div className="text-right">
+                <div className="flex items-center gap-2 text-xl font-bold text-primary">
+                    <Star className="text-yellow-400 fill-yellow-400" />
+                    <span>{totalPoints} Points</span>
+                </div>
+                <p className="text-xs text-muted-foreground">Your Score</p>
               </div>
             </div>
-            <CardDescription>Engage with the sermon in a fun new way and earn points!</CardDescription>
           </CardHeader>
-          <CardContent className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {weeklyContent.games?.map((game: Game, index: number) => (
-                  <Dialog key={`${game.title}-${index}`}>
-                      <DialogTrigger asChild>
-                          <Card className="hover:bg-accent/50 cursor-pointer transition-colors flex flex-col h-full">
-                              <CardHeader className="flex-grow">
-                                <div className="flex justify-between items-start gap-4">
-                                  <div>
-                                    <CardTitle className="text-lg">{game.title}</CardTitle>
-                                    <CardDescription>Game Type: {game.type}</CardDescription>
-                                  </div>
-                                  {getIconForGame(game.type)}
+          <CardContent>
+            <Tabs defaultValue="games">
+                <TabsList>
+                    <TabsTrigger value="games">Games</TabsTrigger>
+                    <TabsTrigger value="leaderboard">Leaderboard</TabsTrigger>
+                </TabsList>
+                <TabsContent value="games" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pt-4">
+                    {weeklyContent.games?.map((game: Game, index: number) => (
+                        <Dialog key={`${game.title}-${index}`}>
+                            <DialogTrigger asChild>
+                                <Card className="hover:bg-accent/50 cursor-pointer transition-colors flex flex-col h-full">
+                                    <CardHeader className="flex-grow">
+                                        <div className="flex justify-between items-start gap-4">
+                                        <div>
+                                            <CardTitle className="text-lg">{game.title}</CardTitle>
+                                            <CardDescription>Game Type: {game.type}</CardDescription>
+                                        </div>
+                                        {getIconForGame(game.type)}
+                                        </div>
+                                    </CardHeader>
+                                    <CardFooter className="flex justify-between items-center">
+                                        <Badge variant="secondary" className="w-fit">{game.audience}</Badge>
+                                        {gameScores[game.title] > 0 && (
+                                            <div className="flex items-center gap-1 text-sm font-semibold text-yellow-500">
+                                                <Star className="h-4 w-4 fill-current" />
+                                                <span>{gameScores[game.title]}</span>
+                                            </div>
+                                        )}
+                                    </CardFooter>
+                                </Card>
+                            </DialogTrigger>
+                            <DialogContent className="max-w-4xl">
+                                <GamePlayer game={game} onScoreChange={(score) => handleGameScoreChange(game.title, score)} initialScore={gameScores[game.title] || 0} />
+                            </DialogContent>
+                        </Dialog>
+                    ))}
+                </TabsContent>
+                <TabsContent value="leaderboard" className="pt-4">
+                    <div className="space-y-4">
+                        {leaderboard.map((player, index) => (
+                            <div key={player.userId} className={cn("flex items-center gap-4 p-3 rounded-lg", index < 3 ? 'bg-accent/50' : '')}>
+                                <div className="flex items-center gap-2 w-10">
+                                    {index < 3 ? (
+                                        <Trophy className={cn("h-6 w-6", 
+                                            index === 0 && "text-yellow-500",
+                                            index === 1 && "text-gray-400",
+                                            index === 2 && "text-amber-700"
+                                        )} />
+                                    ) : (
+                                        <span className="text-center w-6 text-muted-foreground font-semibold">{index + 1}</span>
+                                    )}
                                 </div>
-                              </CardHeader>
-                              <CardFooter className="flex justify-between items-center">
-                                <Badge variant="secondary" className="w-fit">{game.audience}</Badge>
-                                {gameScores[game.title] > 0 && (
-                                    <div className="flex items-center gap-1 text-sm font-semibold text-yellow-500">
-                                        <Star className="h-4 w-4 fill-current" />
-                                        <span>{gameScores[game.title]}</span>
-                                    </div>
-                                )}
-                              </CardFooter>
-                          </Card>
-                      </DialogTrigger>
-                      <DialogContent className="max-w-4xl">
-                          <DialogHeader>
-                            <DialogTitle className="sr-only">{game.title}</DialogTitle>
-                            <DialogDescription className="sr-only">Playing the game: {game.title}</DialogDescription>
-                          </DialogHeader>
-                          <GamePlayer game={game} onScoreChange={(score) => handleGameScoreChange(game.title, score)} initialScore={gameScores[game.title] || 0} />
-                      </DialogContent>
-                  </Dialog>
-              ))}
+                                <Avatar className="h-10 w-10 border">
+                                    <AvatarImage src={player.userPhotoUrl} />
+                                    <AvatarFallback>{player.userName.charAt(0)}</AvatarFallback>
+                                </Avatar>
+                                <p className="font-semibold flex-1">{player.userName}</p>
+                                <p className="font-bold text-primary">{player.totalScore} pts</p>
+                            </div>
+                        ))}
+                    </div>
+                </TabsContent>
+            </Tabs>
           </CardContent>
       </Card>
 
@@ -468,3 +506,5 @@ function WeeklyPageContent({ sermon, weeklyContent, answers, setAnswers, gameSco
     </div>
   );
 }
+
+    

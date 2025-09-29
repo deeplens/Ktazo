@@ -6,7 +6,7 @@ export const mockUsers: User[] = [
   { id: 'user-master-1', tenantId: 'tenant-1', authId: 'auth-master-1', role: 'MASTER', name: 'Master User', email: 'master@ktazo.com', lastLoginAt: new Date().toISOString(), points: 0 },
   { id: 'user-admin-1', tenantId: 'tenant-1', authId: 'auth-admin-1', role: 'ADMIN', name: 'Admin User', email: 'admin@ktazo.com', lastLoginAt: new Date().toISOString(), points: 120 },
   { id: 'user-pastor-1', tenantId: 'tenant-1', authId: 'auth-pastor-1', role: 'PASTOR', name: 'Pastor User', email: 'pastor@ktazo.com', lastLoginAt: new Date().toISOString(), points: 50 },
-  { id: 'user-member-1', tenantId: 'tenant-1', authId: 'auth-member-1', role: 'MEMBER', name: 'Member User 1', email: 'member1@ktazo.com', lastLoginAt: new Date().toISOString(), points: 800 },
+  { id: 'user-member-1', tenantId: 'tenant-1', authId: 'auth-member-1', role: 'MEMBER', name: 'Member User 1', email: 'member1@ktazo.com', lastLoginAt: new Date().toISOString(), points: 800, photoUrl: 'https://avatar.vercel.sh/member1@ktazo.com.png' },
   { id: 'user-member-2', tenantId: 'tenant-1', authId: 'auth-member-2', role: 'MEMBER', name: 'Member User 2', email: 'member2@ktazo.com', lastLoginAt: new Date(Date.now() - 86400000 * 2).toISOString(), points: 450, photoUrl: 'https://avatar.vercel.sh/member2@ktazo.com.png' },
   { id: 'user-member-3', tenantId: 'tenant-1', authId: 'auth-member-3', role: 'MEMBER', name: 'Member User 3', email: 'member3@ktazo.com', lastLoginAt: new Date(Date.now() - 86400000 * 5).toISOString(), points: 210, photoUrl: 'https://avatar.vercel.sh/member3@ktazo.com.png' },
 ];
@@ -743,7 +743,12 @@ export const deletePrayerRequest = (requestId: string) => {
 
 
 const GAME_SCORES_KEY = 'ktazo-game-scores';
-const initialGameScores: GameScore[] = [];
+const initialGameScores: GameScore[] = [
+    { userId: 'user-member-1', sermonId: 'sermon-1', gameId: 'Verse Scramble', score: 100 },
+    { userId: 'user-member-1', sermonId: 'sermon-1', gameId: 'Psalm 23 Quiz', score: 20 },
+    { userId: 'user-member-2', sermonId: 'sermon-1', gameId: 'Verse Scramble', score: 100 },
+    { userId: 'user-member-3', sermonId: 'sermon-1', gameId: 'Sermon Wordle', score: 80 },
+];
 
 export const getMockGameScores = (): GameScore[] => {
     if (typeof window !== 'undefined') {
@@ -754,10 +759,38 @@ export const getMockGameScores = (): GameScore[] => {
             } catch (e) {
                 return initialGameScores;
             }
+        } else {
+             sessionStorage.setItem(GAME_SCORES_KEY, JSON.stringify(initialGameScores));
+             return initialGameScores;
         }
     }
     return initialGameScores;
 };
+
+export const getLeaderboardForSermon = (sermonId: string): { userId: string, userName: string, userPhotoUrl?: string, totalScore: number }[] => {
+    const allScores = getMockGameScores().filter(s => s.sermonId === sermonId);
+    const userTotals: Record<string, number> = {};
+
+    allScores.forEach(score => {
+        if (!userTotals[score.userId]) {
+            userTotals[score.userId] = 0;
+        }
+        userTotals[score.userId] += score.score;
+    });
+
+    const leaderboard = Object.entries(userTotals).map(([userId, totalScore]) => {
+        const user = mockUsers.find(u => u.id === userId);
+        return {
+            userId,
+            userName: user?.name || 'Unknown User',
+            userPhotoUrl: user?.photoUrl,
+            totalScore,
+        };
+    });
+
+    return leaderboard.sort((a, b) => b.totalScore - a.totalScore);
+};
+
 
 export const getGameScoresForSermon = (userId: string, sermonId: string): Record<string, number> => {
     const allScores = getMockGameScores();
@@ -864,3 +897,5 @@ export const deleteServiceRequest = (requestId: string) => {
 
 // For initial load, we still need this export for components that use it directly
 export const mockWeeklyContent = getMockWeeklyContent();
+
+    

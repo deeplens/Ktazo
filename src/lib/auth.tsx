@@ -54,12 +54,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const switchRole = (role: UserRole) => {
-    const foundUser = mockUsers.find(u => u.role === role);
-    if(foundUser) {
-        setUser(foundUser);
-        sessionStorage.setItem('ktazo-user', JSON.stringify(foundUser));
+    // Find a user with the target role to switch to.
+    // In a real app, this would be a more complex operation,
+    // but for the demo, we just find the first user with that role.
+    const targetUser = mockUsers.find(u => u.role === role);
+    const currentUser = user;
+    
+    if (targetUser && currentUser) {
+        // Create a new user object that is the target user, but keep the current user's name, email, photo, etc.
+        const switchedUser: User = {
+            ...targetUser,
+            id: currentUser.id, // Keep current user's ID
+            name: currentUser.name,
+            email: currentUser.email,
+            photoUrl: currentUser.photoUrl,
+            points: currentUser.points,
+            lastLoginAt: currentUser.lastLoginAt,
+            authId: currentUser.authId,
+            tenantId: currentUser.tenantId,
+        };
+
+        setUser(switchedUser);
+        sessionStorage.setItem('ktazo-user', JSON.stringify(switchedUser));
+    } else if (targetUser) {
+        // Fallback if there is no current user for some reason
+        setUser(targetUser);
+        sessionStorage.setItem('ktazo-user', JSON.stringify(targetUser));
     }
   }
+
 
   const updateUser = (userData: Partial<User>) => {
     if (user) {
@@ -91,3 +114,5 @@ export function useAuth() {
   }
   return context;
 }
+
+    
