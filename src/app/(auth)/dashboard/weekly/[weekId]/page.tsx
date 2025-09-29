@@ -7,7 +7,7 @@ import { getMockSermons, getMockWeeklyContent, getAnswersForSermon, saveAnswersF
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
-import { Gamepad2, Headphones, MessageCircleQuestion, Users, User, HeartHandshake, MessageSquare, MicVocal, Languages, BookOpen, HandHeart, Sparkles, Globe, Target, Briefcase, Flower, Puzzle, Search, Brackets, Binary, WholeWord, KeyRound, Type, CheckSquare, Brain, Quote, ListChecks, Star, Wrench, Trophy } from "lucide-react";
+import { Gamepad2, Headphones, MessageCircleQuestion, Users, User, HeartHandshake, MessageSquare, MicVocal, Languages, BookOpen, HandHeart, Sparkles, Globe, Target, Briefcase, Flower, Puzzle, Search, Brackets, Binary, WholeWord, KeyRound, Type, CheckSquare, Brain, Quote, ListChecks, Star, Wrench, Trophy, Award } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Sermon, WeeklyContent, Game, VerseScrambleItem, BibleReadingPlanItem, SpiritualPractice, OutwardFocusItem, JeopardyCategory } from "@/lib/types";
@@ -23,6 +23,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import { ServiceWall } from "@/components/sermons/service-wall";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { getLevelForPoints } from "@/lib/levels";
 
 export default function WeeklyPage() {
   const params = useParams();
@@ -135,9 +136,32 @@ function WeeklyPageContent({ sermon, weeklyContent, answers, setAnswers, gameSco
 
   const handleGameScoreChange = (gameTitle: string, newScore: number) => {
     if (user) {
-        setGameScores(prev => ({ ...prev, [gameTitle]: newScore }));
-        saveGameScore(user.id, sermon.id, gameTitle, newScore);
-        setLeaderboard(getGlobalLeaderboard());
+        const oldScores = getGameScoresForSermon(user.id, sermon.id);
+        const oldGameScore = oldScores[gameTitle] || 0;
+        const scoreDifference = newScore - oldGameScore;
+
+        if (scoreDifference > 0) {
+            const currentGlobalScores = getGlobalLeaderboard();
+            const userTotalScore = currentGlobalScores.find(p => p.userId === user.id)?.totalScore || 0;
+            const oldLevel = getLevelForPoints(userTotalScore);
+            
+            saveGameScore(user.id, sermon.id, gameTitle, newScore);
+            setGameScores(prev => ({ ...prev, [gameTitle]: newScore }));
+
+            const updatedGlobalScores = getGlobalLeaderboard();
+            setLeaderboard(updatedGlobalScores);
+
+            const newUserTotalScore = updatedGlobalScores.find(p => p.userId === user.id)?.totalScore || 0;
+            const newLevel = getLevelForPoints(newUserTotalScore);
+
+            if (newLevel.name !== oldLevel.name && newUserTotalScore > userTotalScore) {
+                toast({
+                    title: `Level Up! ${newLevel.icon}`,
+                    description: newLevel.celebrationMessage,
+                    duration: 5000,
+                });
+            }
+        }
     }
   };
 

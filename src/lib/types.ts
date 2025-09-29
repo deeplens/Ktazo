@@ -216,4 +216,6 @@ export interface FaithLevel {
     maxPoints: number;
     quote: string;
     reference: string;
+    celebrationMessage: string;
+    icon: string;
 }

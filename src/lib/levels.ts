@@ -1,7 +1,9 @@
 
-import { FaithLevel } from './types';
 
-export const faithLevels: FaithLevel[] = [
+import { FaithLevel } from './types';
+import { levelUpMessages } from './celebrations';
+
+export const faithLevels: Omit<FaithLevel, 'celebrationMessage' | 'icon'>[] = [
   // Stage 1 – Foundation
   { name: 'Listener', stage: 'Stage 1 – Foundation', minPoints: 0, maxPoints: 2000, quote: 'Faith comes from hearing, and hearing through the word of Christ.', reference: 'Romans 10:17' },
   { name: 'Seeker', stage: 'Stage 1 – Foundation', minPoints: 2001, maxPoints: 5000, quote: 'You will seek me and find me when you seek me with all your heart.', reference: 'Jeremiah 29:13' },
@@ -32,6 +34,16 @@ export const faithLevels: FaithLevel[] = [
   { name: 'Light to the Nations', stage: 'Stage 7 – Eternal Legacy', minPoints: 3000001, maxPoints: Infinity, quote: 'I will make you as a light for the nations, that my salvation may reach to the end of the earth.', reference: 'Isaiah 49:6' },
 ];
 
+const fullFaithLevels: FaithLevel[] = faithLevels.map(level => {
+    const celebration = levelUpMessages[level.name];
+    return {
+        ...level,
+        celebrationMessage: celebration.message,
+        icon: celebration.icon
+    };
+});
+
 export function getLevelForPoints(points: number): FaithLevel {
-  return faithLevels.find(level => points >= level.minPoints && points <= level.maxPoints) || faithLevels[0];
+  const level = fullFaithLevels.find(level => points >= level.minPoints && points <= level.maxPoints) || fullFaithLevels[0];
+  return level;
 }
