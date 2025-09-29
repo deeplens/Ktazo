@@ -8,6 +8,15 @@ import { getGlobalLeaderboard, mockUsers } from "@/lib/mock-data";
 import { Button } from "@/components/ui/button";
 import { Star, Users, Wifi } from "lucide-react";
 import Link from "next/link";
+import { getLevelForPoints } from "@/lib/levels";
+import { Progress } from "@/components/ui/progress";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
+
 
 export default function Dashboard() {
   const { user } = useAuth();
@@ -33,7 +42,8 @@ export default function Dashboard() {
   
   const leaderboard = getGlobalLeaderboard();
   const currentUserScore = leaderboard.find(p => p.userId === user.id)?.totalScore || 0;
-
+  const userLevel = getLevelForPoints(currentUserScore);
+  const progressPercentage = userLevel.maxPoints === Infinity ? 100 : ((currentUserScore - userLevel.minPoints) / (userLevel.maxPoints - userLevel.minPoints)) * 100;
 
   return (
     <div className="flex flex-col gap-8">
@@ -53,24 +63,34 @@ export default function Dashboard() {
                             </div>
                         </div>
                     ) : (
-                         <div className="flex items-center gap-2 text-lg">
-                            <Star className="h-5 w-5 text-yellow-400 fill-yellow-400" />
-                             <div>
-                                <span className="font-bold">{currentUserScore}</span>
-                                <span className="font-bold"> Points</span>
-                            </div>
+                         <div className="w-64">
+                            <TooltipProvider>
+                                <Tooltip>
+                                    <TooltipTrigger className="w-full text-left">
+                                        <div className="text-sm font-semibold flex justify-between mb-1">
+                                            <span>{userLevel.stage}: {userLevel.name}</span>
+                                            <span className="text-primary">{currentUserScore.toLocaleString()} / {userLevel.maxPoints.toLocaleString()} pts</span>
+                                        </div>
+                                        <Progress value={progressPercentage} />
+                                    </TooltipTrigger>
+                                    <TooltipContent align="end" className="max-w-xs">
+                                        <p className="italic">&quot;{userLevel.quote}&quot;</p>
+                                        <p className="text-right font-medium">- {userLevel.reference}</p>
+                                    </TooltipContent>
+                                </Tooltip>
+                            </TooltipProvider>
                         </div>
                     )}
-                     <div className="flex items-center gap-2 text-lg">
+                     <div className="flex items-center gap-2 text-sm">
                         <Wifi className="h-5 w-5 text-green-500" />
                          <div>
                             <span className="font-bold">{onlineUsers}</span>
-                            <span className="font-bold"> Online</span>
+                            <span className="text-muted-foreground"> Online</span>
                         </div>
                     </div>
                 </div>
                 {isAdmin && (
-                    <Button variant="link" className="h-auto p-0 mt-1 text-lg" asChild>
+                    <Button variant="link" className="h-auto p-0 mt-1 text-sm" asChild>
                         <Link href="/dashboard/admin/members">See Who is Online</Link>
                     </Button>
                 )}

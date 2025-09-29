@@ -12,6 +12,7 @@ export interface User {
   photoUrl?: string;
   lastLoginAt: string;
   points: number;
+  level?: FaithLevel;
 }
 
 export interface Sermon {
@@ -117,7 +118,7 @@ export interface Game {
     type: 'Quiz' | 'Word Search' | 'Fill in the Blank' | 'Matching' | 'Word Guess' | 'Wordle' | 'Jeopardy' | 'Verse Scramble' | 'True/False' | 'Word Cloud Hunt' | 'Two Truths and a Lie' | 'Sermon Escape Room';
     title: string;
     audience: 'Youth' | 'Adults';
-    data: GameQuestion[] | { words: string[] } | FillInTheBlankItem[] | MatchingGameItem[] | WordGuessItem[] | WordleItem | JeopardyCategory[] | VerseScrambleItem | TrueFalseQuestion[] | TwoTruthsAndALieItem[] | SermonEscapeRoomPuzzle[] | {};
+    data: GameQuestion[] | { words: string[] } | FillInTheBlankItem[] | MatchingGameItem[] | WordGuessItem[] | WordleItem | JeopardyCategory[] | VerseScrambleItem | TrueFalseQuestion[] | TwoTruthsAndALieItem[] | SermonEscapeRoomPuzzle[];
 }
 
 export interface BibleReadingPlanItem {
@@ -206,4 +207,13 @@ export interface ServiceRequest {
     sermonId: string;
     requestText: string;
     createdAt: string;
+}
+
+export interface FaithLevel {
+    name: string;
+    stage: string;
+    minPoints: number;
+    maxPoints: number;
+    quote: string;
+    reference: string;
 }

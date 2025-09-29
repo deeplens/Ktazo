@@ -5,6 +5,7 @@ import { createContext, useContext, useState, ReactNode, useMemo, useEffect } fr
 import { User, UserRole } from './types';
 import { mockUsers } from './mock-data';
 import { useRouter } from 'next/navigation';
+import { getLevelForPoints } from './levels';
 
 interface AuthContextType {
   user: User | null;
@@ -27,7 +28,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const storedUser = sessionStorage.getItem('ktazo-user');
       if (storedUser) {
-        setUser(JSON.parse(storedUser));
+        const parsedUser = JSON.parse(storedUser);
+        parsedUser.level = getLevelForPoints(parsedUser.points);
+        setUser(parsedUser);
       }
     } catch (e) {
       console.error("Could not parse stored user", e);
@@ -40,6 +43,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = (email: string) => {
     const foundUser = mockUsers.find(u => u.email.toLowerCase() === email.toLowerCase());
     if (foundUser) {
+      foundUser.level = getLevelForPoints(foundUser.points);
       setUser(foundUser);
       sessionStorage.setItem('ktazo-user', JSON.stringify(foundUser));
       return true;
@@ -73,11 +77,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             authId: currentUser.authId,
             tenantId: currentUser.tenantId,
         };
-
+        switchedUser.level = getLevelForPoints(switchedUser.points);
         setUser(switchedUser);
         sessionStorage.setItem('ktazo-user', JSON.stringify(switchedUser));
     } else if (targetUser) {
         // Fallback if there is no current user for some reason
+        targetUser.level = getLevelForPoints(targetUser.points);
         setUser(targetUser);
         sessionStorage.setItem('ktazo-user', JSON.stringify(targetUser));
     }
@@ -87,6 +92,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const updateUser = (userData: Partial<User>) => {
     if (user) {
       const updatedUser = { ...user, ...userData };
+      updatedUser.level = getLevelForPoints(updatedUser.points);
       setUser(updatedUser);
       sessionStorage.setItem('ktazo-user', JSON.stringify(updatedUser));
       
@@ -114,5 +120,3 @@ export function useAuth() {
   }
   return context;
 }
-
-    
