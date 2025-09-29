@@ -69,7 +69,7 @@ export default function Dashboard() {
                                     <TooltipTrigger className="w-full text-left">
                                         <div className="text-sm font-semibold flex justify-between mb-1">
                                             <span>{userLevel.stage}: {userLevel.name}</span>
-                                            <span className="text-primary">{currentUserScore.toLocaleString()} / {userLevel.maxPoints.toLocaleString()} pts</span>
+                                            <span className="text-primary">{currentUserScore.toLocaleString()} / {userLevel.maxPoints === Infinity ? '∞' : userLevel.maxPoints.toLocaleString()} pts</span>
                                         </div>
                                         <Progress value={progressPercentage} />
                                     </TooltipTrigger>
