@@ -3,7 +3,6 @@
 import {config} from 'dotenv';
 config({path: '.env'});
 
-import './tools/get-url-content';
 import './flows/generate-weekly-content';
 import './flows/rag-chatbot-companion';
 import './flows/transcribe-sermon';

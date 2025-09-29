@@ -27,7 +27,7 @@ export default function NewSermonPage() {
   const [loadingMessage, setLoadingMessage] = useState('Transcribing...');
   const [transcript, setTranscript] = useState('');
   const [showTranscriptDialog, setShowTranscriptDialog] = useState(false);
-  const [uploadType, setUploadType] = useState<'url' | 'audio' | 'text'>('audio');
+  const [uploadType, setUploadType] = useState<'audio' | 'text'>('audio');
   const router = useRouter();
   const { toast } = useToast();
 
@@ -116,15 +116,7 @@ export default function NewSermonPage() {
     let transcriptSource = '';
 
     try {
-        if (uploadType === 'url') {
-            if (!sermonUrl) {
-                toast({ variant: 'destructive', title: "Missing URL", description: "Please provide a sermon URL." });
-                setIsLoading(false);
-                return;
-            }
-            sourceForSermon = sermonUrl;
-            transcriptSource = sermonUrl;
-        } else if (uploadType === 'audio') {
+        if (uploadType === 'audio') {
             if (!audioFile) {
                 toast({ variant: 'destructive', title: "Missing File", description: "Please select an MP3 file to upload." });
                 setIsLoading(false);
@@ -216,8 +208,6 @@ export default function NewSermonPage() {
     if (isLoading) return true;
     if (!speaker.trim()) return true;
     switch (uploadType) {
-        case 'url':
-            return !sermonUrl.trim();
         case 'audio':
             return !audioFile;
         case 'text':
@@ -319,19 +309,6 @@ export default function NewSermonPage() {
                   Transcript
                 </Button>
               </div>
-
-              {uploadType === 'url' && (
-                 <div className="space-y-2">
-                    <Label htmlFor="sermon-url">Sermon Audio URL</Label>
-                    <Input 
-                        id="sermon-url"
-                        placeholder="https://example.com/sermon.mp3 or YouTube URL"
-                        value={sermonUrl}
-                        onChange={(e) => setSermonUrl(e.target.value)}
-                        disabled={isLoading}
-                    />
-                 </div>
-              )}
 
               {uploadType === 'audio' && (
                 <div className="space-y-2">
@@ -467,7 +444,7 @@ export default function NewSermonPage() {
               Cancel
             </Button>
             <AlertDialogAction onClick={() => {
-                const sourceUrl = uploadType === 'url' ? sermonUrl : (uploadType === 'audio' && audioBlobUrl ? audioBlobUrl : '');
+                const sourceUrl = uploadType === 'audio' && audioBlobUrl ? audioBlobUrl : '';
                 handleConfirmSermon(transcript, sourceUrl);
             }}>
               Confirm and Add Sermon
@@ -478,9 +455,3 @@ export default function NewSermonPage() {
     </div>
   );
 }
-
-    
-
-    
-
-    
