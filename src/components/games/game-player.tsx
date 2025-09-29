@@ -20,6 +20,7 @@ import { TrueFalseGame } from "./true-false-game";
 import { WordCloudHunt } from "./word-cloud-hunt";
 import { TwoTruthsAndALieGame } from "./two-truths-and-a-lie";
 import { SermonEscapeRoomGame } from "./sermon-escape-room";
+import { DialogHeader } from "../ui/dialog";
 
 interface GamePlayerProps {
     game: Game;
@@ -134,14 +135,10 @@ export function GamePlayer({ game, onScoreChange, initialScore }: GamePlayerProp
     
     return (
         <div>
-            <div className="flex justify-between items-center mb-4">
-                <div>
-                    <h3 className="text-lg font-bold">{game.title}</h3>
-                    <p className="text-sm text-muted-foreground">An interactive '{game.type}' game for {game.audience}.</p>
-                </div>
-                <div className="flex items-center gap-2 text-lg font-bold text-primary">
+            <div className="flex justify-between items-center mb-4 border-b pb-4">
+                 <div className="flex items-center gap-2 text-lg font-bold text-primary">
                     <Star className="text-yellow-400 fill-yellow-400" />
-                    <span>{initialScore} / {gamePoints} Points</span>
+                    <span>{initialScore} / {gamePoints} Points Earned</span>
                 </div>
             </div>
             

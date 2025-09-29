@@ -390,78 +390,85 @@ function WeeklyPageContent({ sermon, weeklyContent, answers, setAnswers, gameSco
                 <CardTitle className="font-headline flex items-center gap-2"><Gamepad2 /> Interactive Games</CardTitle>
                 <CardDescription>Engage with the sermon in a fun new way and earn points!</CardDescription>
               </div>
-              <div className="text-right">
+              <div className="text-right space-y-2">
                 <div className="flex items-center gap-2 text-xl font-bold text-primary">
                     <Star className="text-yellow-400 fill-yellow-400" />
                     <span>{totalPoints} Points</span>
                 </div>
-                <p className="text-xs text-muted-foreground">Your Score</p>
+                <Dialog>
+                    <DialogTrigger asChild>
+                        <Button variant="outline" size="sm">
+                            <Trophy className="mr-2 h-4 w-4" />
+                            View Leaderboard
+                        </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                        <DialogHeader>
+                            <DialogTitle>Weekly Leaderboard</DialogTitle>
+                            <DialogDescription>Top scores for &quot;{sermon.title}&quot;</DialogDescription>
+                        </DialogHeader>
+                         <div className="space-y-4 pt-4">
+                            {leaderboard.map((player, index) => (
+                                <div key={player.userId} className={cn("flex items-center gap-4 p-3 rounded-lg", index < 3 ? 'bg-accent/50' : '')}>
+                                    <div className="flex items-center gap-2 w-10">
+                                        {index < 3 ? (
+                                            <Trophy className={cn("h-6 w-6", 
+                                                index === 0 && "text-yellow-500",
+                                                index === 1 && "text-gray-400",
+                                                index === 2 && "text-amber-700"
+                                            )} />
+                                        ) : (
+                                            <span className="text-center w-6 text-muted-foreground font-semibold">{index + 1}</span>
+                                        )}
+                                    </div>
+                                    <Avatar className="h-10 w-10 border">
+                                        <AvatarImage src={player.userPhotoUrl} />
+                                        <AvatarFallback>{player.userName.charAt(0)}</AvatarFallback>
+                                    </Avatar>
+                                    <p className="font-semibold flex-1">{player.userName}</p>
+                                    <p className="font-bold text-primary">{player.totalScore} pts</p>
+                                </div>
+                            ))}
+                        </div>
+                    </DialogContent>
+                </Dialog>
               </div>
             </div>
           </CardHeader>
-          <CardContent>
-            <Tabs defaultValue="games">
-                <TabsList>
-                    <TabsTrigger value="games">Games</TabsTrigger>
-                    <TabsTrigger value="leaderboard">Leaderboard</TabsTrigger>
-                </TabsList>
-                <TabsContent value="games" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pt-4">
-                    {weeklyContent.games?.map((game: Game, index: number) => (
-                        <Dialog key={`${game.title}-${index}`}>
-                            <DialogTrigger asChild>
-                                <Card className="hover:bg-accent/50 cursor-pointer transition-colors flex flex-col h-full">
-                                    <CardHeader className="flex-grow">
-                                        <div className="flex justify-between items-start gap-4">
-                                        <div>
-                                            <CardTitle className="text-lg">{game.title}</CardTitle>
-                                            <CardDescription>Game Type: {game.type}</CardDescription>
-                                        </div>
-                                        {getIconForGame(game.type)}
-                                        </div>
-                                    </CardHeader>
-                                    <CardFooter className="flex justify-between items-center">
-                                        <Badge variant="secondary" className="w-fit">{game.audience}</Badge>
-                                        {gameScores[game.title] > 0 && (
-                                            <div className="flex items-center gap-1 text-sm font-semibold text-yellow-500">
-                                                <Star className="h-4 w-4 fill-current" />
-                                                <span>{gameScores[game.title]}</span>
-                                            </div>
-                                        )}
-                                    </CardFooter>
-                                </Card>
-                            </DialogTrigger>
-                            <DialogContent className="max-w-4xl">
-                                <GamePlayer game={game} onScoreChange={(score) => handleGameScoreChange(game.title, score)} initialScore={gameScores[game.title] || 0} />
-                            </DialogContent>
-                        </Dialog>
-                    ))}
-                </TabsContent>
-                <TabsContent value="leaderboard" className="pt-4">
-                    <div className="space-y-4">
-                        {leaderboard.map((player, index) => (
-                            <div key={player.userId} className={cn("flex items-center gap-4 p-3 rounded-lg", index < 3 ? 'bg-accent/50' : '')}>
-                                <div className="flex items-center gap-2 w-10">
-                                    {index < 3 ? (
-                                        <Trophy className={cn("h-6 w-6", 
-                                            index === 0 && "text-yellow-500",
-                                            index === 1 && "text-gray-400",
-                                            index === 2 && "text-amber-700"
-                                        )} />
-                                    ) : (
-                                        <span className="text-center w-6 text-muted-foreground font-semibold">{index + 1}</span>
-                                    )}
+          <CardContent className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pt-4">
+            {weeklyContent.games?.map((game: Game, index: number) => (
+                <Dialog key={`${game.title}-${index}`}>
+                    <DialogTrigger asChild>
+                        <Card className="hover:bg-accent/50 cursor-pointer transition-colors flex flex-col h-full">
+                            <CardHeader className="flex-grow">
+                                <div className="flex justify-between items-start gap-4">
+                                <div>
+                                    <CardTitle className="text-lg">{game.title}</CardTitle>
+                                    <CardDescription>Game Type: {game.type}</CardDescription>
                                 </div>
-                                <Avatar className="h-10 w-10 border">
-                                    <AvatarImage src={player.userPhotoUrl} />
-                                    <AvatarFallback>{player.userName.charAt(0)}</AvatarFallback>
-                                </Avatar>
-                                <p className="font-semibold flex-1">{player.userName}</p>
-                                <p className="font-bold text-primary">{player.totalScore} pts</p>
-                            </div>
-                        ))}
-                    </div>
-                </TabsContent>
-            </Tabs>
+                                {getIconForGame(game.type)}
+                                </div>
+                            </CardHeader>
+                            <CardFooter className="flex justify-between items-center">
+                                <Badge variant="secondary" className="w-fit">{game.audience}</Badge>
+                                {gameScores[game.title] > 0 && (
+                                    <div className="flex items-center gap-1 text-sm font-semibold text-yellow-500">
+                                        <Star className="h-4 w-4 fill-current" />
+                                        <span>{gameScores[game.title]}</span>
+                                    </div>
+                                )}
+                            </CardFooter>
+                        </Card>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-4xl">
+                        <DialogHeader>
+                            <DialogTitle>{game.title}</DialogTitle>
+                            <DialogDescription>An interactive '{game.type}' game for {game.audience}.</DialogDescription>
+                        </DialogHeader>
+                        <GamePlayer game={game} onScoreChange={(score) => handleGameScoreChange(game.title, score)} initialScore={gameScores[game.title] || 0} />
+                    </DialogContent>
+                </Dialog>
+            ))}
           </CardContent>
       </Card>
 
