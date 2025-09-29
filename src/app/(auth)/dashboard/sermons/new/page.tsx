@@ -19,7 +19,6 @@ export default function NewSermonPage() {
   const [series, setSeries] = useState('');
   const [speaker, setSpeaker] = useState('');
   const [date, setDate] = useState('');
-  const [sermonUrl, setSermonUrl] = useState('');
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const [audioBlobUrl, setAudioBlobUrl] = useState<string | null>(null);
   const [textFile, setTextFile] = useState<File | null>(null);
@@ -113,7 +112,7 @@ export default function NewSermonPage() {
 
     setIsLoading(true);
     let sourceForSermon = '';
-    let transcriptSource = '';
+    let audioDataUrlForTranscription = '';
 
     try {
         if (uploadType === 'audio') {
@@ -124,7 +123,7 @@ export default function NewSermonPage() {
             }
             const audioDataUrl = await fileToDataURI(audioFile);
             sourceForSermon = audioBlobUrl || audioDataUrl; // Use blob for playback, data for processing
-            transcriptSource = audioDataUrl;
+            audioDataUrlForTranscription = audioDataUrl;
         } else { // Text tab
             if (!textFile) {
                 toast({ variant: 'destructive', title: "Missing Transcript File", description: "Please upload a text file for the transcript." });
@@ -143,7 +142,7 @@ export default function NewSermonPage() {
         }
 
         setLoadingMessage('Transcribing...');
-        const transcriptionResult = await transcribeSermon({ sermonUrl: transcriptSource });
+        const transcriptionResult = await transcribeSermon({ audioDataUri: audioDataUrlForTranscription });
         const currentTranscript = transcriptionResult.transcript;
         setTranscript(currentTranscript);
 

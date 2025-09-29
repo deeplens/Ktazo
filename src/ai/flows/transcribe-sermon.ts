@@ -12,7 +12,7 @@ import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
 
 const TranscribeSermonInputSchema = z.object({
-  sermonUrl: z
+  audioDataUri: z
     .string()
     .describe(
       "A data URI of an audio file. Expected data URI format: 'data:<mimetype>;base64,<encoded_data>'."
@@ -49,16 +49,16 @@ const transcribeSermonFlow = ai.defineFlow(
     inputSchema: TranscribeSermonInputSchema,
     outputSchema: TranscribeSermonOutputSchema,
   },
-  async ({ sermonUrl }) => {
+  async ({ audioDataUri }) => {
     try {
-      console.log('[[DEBUG]] Starting transcribeSermonFlow for:', sermonUrl.substring(0, 50) + '...');
+      console.log('[[DEBUG]] Starting transcribeSermonFlow for:', audioDataUri.substring(0, 50) + '...');
 
       // Data URI: MIME is embedded; extract and pass through
-      if (sermonUrl.startsWith('data:')) {
+      if (audioDataUri.startsWith('data:')) {
         console.log('[[DEBUG]] Data URI detected. Transcribing directly.');
-        const ct = sermonUrl.slice(5, sermonUrl.indexOf(';'));
+        const ct = audioDataUri.slice(5, audioDataUri.indexOf(';'));
         const { text } = await transcribeMediaPrompt({
-          mediaUri: sermonUrl,
+          mediaUri: audioDataUri,
           contentType: ct,
         });
         if (!text) {
