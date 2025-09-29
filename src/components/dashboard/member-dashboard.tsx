@@ -6,17 +6,8 @@ import { getMockSermons, getMockWeeklyContent, getTenantSettings } from "@/lib/m
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "../ui/button";
-import { ArrowRight, Gamepad2, MessageSquare, PenSquare, Info, Link as LinkIcon, BookOpenCheck } from "lucide-react";
+import { ArrowRight, Info, BookOpenCheck } from "lucide-react";
 import { Badge } from "../ui/badge";
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
-import { ChatbotPanel } from "../chatbot/chatbot-panel";
 import { useEffect, useState } from "react";
 import { Sermon, TenantSettings } from "@/lib/types";
 import { Skeleton } from "../ui/skeleton";
@@ -71,7 +62,7 @@ export function MemberDashboard() {
     );
   }
   
-  const weeklyContent = getMockWeeklyContent().find(wc => wc.sermonId === publishedSermon.id);
+  const weeklyContent = getMockWeeklyContent().find(wc => wc.sermonId === publishedSermon.id && wc.language === 'en');
   if (!weeklyContent) {
     return (
         <Alert variant="destructive">
@@ -97,9 +88,6 @@ export function MemberDashboard() {
                     <CardTitle className="font-headline">{publishedSermon.title}</CardTitle>
                     <CardDescription>{publishedSermon.series}</CardDescription>
                 </div>
-                <Button asChild variant="secondary">
-                  <Link href={`/dashboard/weekly/${publishedSermon.id}`}>View Week <ArrowRight className="ml-2 h-4 w-4" /></Link>
-                </Button>
             </div>
           </CardHeader>
           <CardContent>
@@ -114,63 +102,13 @@ export function MemberDashboard() {
             </div>
             <p className="text-muted-foreground">{weeklyContent.summaryShort}</p>
           </CardContent>
+          <CardFooter>
+            <Button asChild className="w-full">
+                <Link href={`/dashboard/weekly/${publishedSermon.id}`}>View This Week's Content <ArrowRight className="ml-2 h-4 w-4" /></Link>
+            </Button>
+          </CardFooter>
       </Card>
       
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        <Card>
-            <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-xl font-headline"><PenSquare /> Devotionals</CardTitle>
-            </CardHeader>
-            <CardContent>
-                <p className="text-muted-foreground">Access your daily devotionals for the week.</p>
-            </CardContent>
-            <CardFooter>
-                 <Button asChild className="w-full">
-                  <Link href={`/dashboard/weekly/${publishedSermon.id}#devotionals`}>Start Reading</Link>
-                </Button>
-            </CardFooter>
-        </Card>
-        <Card>
-            <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-xl font-headline"><Gamepad2 /> Games</CardTitle>
-            </CardHeader>
-            <CardContent>
-                <p className="text-muted-foreground">Play interactive games based on this week's sermon.</p>
-            </CardContent>
-            <CardFooter>
-                 <Button asChild className="w-full">
-                  <Link href={`/dashboard/weekly/${publishedSermon.id}#games`}>Play Now</Link>
-                </Button>
-            </CardFooter>
-        </Card>
-        <Card>
-            <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-xl font-headline"><MessageSquare /> Chatbot</CardTitle>
-            </CardHeader>
-            <CardContent>
-                <p className="text-muted-foreground">Ask questions and explore topics from the sermon.</p>
-            </CardContent>
-            <CardFooter>
-                 <Sheet>
-                    <SheetTrigger asChild>
-                        <Button className="w-full">
-                          Launch Companion
-                        </Button>
-                    </SheetTrigger>
-                    <SheetContent className="w-full sm:w-[540px] p-0 flex flex-col h-full">
-                        <SheetHeader className="p-4 border-b">
-                            <SheetTitle className="font-headline">Ktazo Companion</SheetTitle>
-                            <SheetDescription>
-                                Your AI assistant for exploring sermon content.
-                            </SheetDescription>
-                        </SheetHeader>
-                        <ChatbotPanel />
-                    </SheetContent>
-                </Sheet>
-            </CardFooter>
-        </Card>
-      </div>
-
        {showOdb && (
         <Card>
             <CardHeader>
