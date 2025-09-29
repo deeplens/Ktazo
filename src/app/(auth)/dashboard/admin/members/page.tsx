@@ -1,3 +1,4 @@
+
 import {
   Table,
   TableBody,
@@ -60,7 +61,7 @@ export default function MembersPage() {
                                         </div>
                                     </TableCell>
                                     <TableCell><Badge variant="outline">{user.role}</Badge></TableCell>
-                                    <TableCell className="hidden md:table-cell text-muted-foreground">{new Date(user.lastLoginAt).toLocaleString()}</TableCell>
+                                    <TableCell className="hidden md:table-cell text-muted-foreground">{new Date(user.lastLoginAt).toLocaleString('en-US', { timeZone: 'America/Denver' })}</TableCell>
                                     <TableCell className="hidden md:table-cell text-muted-foreground">{user.points}</TableCell>
                                     <TableCell>
                                         <DropdownMenu>
