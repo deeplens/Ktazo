@@ -90,7 +90,7 @@ export default function WeeklyPage() {
             culturalEngagement: { title: 'Not available', description: '', details: '' },
         },
     };
-    return <WeeklyPageContent sermon={placeholderSermon || {} as Sermon} weeklyContent={placeholderContent} answers={{}} setAnswers={setAnswers} gameScores={{}} setGameScores={() => {}} availableLanguages={[]} selectedLanguage="en" onSelectLanguage={() => {}} leaderboard={[]} />;
+    return <WeeklyPageContent sermon={placeholderSermon || {} as Sermon} weeklyContent={placeholderContent} answers={{}} setAnswers={setAnswers} gameScores={{}} setGameScores={() => {}} availableLanguages={[]} selectedLanguage="en" onSelectLanguage={() => {}} leaderboard={[]} setLeaderboard={setLeaderboard} />;
   }
   
   return <WeeklyPageContent 
@@ -104,11 +104,12 @@ export default function WeeklyPage() {
     selectedLanguage={selectedLanguage}
     onSelectLanguage={setSelectedLanguage}
     leaderboard={leaderboard}
+    setLeaderboard={setLeaderboard}
     />;
 }
 
 
-function WeeklyPageContent({ sermon, weeklyContent, answers, setAnswers, gameScores, setGameScores, availableLanguages, selectedLanguage, onSelectLanguage, leaderboard }: { sermon: Sermon, weeklyContent: WeeklyContent, answers: Record<string, string>, setAnswers: React.Dispatch<React.SetStateAction<Record<string, string>>>, gameScores: Record<string, number>, setGameScores: React.Dispatch<React.SetStateAction<Record<string, number>>>, availableLanguages: string[], selectedLanguage: string, onSelectLanguage: (lang: string) => void, leaderboard: { userId: string, userName: string, userPhotoUrl?: string, totalScore: number }[] }) {
+function WeeklyPageContent({ sermon, weeklyContent, answers, setAnswers, gameScores, setGameScores, availableLanguages, selectedLanguage, onSelectLanguage, leaderboard, setLeaderboard }: { sermon: Sermon, weeklyContent: WeeklyContent, answers: Record<string, string>, setAnswers: React.Dispatch<React.SetStateAction<Record<string, string>>>, gameScores: Record<string, number>, setGameScores: React.Dispatch<React.SetStateAction<Record<string, number>>>, availableLanguages: string[], selectedLanguage: string, onSelectLanguage: (lang: string) => void, leaderboard: { userId: string, userName: string, userPhotoUrl?: string, totalScore: number }[], setLeaderboard: React.Dispatch<React.SetStateAction<{ userId: string, userName: string, userPhotoUrl?: string, totalScore: number }[]>> }) {
   const { user } = useAuth();
   const { toast } = useToast();
   
@@ -136,6 +137,7 @@ function WeeklyPageContent({ sermon, weeklyContent, answers, setAnswers, gameSco
     if (user) {
         setGameScores(prev => ({ ...prev, [gameTitle]: newScore }));
         saveGameScore(user.id, sermon.id, gameTitle, newScore);
+        setLeaderboard(getGlobalLeaderboard());
     }
   };
 
