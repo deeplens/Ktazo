@@ -416,6 +416,10 @@ function WeeklyPageContent({ sermon, weeklyContent, answers, setAnswers, gameSco
                           </Card>
                       </DialogTrigger>
                       <DialogContent className="max-w-4xl">
+                          <DialogHeader>
+                            <DialogTitle className="sr-only">{game.title}</DialogTitle>
+                            <DialogDescription className="sr-only">Playing the game: {game.title}</DialogDescription>
+                          </DialogHeader>
                           <GamePlayer game={game} onScoreChange={(score) => handleGameScoreChange(game.title, score)} initialScore={gameScores[game.title] || 0} />
                       </DialogContent>
                   </Dialog>
