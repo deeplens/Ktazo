@@ -87,12 +87,80 @@ const SermonEscapeRoomPuzzleSchema = z.object({
 });
 
 
-const GameSchema = z.object({
-    type: z.enum(['Quiz', 'Word Search', 'Fill in the Blank', 'Matching', 'Word Guess', 'Wordle', 'Jeopardy', 'Verse Scramble', 'True/False', 'Word Cloud Hunt', 'Two Truths and a Lie', 'Sermon Escape Room']),
-    title: z.string(),
-    audience: z.enum(['Youth', 'Adults']),
-    data: z.any().describe("The data for the game, which varies by type. See prompt for specific structures."),
-});
+const GameSchema = z.discriminatedUnion("type", [
+    z.object({
+        type: z.literal('Quiz'),
+        title: z.string(),
+        audience: z.enum(['Youth', 'Adults']),
+        data: z.array(GameQuestionSchema),
+    }),
+    z.object({
+        type: z.literal('Word Search'),
+        title: z.string(),
+        audience: z.enum(['Youth', 'Adults']),
+        data: z.object({ words: z.array(z.string()) }),
+    }),
+    z.object({
+        type: z.literal('Fill in the Blank'),
+        title: z.string(),
+        audience: z.enum(['Youth', 'Adults']),
+        data: z.array(FillInTheBlankItemSchema),
+    }),
+    z.object({
+        type: z.literal('Matching'),
+        title: z.string(),
+        audience: z.enum(['Youth', 'Adults']),
+        data: z.array(MatchingGameItemSchema),
+    }),
+    z.object({
+        type: z.literal('Word Guess'),
+        title: z.string(),
+        audience: z.enum(['Youth', 'Adults']),
+        data: z.array(WordGuessItemSchema),
+    }),
+    z.object({
+        type: z.literal('Wordle'),
+        title: z.string(),
+        audience: z.enum(['Youth', 'Adults']),
+        data: WordleItemSchema,
+    }),
+    z.object({
+        type: z.literal('Jeopardy'),
+        title: z.string(),
+        audience: z.enum(['Youth', 'Adults']),
+        data: z.array(JeopardyCategorySchema),
+    }),
+    z.object({
+        type: z.literal('Verse Scramble'),
+        title: z.string(),
+        audience: z.enum(['Youth', 'Adults']),
+        data: VerseScrambleItemSchema,
+    }),
+    z.object({
+        type: z.literal('True/False'),
+        title: z.string(),
+        audience: z.enum(['Youth', 'Adults']),
+        data: z.array(TrueFalseQuestionSchema),
+    }),
+    z.object({
+        type: z.literal('Word Cloud Hunt'),
+        title: z.string(),
+        audience: z.enum(['Youth', 'Adults']),
+        data: z.object({ words: z.array(z.string()) }),
+    }),
+    z.object({
+        type: z.literal('Two Truths and a Lie'),
+        title: z.string(),
+        audience: z.enum(['Youth', 'Adults']),
+        data: z.array(TwoTruthsAndALieItemSchema),
+    }),
+    z.object({
+        type: z.literal('Sermon Escape Room'),
+        title: z.string(),
+        audience: z.enum(['Youth', 'Adults']),
+        data: z.array(SermonEscapeRoomPuzzleSchema),
+    }),
+]);
 
 const BibleReadingPlanItemSchema = z.object({
     theme: z.string().describe('The theme connecting the passages.'),
@@ -161,26 +229,12 @@ const generateWeeklyContentPrompt = ai.definePrompt({
 
   Your task is to generate the full JSON object based on the provided schema definitions. Ensure all fields are populated with high-quality, relevant content derived from the sermon transcript.
 
-  - For the 'games' array: Generate a good variety of 8-12 games.
+  - For the 'games' array: Generate a good variety of 8-12 games. This is an important requirement.
     - One game MUST be 'Jeopardy'.
     - One game MUST be 'Verse Scramble'.
     - One game MUST be 'True/False' with exactly 20 questions.
     - One game MUST be 'Word Cloud Hunt'.
     - Fill the remaining slots with a mix of 'Quiz', 'Word Search', 'Fill in the Blank', 'Matching', 'Word Guess', 'Wordle', 'Two Truths and a Lie', or 'Sermon Escape Room'.
-
-  Game Data Structures (for the 'data' field within each game object):
-  - For 'Quiz': An array of objects, each with 'question' (string), 'options' (array of 4 strings), and 'correctAnswer' (string). Generate 3-4 questions.
-  - For 'Word Search': An object like { "words": ["ARRAY", "OF", "STRINGS"] }.
-  - For 'Fill in the Blank': An array of 4 objects, each with 'sentence' (string with '___') and 'blank' (string).
-  - For 'Matching': An array of 4-6 objects, each with 'id' (number), 'term' (string), and 'definition' (string).
-  - For 'Word Guess': An array of 4 objects, each with 'word' (string) and 'hint' (string).
-  - For 'Wordle': An object with a single 5-letter 'word' (string).
-  - For 'Jeopardy': An array of 2-3 category objects. Each category has 'title' and 'questions' (an array of 3 objects with 'question', 'answer' [must be a question], and 'points').
-  - For 'Verse Scramble': An object with 'verse' (string) and 'reference' (string).
-  - For 'True/False': An array of exactly 20 objects, each with 'statement' (string) and 'isTrue' (boolean).
-  - For 'Word Cloud Hunt': An object with a 'words' field containing an array of 15-20 single-word keywords.
-  - For 'Two Truths and a Lie': An array of 3-5 objects, each with 'truth1', 'truth2', and 'lie' (all strings).
-  - For 'Sermon Escape Room': An array of 3-5 puzzle objects, forming a short narrative. Each object must have a 'type' (one of 'Multiple Choice', 'Text Answer', 'Verse Code'), a 'prompt' (the puzzle question), an 'answer' (the solution), and 'feedback' (a piece of the story or a clue revealed upon solving). For 'Verse Code', the answer should be a number derived from a Bible verse. For 'Multiple Choice', include an 'options' array of 4 strings.
   `,
 });
 
@@ -208,7 +262,7 @@ const generateWeeklyContentFlow = ai.defineFlow(
                 // Ensure Jeopardy data is an array
                 if (game.data && !Array.isArray(game.data)) {
                     console.warn('[[WARN]] Jeopardy data was not an array, wrapping it.');
-                    game.data = [game.data];
+                    game.data = [game.data as any];
                 }
             }
         });
@@ -234,3 +288,4 @@ const generateWeeklyContentFlow = ai.defineFlow(
     }
   }
 );
+

@@ -56,8 +56,12 @@ export function JeopardyGame({ data, onScoreChange, initialScore }: JeopardyGame
     setAwardedPoints({});
   };
   
+  if (!data || !Array.isArray(data)) {
+    return <p>There was an error loading the Jeopardy game data.</p>;
+  }
+  
   const allAnswered = data.flatMap(c => c.questions).length === Object.keys(answered).length;
-  const numRows = data[0]?.questions.length || 0;
+  const numRows = data.length > 0 ? Math.max(...data.map(c => c.questions.length)) : 0;
   
   const isCurrentQuestionAwarded = currentQuestion ? !!awardedPoints[`${currentQuestion.category}-${currentQuestion.question.points}`] : false;
 
@@ -76,7 +80,7 @@ export function JeopardyGame({ data, onScoreChange, initialScore }: JeopardyGame
         {Array.from({ length: numRows }).map((_, rowIndex) => 
             data.map(category => {
                 const question = category.questions[rowIndex];
-                if (!question) return <div key={`${category.title}-${rowIndex}`} />; // Should not happen with consistent data
+                if (!question) return <div key={`${category.title}-${rowIndex}`} className="h-20 bg-blue-800" />;
 
                 const key = `${category.title}-${question.points}`;
                 const isAnswered = !!answered[key];
@@ -148,3 +152,4 @@ export function JeopardyGame({ data, onScoreChange, initialScore }: JeopardyGame
     </div>
   );
 }
+
