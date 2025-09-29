@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Gamepad2, Headphones, MessageCircleQuestion, Users, User, HeartHandshake, MessageSquare, MicVocal, Languages, BookOpen, HandHeart, Sparkles, Globe, Target, Briefcase, Flower, Puzzle, Search, Brackets, Binary, WholeWord, KeyRound, Type, CheckSquare, Brain, Quote, ListChecks, Star, Wrench, Trophy } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Sermon, WeeklyContent, Game, VerseScrambleItem, BibleReadingPlanItem, SpiritualPractice, OutwardFocusItem } from "@/lib/types";
+import { Sermon, WeeklyContent, Game, VerseScrambleItem, BibleReadingPlanItem, SpiritualPractice, OutwardFocusItem, JeopardyCategory } from "@/lib/types";
 import { useEffect, useState } from "react";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -140,6 +140,16 @@ function WeeklyPageContent({ sermon, weeklyContent, answers, setAnswers, gameSco
   };
 
   const totalPoints = Object.values(gameScores).reduce((sum, score) => sum + score, 0);
+
+  const totalPossiblePoints = weeklyContent.games?.reduce((total, game) => {
+    if (game.type === 'Jeopardy' && Array.isArray(game.data)) {
+      const jeopardyPoints = (game.data as JeopardyCategory[]).flatMap(c => c.questions).reduce((sum, q) => sum + q.points, 0);
+      return total + jeopardyPoints;
+    }
+    // Most other games are worth 100 points
+    return total + 100;
+  }, 0);
+
 
   const getIconForAudience = (audience: string) => {
     switch (audience) {
@@ -393,7 +403,7 @@ function WeeklyPageContent({ sermon, weeklyContent, answers, setAnswers, gameSco
               <div className="text-right space-y-2">
                 <div className="flex items-center gap-2 text-xl font-bold text-primary">
                     <Star className="text-yellow-400 fill-yellow-400" />
-                    <span>{totalPoints} Points This Week</span>
+                    <span>{totalPoints} / {totalPossiblePoints} Points This Week</span>
                 </div>
                 <Dialog>
                     <DialogTrigger asChild>
