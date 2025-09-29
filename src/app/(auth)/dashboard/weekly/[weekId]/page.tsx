@@ -7,7 +7,7 @@ import { getMockSermons, getMockWeeklyContent, getAnswersForSermon, saveAnswersF
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
-import { Gamepad2, Headphones, MessageCircleQuestion, Users, User, HeartHandshake, MessageSquare, MicVocal, Languages, BookOpen, HandHeart, Sparkles, Globe, Target, Briefcase, Flower, Puzzle, Search, Brackets, Binary, WholeWord, KeyRound, Type, CheckSquare, Brain, Quote, ListChecks, Star, Wrench, Trophy, Award } from "lucide-react";
+import { Gamepad2, Headphones, MessageCircleQuestion, Users, User, HeartHandshake, MessageSquare, MicVocal, Languages, BookOpen, HandHeart, Sparkles, Globe, Target, Briefcase, Flower, Puzzle, Search, Brackets, Binary, WholeWord, KeyRound, Type, CheckSquare, Brain, Quote, ListChecks, Star, Wrench, Trophy, Award, Info } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Sermon, WeeklyContent, Game, VerseScrambleItem, BibleReadingPlanItem, SpiritualPractice, OutwardFocusItem, JeopardyCategory } from "@/lib/types";
@@ -23,7 +23,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import { ServiceWall } from "@/components/sermons/service-wall";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { getLevelForPoints } from "@/lib/levels";
+import { getLevelForPoints, faithLevels } from "@/lib/levels";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Progress } from "@/components/ui/progress";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 export default function WeeklyPage() {
   const params = useParams();
@@ -205,9 +208,32 @@ function WeeklyPageContent({ sermon, weeklyContent, answers, setAnswers, gameSco
     }
   }
 
-  if (!weeklyContent) {
+  if (!weeklyContent || !user) {
     return <div>No content available for this week.</div>
   }
+  
+  const currentUserScore = leaderboard.find(p => p.userId === user.id)?.totalScore || 0;
+  const userLevel = getLevelForPoints(currentUserScore);
+  const progressPercentage = userLevel.maxPoints === Infinity ? 100 : ((currentUserScore - userLevel.minPoints) / (userLevel.maxPoints - userLevel.minPoints)) * 100;
+
+  const groupedLevels = faithLevels.reduce((acc, level) => {
+    const stageKey = level.stage;
+    if (!acc[stageKey]) {
+      acc[stageKey] = [];
+    }
+    acc[stageKey].push(level);
+    return acc;
+  }, {} as Record<string, typeof faithLevels>);
+
+  const stageOrder = [
+    'Stage 1 – Foundation',
+    'Stage 2 – Growth',
+    'Stage 3 – Strengthening',
+    'Stage 4 – Deepening',
+    'Stage 5 – Builders',
+    'Stage 6 – Overcomers',
+    'Stage 7 – Eternal Legacy'
+  ];
 
   const heroImage = sermon.artworkUrl || `https://picsum.photos/seed/${sermon.id}/1200/800`;
   const showLanguageSwitcher = availableLanguages.length > 1;
@@ -421,21 +447,79 @@ function WeeklyPageContent({ sermon, weeklyContent, answers, setAnswers, gameSco
 
       <Card id="games">
           <CardHeader>
-            <div className="flex justify-between items-start">
+            <div className="flex justify-between items-start gap-4">
               <div>
                 <CardTitle className="font-headline flex items-center gap-2"><Gamepad2 /> Interactive Games</CardTitle>
                 <CardDescription>Engage with the sermon in a fun new way and earn points!</CardDescription>
               </div>
-              <div className="text-right space-y-2">
+              <div className="text-right space-y-1">
                 <div className="flex items-center gap-2 text-xl font-bold text-primary">
                     <Star className="text-yellow-400 fill-yellow-400" />
                     <span>{totalPoints} / {totalPossiblePoints} Points This Week</span>
                 </div>
-                <Dialog>
+                 <div className="flex items-center justify-end gap-2">
+                    <div className="w-64">
+                        <TooltipProvider>
+                            <Tooltip>
+                                <TooltipTrigger className="w-full text-left">
+                                    <div className="text-sm font-semibold flex justify-between mb-1">
+                                        <span>{userLevel.stage.split(' – ')[1]}: {userLevel.name}</span>
+                                        <span className="text-primary">{currentUserScore.toLocaleString()} / {userLevel.maxPoints === Infinity ? '∞' : userLevel.maxPoints.toLocaleString()} pts</span>
+                                    </div>
+                                    <Progress value={progressPercentage} />
+                                </TooltipTrigger>
+                                <TooltipContent align="end" className="max-w-xs">
+                                    <p className="italic">&quot;{userLevel.quote}&quot;</p>
+                                    <p className="text-right font-medium">- {userLevel.reference}</p>
+                                </TooltipContent>
+                            </Tooltip>
+                        </TooltipProvider>
+                    </div>
+                        <Dialog>
+                        <DialogTrigger asChild>
+                            <Button variant="ghost" size="icon" className="h-8 w-8">
+                                <Info className="h-5 w-5 text-muted-foreground" />
+                            </Button>
+                        </DialogTrigger>
+                        <DialogContent className="sm:max-w-2xl">
+                            <DialogHeader>
+                                <DialogTitle>Faith Journey Game Levels</DialogTitle>
+                                <DialogDescription>
+                                    This progression rewards long-term play, keeps people encouraged, and reinforces scripture at every milestone.
+                                </DialogDescription>
+                            </DialogHeader>
+                            <ScrollArea className="max-h-[60vh] pr-6">
+                                <div className="space-y-6">
+                                    {stageOrder.map((stageKey) => {
+                                        const levels = groupedLevels[stageKey];
+                                        if (!levels) return null;
+                                        
+                                        return (
+                                            <div key={stageKey}>
+                                                <h3 className="text-lg font-semibold mb-2 border-b pb-1">{stageKey}</h3>
+                                                <div className="space-y-4">
+                                                    {levels.map(level => (
+                                                        <div key={level.name}>
+                                                            <p className="font-bold">{level.minPoints.toLocaleString()} - {level.maxPoints === Infinity ? '∞' : level.maxPoints.toLocaleString()} pts → {level.name}</p>
+                                                            <blockquote className="pl-4 border-l-2 ml-2 mt-1">
+                                                                <p className="text-sm italic text-muted-foreground">&quot;{level.quote}&quot; — {level.reference}</p>
+                                                            </blockquote>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )
+                                    })}
+                                </div>
+                            </ScrollArea>
+                        </DialogContent>
+                    </Dialog>
+                </div>
+                 <Dialog>
                     <DialogTrigger asChild>
-                        <Button variant="outline" size="sm">
+                        <Button variant="link" size="sm" className="h-auto p-0 justify-end">
                             <Trophy className="mr-2 h-4 w-4" />
-                            View Leaderboard
+                            View Overall Leaderboard
                         </Button>
                     </DialogTrigger>
                     <DialogContent>

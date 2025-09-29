@@ -6,25 +6,9 @@ import { AdminPastorDashboard } from "@/components/dashboard/admin-pastor-dashbo
 import { Skeleton } from "@/components/ui/skeleton";
 import { getGlobalLeaderboard, mockUsers } from "@/lib/mock-data";
 import { Button } from "@/components/ui/button";
-import { Star, Users, Wifi, Info } from "lucide-react";
+import { Users, Wifi } from "lucide-react";
 import Link from "next/link";
 import { getLevelForPoints, faithLevels } from "@/lib/levels";
-import { Progress } from "@/components/ui/progress";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-} from "@/components/ui/dialog";
-import { ScrollArea } from "@/components/ui/scroll-area";
 
 
 export default function Dashboard() {
@@ -52,26 +36,6 @@ export default function Dashboard() {
   const leaderboard = getGlobalLeaderboard();
   const currentUserScore = leaderboard.find(p => p.userId === user.id)?.totalScore || 0;
   const userLevel = getLevelForPoints(currentUserScore);
-  const progressPercentage = userLevel.maxPoints === Infinity ? 100 : ((currentUserScore - userLevel.minPoints) / (userLevel.maxPoints - userLevel.minPoints)) * 100;
-
-  const groupedLevels = faithLevels.reduce((acc, level) => {
-    const stageKey = level.stage;
-    if (!acc[stageKey]) {
-      acc[stageKey] = [];
-    }
-    acc[stageKey].push(level);
-    return acc;
-  }, {} as Record<string, typeof faithLevels>);
-
-  const stageOrder = [
-    'Stage 1 – Foundation',
-    'Stage 2 – Growth',
-    'Stage 3 – Strengthening',
-    'Stage 4 – Deepening',
-    'Stage 5 – Builders',
-    'Stage 6 – Overcomers',
-    'Stage 7 – Eternal Legacy'
-  ];
 
   return (
     <div className="flex flex-col gap-8">
@@ -82,7 +46,7 @@ export default function Dashboard() {
             </div>
             <div className="text-right">
                 <div className="flex items-center justify-end gap-4">
-                    {isAdmin ? (
+                    {isAdmin && (
                         <div className="flex items-center gap-2 text-sm">
                             <Users className="h-5 w-5 text-muted-foreground" />
                             <div>
@@ -90,66 +54,6 @@ export default function Dashboard() {
                                 <span className="text-muted-foreground"> Registered</span>
                             </div>
                         </div>
-                    ) : (
-                         <div className="flex items-center gap-2">
-                            <div className="w-64">
-                                <TooltipProvider>
-                                    <Tooltip>
-                                        <TooltipTrigger className="w-full text-left">
-                                            <div className="text-sm font-semibold flex justify-between mb-1">
-                                                <span>{userLevel.stage.split(' – ')[1]}: {userLevel.name}</span>
-                                                <span className="text-primary">{currentUserScore.toLocaleString()} / {userLevel.maxPoints === Infinity ? '∞' : userLevel.maxPoints.toLocaleString()} pts</span>
-                                            </div>
-                                            <Progress value={progressPercentage} />
-                                        </TooltipTrigger>
-                                        <TooltipContent align="end" className="max-w-xs">
-                                            <p className="italic">&quot;{userLevel.quote}&quot;</p>
-                                            <p className="text-right font-medium">- {userLevel.reference}</p>
-                                        </TooltipContent>
-                                    </Tooltip>
-                                </TooltipProvider>
-                            </div>
-                             <Dialog>
-                                <DialogTrigger asChild>
-                                    <Button variant="ghost" size="icon" className="h-8 w-8">
-                                        <Info className="h-5 w-5 text-muted-foreground" />
-                                    </Button>
-                                </DialogTrigger>
-                                <DialogContent className="sm:max-w-2xl">
-                                    <DialogHeader>
-                                        <DialogTitle>Faith Journey Game Levels</DialogTitle>
-                                        <DialogDescription>
-                                            This progression rewards long-term play, keeps people encouraged, and reinforces scripture at every milestone.
-                                        </DialogDescription>
-                                    </DialogHeader>
-                                    <ScrollArea className="max-h-[60vh] pr-6">
-                                        <div className="space-y-6">
-                                            {stageOrder.map((stageKey) => {
-                                                const levels = groupedLevels[stageKey];
-                                                if (!levels) return null;
-                                                const [stageNum, stageName] = stageKey.split(' – ');
-                                                
-                                                return (
-                                                    <div key={stageKey}>
-                                                        <h3 className="text-lg font-semibold mb-2 border-b pb-1">{stageNum}: {stageName}</h3>
-                                                        <div className="space-y-4">
-                                                            {levels.map(level => (
-                                                                <div key={level.name}>
-                                                                    <p className="font-bold">{level.minPoints.toLocaleString()} - {level.maxPoints === Infinity ? '∞' : level.maxPoints.toLocaleString()} pts → {level.name}</p>
-                                                                    <blockquote className="pl-4 border-l-2 ml-2 mt-1">
-                                                                        <p className="text-sm italic text-muted-foreground">&quot;{level.quote}&quot; — {level.reference}</p>
-                                                                    </blockquote>
-                                                                </div>
-                                                            ))}
-                                                        </div>
-                                                    </div>
-                                                )
-                                            })}
-                                        </div>
-                                    </ScrollArea>
-                                </DialogContent>
-                            </Dialog>
-                         </div>
                     )}
                      <div className="flex items-center gap-2 text-sm">
                         <Wifi className="h-5 w-5 text-green-500" />
