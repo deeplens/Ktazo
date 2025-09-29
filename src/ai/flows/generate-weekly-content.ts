@@ -148,8 +148,8 @@ export async function generateWeeklyContent(input: GenerateWeeklyContentInput): 
 const generateWeeklyContentPrompt = ai.definePrompt({
   name: 'generateWeeklyContentPrompt',
   input: {schema: GenerateWeeklyContentInputSchema},
-  output: {format: 'text'},
-  prompt: `You are an AI assistant designed to generate weekly content for a church, based on a given sermon. You MUST return a single, valid JSON object that conforms to the schema described below. All property names (keys) in the JSON object MUST be enclosed in double quotes. Do not add any extra text, formatting, or code fences around the JSON.
+  output: {schema: GenerateWeeklyContentOutputSchema},
+  prompt: `You are an AI assistant designed to generate weekly content for a church, based on a given sermon. You MUST return a single, valid JSON object that conforms to the schema.
 
   {{#if targetLanguage}}
   IMPORTANT: All generated text content MUST be in {{targetLanguage}}.
@@ -159,22 +159,14 @@ const generateWeeklyContentPrompt = ai.definePrompt({
 
   Sermon Transcript: {{{sermonTranscript}}}
 
-  Generate a valid JSON object with the following fields:
+  Your task is to generate the full JSON object based on the provided schema definitions. Ensure all fields are populated with high-quality, relevant content derived from the sermon transcript.
 
-  - summaryShort: A short summary of the sermon.
-  - summaryLong: A longer devotional guide summary of the sermon.
-  - oneLiners: An object with two fields, 'tuesday' and 'thursday', containing concise, impactful one-liner quotes from the sermon.
-  - devotionals: An object with five fields (monday, tuesday, wednesday, thursday, friday), each containing a devotional of around 200 words.
-  - reflectionQuestions: An array of question group objects. Each object in the array MUST have an 'audience' field (one of 'Individuals', 'Families', 'Small Groups', 'Youth') and a 'questions' field (an array of 3-4 strings).
-  - games: An array of up to 12 interactive game objects. Each game object MUST have a 'type', 'title', 'audience', and 'data' field. The 'audience' for games MUST be either 'Youth' or 'Adults'. If the sermon material is not substantial enough to create 12 high-quality, distinct games, generate fewer.
+  - For the 'games' array: If the sermon material is not substantial enough to create 12 high-quality, distinct games, generate fewer.
     - One game MUST be 'Jeopardy'.
     - One game MUST be 'Verse Scramble'.
     - One game MUST be 'True/False' with exactly 20 questions.
     - One game MUST be 'Word Cloud Hunt'.
     - Fill the remaining slots with a mix of 'Quiz', 'Word Search', 'Fill in the Blank', 'Matching', 'Word Guess', 'Wordle', 'Two Truths and a Lie', or 'Sermon Escape Room'.
-  - bibleReadingPlan: An array of 2-3 thematic reading connections. Each theme should have 2-3 relevant Bible passages with explanations.
-  - spiritualPractices: An array of 2-3 small, practical spiritual practice challenges related to the sermon.
-  - outwardFocus: An object with three fields: 'missionFocus', 'serviceChallenge', and 'culturalEngagement'. Each should be an object with 'title', 'description', and 'details' fields.
 
   Game Data Structures (for the 'data' field within each game object):
   - For 'Quiz': An array of objects, each with 'question' (string), 'options' (array of 4 strings), and 'correctAnswer' (string). Generate 3-4 questions.
@@ -204,28 +196,17 @@ const generateWeeklyContentFlow = ai.defineFlow(
         console.log('[[DEBUG]] Starting generateWeeklyContentFlow');
         
         const response = await generateWeeklyContentPrompt(input);
-        
-        const jsonText = response.text
-          .replace(/^```json/, '')
-          .replace(/```$/, '')
-          .trim();
-
-        const output = JSON.parse(jsonText);
+        const output = response.output;
 
         if (!output) {
             throw new Error('AI content generation failed: No output was returned from the model.');
         }
 
-        // Validate the parsed output against the Zod schema
-        const validatedOutput = GenerateWeeklyContentOutputSchema.parse(output);
-
         console.log('[[DEBUG]] Finishing generateWeeklyContentFlow.');
-        return validatedOutput;
+        return output;
     } catch (error: any) {
         console.error('[[ERROR]] in generateWeeklyContentFlow:', error);
         
-        // Create a more specific and serializable error message.
-        // This helps prevent generic "unexpected response" errors on the client.
         let finalMessage = 'AI content generation failed. ';
 
         if (error instanceof z.ZodError) {
