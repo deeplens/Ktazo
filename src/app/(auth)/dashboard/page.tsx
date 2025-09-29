@@ -55,12 +55,23 @@ export default function Dashboard() {
   const progressPercentage = userLevel.maxPoints === Infinity ? 100 : ((currentUserScore - userLevel.minPoints) / (userLevel.maxPoints - userLevel.minPoints)) * 100;
 
   const groupedLevels = faithLevels.reduce((acc, level) => {
-    if (!acc[level.stage]) {
-      acc[level.stage] = [];
+    const stageKey = level.stage;
+    if (!acc[stageKey]) {
+      acc[stageKey] = [];
     }
-    acc[level.stage].push(level);
+    acc[stageKey].push(level);
     return acc;
   }, {} as Record<string, typeof faithLevels>);
+
+  const stageOrder = [
+    'Stage 1 – Foundation',
+    'Stage 2 – Growth',
+    'Stage 3 – Strengthening',
+    'Stage 4 – Deepening',
+    'Stage 5 – Builders',
+    'Stage 6 – Overcomers',
+    'Stage 7 – Eternal Legacy'
+  ];
 
   return (
     <div className="flex flex-col gap-8">
@@ -86,7 +97,7 @@ export default function Dashboard() {
                                     <Tooltip>
                                         <TooltipTrigger className="w-full text-left">
                                             <div className="text-sm font-semibold flex justify-between mb-1">
-                                                <span>{userLevel.stage}: {userLevel.name}</span>
+                                                <span>{userLevel.stage.split(' – ')[1]}: {userLevel.name}</span>
                                                 <span className="text-primary">{currentUserScore.toLocaleString()} / {userLevel.maxPoints === Infinity ? '∞' : userLevel.maxPoints.toLocaleString()} pts</span>
                                             </div>
                                             <Progress value={progressPercentage} />
@@ -113,21 +124,27 @@ export default function Dashboard() {
                                     </DialogHeader>
                                     <ScrollArea className="max-h-[60vh] pr-6">
                                         <div className="space-y-6">
-                                            {Object.entries(groupedLevels).map(([stage, levels]) => (
-                                                <div key={stage}>
-                                                    <h3 className="text-lg font-semibold mb-2 border-b pb-1">Stage {stage.split(' ')[1]}: {stage.split(' – ')[1]}</h3>
-                                                    <div className="space-y-4">
-                                                        {levels.map(level => (
-                                                            <div key={level.name}>
-                                                                <p className="font-bold">{level.minPoints.toLocaleString()} - {level.maxPoints === Infinity ? '∞' : level.maxPoints.toLocaleString()} pts → {level.name}</p>
-                                                                <blockquote className="pl-4 border-l-2 ml-2 mt-1">
-                                                                    <p className="text-sm italic text-muted-foreground">&quot;{level.quote}&quot; — {level.reference}</p>
-                                                                </blockquote>
-                                                            </div>
-                                                        ))}
+                                            {stageOrder.map((stageKey) => {
+                                                const levels = groupedLevels[stageKey];
+                                                if (!levels) return null;
+                                                const [stageNum, stageName] = stageKey.split(' – ');
+                                                
+                                                return (
+                                                    <div key={stageKey}>
+                                                        <h3 className="text-lg font-semibold mb-2 border-b pb-1">{stageNum}: {stageName}</h3>
+                                                        <div className="space-y-4">
+                                                            {levels.map(level => (
+                                                                <div key={level.name}>
+                                                                    <p className="font-bold">{level.minPoints.toLocaleString()} - {level.maxPoints === Infinity ? '∞' : level.maxPoints.toLocaleString()} pts → {level.name}</p>
+                                                                    <blockquote className="pl-4 border-l-2 ml-2 mt-1">
+                                                                        <p className="text-sm italic text-muted-foreground">&quot;{level.quote}&quot; — {level.reference}</p>
+                                                                    </blockquote>
+                                                                </div>
+                                                            ))}
+                                                        </div>
                                                     </div>
-                                                </div>
-                                            ))}
+                                                )
+                                            })}
                                         </div>
                                     </ScrollArea>
                                 </DialogContent>
