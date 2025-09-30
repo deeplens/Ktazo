@@ -558,7 +558,7 @@ function WeeklyPageContent({ sermon, weeklyContent, answers, setAnswers, gameSco
                     <CardTitle className="font-headline flex items-center gap-2"><Flower /> Self-Assessment</CardTitle>
                     <CardDescription>Reflect on your spiritual growth and well-being.</CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-4">
+                <CardContent>
                      <Dialog onOpenChange={(open) => !open && resetFlourishing()}>
                         <DialogTrigger asChild>
                             <Button className="w-full" variant="outline">
@@ -567,14 +567,18 @@ function WeeklyPageContent({ sermon, weeklyContent, answers, setAnswers, gameSco
                         </DialogTrigger>
                         <DialogContent className="max-w-2xl min-h-[550px] flex flex-col">
                             {renderFlourishingContent()}
+                            {flourishingStep === 'ring' && (
+                                <DialogFooter>
+                                    <Button onClick={handleFinalSubmit} disabled={!allAreasCompleted}>
+                                        Submit Assessment ({completedAreas.size}/{flourishingAreas.length} Completed)
+                                    </Button>
+                                </DialogFooter>
+                            )}
                              <div className="text-xs text-muted-foreground p-4 bg-muted rounded-md mt-auto">
                                 <p>These questions are intended to assess the current state of human flourishing in congregations. Your answers will not include your name. All your responses are anonymous. These results may be used to provide Gloo with insight into larger trends in human flourishing.</p>
                             </div>
                         </DialogContent>
                     </Dialog>
-                    <Button onClick={handleFinalSubmit} disabled={!allAreasCompleted} className="w-full">
-                        Submit Assessment ({completedAreas.size}/{flourishingAreas.length} Completed)
-                    </Button>
                 </CardContent>
             </Card>
         </div>
@@ -805,6 +809,7 @@ function WeeklyPageContent({ sermon, weeklyContent, answers, setAnswers, gameSco
     
 
     
+
 
 
 
