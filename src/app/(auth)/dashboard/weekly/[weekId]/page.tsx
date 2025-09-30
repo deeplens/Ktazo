@@ -390,9 +390,6 @@ function WeeklyPageContent({ sermon, weeklyContent, answers, setAnswers, gameSco
                     </DialogHeader>
                     <DialogFooter className="justify-center">
                          <Button onClick={resetFlourishing}>Back to Assessment</Button>
-                         <DialogClose asChild>
-                            <Button variant="outline">Close</Button>
-                         </DialogClose>
                     </DialogFooter>
                 </>
             )
@@ -808,5 +805,6 @@ function WeeklyPageContent({ sermon, weeklyContent, answers, setAnswers, gameSco
     
 
     
+
 
 
