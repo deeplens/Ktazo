@@ -219,3 +219,22 @@ export interface FaithLevel {
     celebrationMessage: string;
     icon: string;
 }
+
+export type FlourishingCategoryName = 'Character' | 'Relationships' | 'Happiness' | 'Meaning' | 'Health' | 'Finances' | 'Faith';
+
+export interface FlourishingQuestionSet {
+    objective: {
+        question: string;
+        options: string[];
+        correctAnswerIndex: number;
+    };
+    subjective: {
+        prompt1: string;
+        prompt2: string;
+    };
+}
+
+export interface FlourishingCategory {
+    name: FlourishingCategoryName;
+    questions: FlourishingQuestionSet;
+}

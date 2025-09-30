@@ -7,10 +7,10 @@ import { getMockSermons, getMockWeeklyContent, getAnswersForSermon, saveAnswersF
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
-import { Gamepad2, Headphones, MessageCircleQuestion, Users, User, HeartHandshake, MessageSquare, MicVocal, Languages, BookOpen, HandHeart, Sparkles, Globe, Target, Briefcase, Flower, Puzzle, Search, Brackets, Binary, WholeWord, KeyRound, Type, CheckSquare, Brain, Quote, ListChecks, Star, Wrench, Trophy, Award, Info, Heart, Smile, PiggyBank, Leaf, Scale, Cross } from "lucide-react";
+import { Gamepad2, Headphones, MessageCircleQuestion, Users, User, HeartHandshake, MessageSquare, MicVocal, Languages, BookOpen, HandHeart, Sparkles, Globe, Target, Briefcase, Flower, Puzzle, Search, Brackets, Binary, WholeWord, KeyRound, Type, CheckSquare, Brain, Quote, ListChecks, Star, Wrench, Trophy, Award, Info, Heart, Smile, PiggyBank, Leaf, Scale, Cross, ArrowLeft } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Sermon, WeeklyContent, Game, VerseScrambleItem, BibleReadingPlanItem, SpiritualPractice, OutwardFocusItem, JeopardyCategory } from "@/lib/types";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Sermon, WeeklyContent, Game, VerseScrambleItem, BibleReadingPlanItem, SpiritualPractice, OutwardFocusItem, JeopardyCategory, FlourishingCategoryName, FlourishingQuestionSet } from "@/lib/types";
 import { useEffect, useState } from "react";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -27,6 +27,8 @@ import { getLevelForPoints, faithLevels } from "@/lib/levels";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Progress } from "@/components/ui/progress";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { flourishingQuestions } from "@/lib/flourishing-questions";
 
 export default function WeeklyPage() {
   const params = useParams();
@@ -116,6 +118,11 @@ export default function WeeklyPage() {
 function WeeklyPageContent({ sermon, weeklyContent, answers, setAnswers, gameScores, setGameScores, availableLanguages, selectedLanguage, onSelectLanguage, leaderboard, setLeaderboard }: { sermon: Sermon, weeklyContent: WeeklyContent, answers: Record<string, string>, setAnswers: React.Dispatch<React.SetStateAction<Record<string, string>>>, gameScores: Record<string, number>, setGameScores: React.Dispatch<React.SetStateAction<Record<string, number>>>, availableLanguages: string[], selectedLanguage: string, onSelectLanguage: (lang: string) => void, leaderboard: { userId: string, userName: string, userPhotoUrl?: string, totalScore: number }[], setLeaderboard: React.Dispatch<React.SetStateAction<{ userId: string, userName: string, userPhotoUrl?: string, totalScore: number }[]>> }) {
   const { user } = useAuth();
   const { toast } = useToast();
+
+  const [selectedFlourishingArea, setSelectedFlourishingArea] = useState<FlourishingCategoryName | null>(null);
+  const [flourishingStep, setFlourishingStep] = useState<'ring' | 'objective' | 'subjective' | 'finished'>('ring');
+  const [objectiveAnswer, setObjectiveAnswer] = useState<string | null>(null);
+  const [subjectiveAnswer, setSubjectiveAnswer] = useState('');
   
   const handleAnswerChange = (questionId: string, value: string) => {
     setAnswers(prev => ({ ...prev, [questionId]: value }));
@@ -179,6 +186,28 @@ function WeeklyPageContent({ sermon, weeklyContent, answers, setAnswers, gameSco
     return total + 100;
   }, 0);
 
+  const handleAreaSelect = (area: FlourishingCategoryName) => {
+    setSelectedFlourishingArea(area);
+    setFlourishingStep('objective');
+  };
+
+  const resetFlourishing = () => {
+    setSelectedFlourishingArea(null);
+    setFlourishingStep('ring');
+    setObjectiveAnswer(null);
+    setSubjectiveAnswer('');
+  };
+
+  const handleSubmitFlourishing = () => {
+    // Here you would save the answers (objectiveAnswer and subjectiveAnswer)
+    console.log({
+        area: selectedFlourishingArea,
+        objective: objectiveAnswer,
+        subjective: subjectiveAnswer,
+    });
+    setFlourishingStep('finished');
+  }
+
 
   const getIconForAudience = (audience: string) => {
     switch (audience) {
@@ -241,7 +270,7 @@ function WeeklyPageContent({ sermon, weeklyContent, answers, setAnswers, gameSco
   const verseScrambleGame = weeklyContent.games?.find(g => g.type === 'Verse Scramble') as Game | undefined;
   const verseData = verseScrambleGame?.data as VerseScrambleItem | undefined;
 
-  const flourishingAreas = [
+  const flourishingAreas: { name: FlourishingCategoryName, icon: React.ElementType }[] = [
       { name: 'Character', icon: Scale },
       { name: 'Relationships', icon: Heart },
       { name: 'Happiness', icon: Smile },
@@ -250,6 +279,109 @@ function WeeklyPageContent({ sermon, weeklyContent, answers, setAnswers, gameSco
       { name: 'Finances', icon: PiggyBank },
       { name: 'Faith', icon: Cross },
   ];
+
+  const renderFlourishingContent = () => {
+    const questions = selectedFlourishingArea ? flourishingQuestions[selectedFlourishingArea]?.questions : null;
+
+    switch (flourishingStep) {
+        case 'ring':
+            return (
+                <>
+                <DialogHeader>
+                    <DialogTitle>Flourishing Self-Assessment</DialogTitle>
+                    <DialogDescription>In which area of your life would you like to focus on growth today?</DialogDescription>
+                </DialogHeader>
+                <div className="relative flex-1 flex items-center justify-center h-80">
+                    {flourishingAreas.map((area, index) => {
+                        const angle = (index / flourishingAreas.length) * 2 * Math.PI - (Math.PI / 2);
+                        const radius = 120; // adjust for size
+                        const x = Math.cos(angle) * radius;
+                        const y = Math.sin(angle) * radius;
+                        const Icon = area.icon;
+
+                        return (
+                            <div
+                                key={area.name}
+                                className="absolute flex flex-col items-center justify-center"
+                                style={{
+                                    transform: `translate(${x}px, ${y}px)`
+                                }}
+                            >
+                                <Button variant="outline" className="w-24 h-24 rounded-full flex flex-col items-center justify-center gap-1 shadow-lg hover:scale-105 transition-transform" onClick={() => handleAreaSelect(area.name)}>
+                                    <Icon className="w-8 h-8 text-primary" />
+                                    <span className="text-xs">{area.name}</span>
+                                </Button>
+                            </div>
+                        );
+                    })}
+                </div>
+                </>
+            );
+        case 'objective':
+            if (!questions) return null;
+            return (
+                <>
+                    <DialogHeader>
+                        <DialogTitle>{selectedFlourishingArea} - Objective Question</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                        <p className="whitespace-pre-wrap">{questions.objective.question}</p>
+                        <RadioGroup value={objectiveAnswer || ''} onValueChange={setObjectiveAnswer}>
+                            {questions.objective.options.map((option, index) => (
+                                <div key={index} className="flex items-center space-x-2">
+                                    <RadioGroupItem value={String(index)} id={`option-${index}`} />
+                                    <Label htmlFor={`option-${index}`}>{option}</Label>
+                                </div>
+                            ))}
+                        </RadioGroup>
+                    </div>
+                    <DialogFooter className="mt-4">
+                        <Button variant="outline" onClick={resetFlourishing}>Back to Areas</Button>
+                        <Button onClick={() => setFlourishingStep('subjective')} disabled={objectiveAnswer === null}>Next</Button>
+                    </DialogFooter>
+                </>
+            );
+        case 'subjective':
+            if (!questions) return null;
+            return (
+                 <>
+                    <DialogHeader>
+                        <DialogTitle>{selectedFlourishingArea} - Subjective Reflection</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                        <div className="space-y-2">
+                            <Label>{questions.subjective.prompt1}</Label>
+                            <Label className="text-muted-foreground">{questions.subjective.prompt2}</Label>
+                        </div>
+                        <Textarea 
+                            placeholder="Share your thoughts here..."
+                            rows={8}
+                            value={subjectiveAnswer}
+                            onChange={(e) => setSubjectiveAnswer(e.target.value)}
+                        />
+                    </div>
+                     <DialogFooter className="mt-4">
+                        <Button variant="outline" onClick={() => setFlourishingStep('objective')}>Back</Button>
+                        <Button onClick={handleSubmitFlourishing} disabled={!subjectiveAnswer.trim()}>Submit</Button>
+                    </DialogFooter>
+                </>
+            );
+        case 'finished':
+            return (
+                <>
+                    <DialogHeader className="text-center items-center">
+                        <CheckSquare className="w-16 h-16 text-green-500" />
+                        <DialogTitle>Thank You!</DialogTitle>
+                        <DialogDescription>Your anonymous response has been recorded. It will help provide insight into the flourishing of the congregation.</DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter className="justify-center">
+                         <Button onClick={resetFlourishing}>Start Over</Button>
+                    </DialogFooter>
+                </>
+            )
+        default: return null;
+    }
+  }
 
   return (
     <div className="container mx-auto py-8 px-4 space-y-8">
@@ -413,42 +545,15 @@ function WeeklyPageContent({ sermon, weeklyContent, answers, setAnswers, gameSco
                     <CardDescription>Reflect on your spiritual growth and well-being.</CardDescription>
                 </CardHeader>
                 <CardContent>
-                     <Dialog>
+                     <Dialog onOpenChange={(open) => !open && resetFlourishing()}>
                         <DialogTrigger asChild>
                             <Button className="w-full">
                                 Flourishing
                             </Button>
                         </DialogTrigger>
-                        <DialogContent className="max-w-2xl h-[550px] flex flex-col">
-                            <DialogHeader>
-                                <DialogTitle>Flourishing Self-Assessment</DialogTitle>
-                                <DialogDescription>In which area of your life would you like to focus on growth today?</DialogDescription>
-                            </DialogHeader>
-                            <div className="relative flex-1 flex items-center justify-center">
-                                {flourishingAreas.map((area, index) => {
-                                    const angle = (index / flourishingAreas.length) * 2 * Math.PI - (Math.PI / 2);
-                                    const radius = 120; // adjust for size
-                                    const x = Math.cos(angle) * radius;
-                                    const y = Math.sin(angle) * radius;
-                                    const Icon = area.icon;
-
-                                    return (
-                                        <div
-                                            key={area.name}
-                                            className="absolute flex flex-col items-center justify-center"
-                                            style={{
-                                                transform: `translate(${x}px, ${y}px)`
-                                            }}
-                                        >
-                                            <Button variant="outline" className="w-24 h-24 rounded-full flex flex-col items-center justify-center gap-1 shadow-lg hover:scale-105 transition-transform">
-                                                <Icon className="w-8 h-8 text-primary" />
-                                                <span className="text-xs">{area.name}</span>
-                                            </Button>
-                                        </div>
-                                    );
-                                })}
-                            </div>
-                             <div className="text-xs text-muted-foreground p-4 bg-muted rounded-md">
+                        <DialogContent className="max-w-2xl min-h-[550px] flex flex-col">
+                            {renderFlourishingContent()}
+                             <div className="text-xs text-muted-foreground p-4 bg-muted rounded-md mt-auto">
                                 <p>These questions are intended to assess the current state of human flourishing in congregations. Your answers will not include your name. All your responses are anonymous. These results may be used to provide Gloo with insight into larger trends in human flourishing.</p>
                             </div>
                         </DialogContent>
@@ -683,3 +788,4 @@ function WeeklyPageContent({ sermon, weeklyContent, answers, setAnswers, gameSco
     
 
     
+
