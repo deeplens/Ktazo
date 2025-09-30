@@ -9,7 +9,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Button } from "@/components/ui/button";
 import { Gamepad2, Headphones, MessageCircleQuestion, Users, User, HeartHandshake, MessageSquare, MicVocal, Languages, BookOpen, HandHeart, Sparkles, Globe, Target, Briefcase, Flower, Puzzle, Search, Brackets, Binary, WholeWord, KeyRound, Type, CheckSquare, Brain, Quote, ListChecks, Star, Wrench, Trophy, Award, Info, Heart, Smile, PiggyBank, Leaf, Scale, Cross, ArrowLeft } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from "@/components/ui/dialog";
 import { Sermon, WeeklyContent, Game, VerseScrambleItem, BibleReadingPlanItem, SpiritualPractice, OutwardFocusItem, JeopardyCategory, FlourishingCategoryName, FlourishingQuestionSet } from "@/lib/types";
 import { useEffect, useState } from "react";
 import { Label } from "@/components/ui/label";
@@ -123,6 +123,7 @@ function WeeklyPageContent({ sermon, weeklyContent, answers, setAnswers, gameSco
   const [flourishingStep, setFlourishingStep] = useState<'ring' | 'objective' | 'subjective' | 'finished'>('ring');
   const [objectiveAnswer, setObjectiveAnswer] = useState<string | null>(null);
   const [subjectiveAnswer, setSubjectiveAnswer] = useState('');
+  const [completedAreas, setCompletedAreas] = useState<Set<FlourishingCategoryName>>(new Set());
   
   const handleAnswerChange = (questionId: string, value: string) => {
     setAnswers(prev => ({ ...prev, [questionId]: value }));
@@ -198,14 +199,24 @@ function WeeklyPageContent({ sermon, weeklyContent, answers, setAnswers, gameSco
     setSubjectiveAnswer('');
   };
 
-  const handleSubmitFlourishing = () => {
-    // Here you would save the answers (objectiveAnswer and subjectiveAnswer)
+  const handleAreaSubmit = () => {
+    // Here you would save the answers for the specific area
+    if (!selectedFlourishingArea) return;
     console.log({
         area: selectedFlourishingArea,
         objective: objectiveAnswer,
         subjective: subjectiveAnswer,
     });
+    setCompletedAreas(prev => new Set(prev).add(selectedFlourishingArea));
     setFlourishingStep('finished');
+  };
+
+  const handleFinalSubmit = () => {
+      // Logic to submit all collected anonymous data
+      toast({
+          title: "Assessment Submitted",
+          description: "Thank you for providing your valuable feedback."
+      });
   }
 
 
@@ -279,6 +290,8 @@ function WeeklyPageContent({ sermon, weeklyContent, answers, setAnswers, gameSco
       { name: 'Finances', icon: PiggyBank },
       { name: 'Faith', icon: Cross },
   ];
+  
+  const allAreasCompleted = flourishingAreas.length === completedAreas.size;
 
   const renderFlourishingContent = () => {
     const questions = selectedFlourishingArea ? flourishingQuestions[selectedFlourishingArea]?.questions : null;
@@ -308,8 +321,9 @@ function WeeklyPageContent({ sermon, weeklyContent, answers, setAnswers, gameSco
                                 }}
                             >
                                 <Button variant="outline" className="w-24 h-24 rounded-full flex flex-col items-center justify-center gap-1 shadow-lg hover:scale-105 transition-transform" onClick={() => handleAreaSelect(area.name)}>
-                                    <Icon className="w-8 h-8 text-primary" />
+                                    <Icon className={cn("w-8 h-8", completedAreas.has(area.name) ? 'text-green-500' : 'text-primary')} />
                                     <span className="text-xs">{area.name}</span>
+                                    {completedAreas.has(area.name) && <CheckSquare className="w-4 h-4 text-green-500 absolute top-1 right-1" />}
                                 </Button>
                             </div>
                         );
@@ -362,7 +376,7 @@ function WeeklyPageContent({ sermon, weeklyContent, answers, setAnswers, gameSco
                     </div>
                      <DialogFooter className="mt-4">
                         <Button variant="outline" onClick={() => setFlourishingStep('objective')}>Back</Button>
-                        <Button onClick={handleSubmitFlourishing} disabled={!subjectiveAnswer.trim()}>Submit</Button>
+                        <Button onClick={handleAreaSubmit} disabled={!subjectiveAnswer.trim()}>Submit</Button>
                     </DialogFooter>
                 </>
             );
@@ -371,11 +385,14 @@ function WeeklyPageContent({ sermon, weeklyContent, answers, setAnswers, gameSco
                 <>
                     <DialogHeader className="text-center items-center">
                         <CheckSquare className="w-16 h-16 text-green-500" />
-                        <DialogTitle>Thank You!</DialogTitle>
-                        <DialogDescription>Your anonymous response has been recorded. It will help provide insight into the flourishing of the congregation.</DialogDescription>
+                        <DialogTitle>Thank You for your response for '{selectedFlourishingArea}'!</DialogTitle>
+                        <DialogDescription>Your anonymous response has been recorded.</DialogDescription>
                     </DialogHeader>
                     <DialogFooter className="justify-center">
-                         <Button onClick={resetFlourishing}>Start Over</Button>
+                         <Button onClick={resetFlourishing}>Back to Assessment</Button>
+                         <DialogClose asChild>
+                            <Button variant="outline">Close</Button>
+                         </DialogClose>
                     </DialogFooter>
                 </>
             )
@@ -544,11 +561,11 @@ function WeeklyPageContent({ sermon, weeklyContent, answers, setAnswers, gameSco
                     <CardTitle className="font-headline flex items-center gap-2"><Flower /> Self-Assessment</CardTitle>
                     <CardDescription>Reflect on your spiritual growth and well-being.</CardDescription>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="space-y-4">
                      <Dialog onOpenChange={(open) => !open && resetFlourishing()}>
                         <DialogTrigger asChild>
-                            <Button className="w-full">
-                                Flourishing
+                            <Button className="w-full" variant="outline">
+                                Start Flourishing Assessment
                             </Button>
                         </DialogTrigger>
                         <DialogContent className="max-w-2xl min-h-[550px] flex flex-col">
@@ -558,6 +575,9 @@ function WeeklyPageContent({ sermon, weeklyContent, answers, setAnswers, gameSco
                             </div>
                         </DialogContent>
                     </Dialog>
+                    <Button onClick={handleFinalSubmit} disabled={!allAreasCompleted} className="w-full">
+                        Submit Assessment ({completedAreas.size}/{flourishingAreas.length} Completed)
+                    </Button>
                 </CardContent>
             </Card>
         </div>
@@ -788,4 +808,5 @@ function WeeklyPageContent({ sermon, weeklyContent, answers, setAnswers, gameSco
     
 
     
+
 
