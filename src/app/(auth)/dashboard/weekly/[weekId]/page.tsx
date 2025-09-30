@@ -419,7 +419,7 @@ function WeeklyPageContent({ sermon, weeklyContent, answers, setAnswers, gameSco
                                 Flourishing
                             </Button>
                         </DialogTrigger>
-                        <DialogContent className="max-w-2xl h-[500px] flex flex-col">
+                        <DialogContent className="max-w-2xl h-[550px] flex flex-col">
                             <DialogHeader>
                                 <DialogTitle>Flourishing Self-Assessment</DialogTitle>
                                 <DialogDescription>In which area of your life would you like to focus on growth today?</DialogDescription>
@@ -447,6 +447,9 @@ function WeeklyPageContent({ sermon, weeklyContent, answers, setAnswers, gameSco
                                         </div>
                                     );
                                 })}
+                            </div>
+                             <div className="text-xs text-muted-foreground p-4 bg-muted rounded-md">
+                                <p>These questions are intended to assess the current state of human flourishing in congregations. Your answers will not include your name. All your responses are anonymous. These results may be used to provide Gloo with insight into larger trends in human flourishing.</p>
                             </div>
                         </DialogContent>
                     </Dialog>
@@ -539,7 +542,7 @@ function WeeklyPageContent({ sermon, weeklyContent, answers, setAnswers, gameSco
                                         
                                         return (
                                             <div key={stageKey}>
-                                                <h3 className="text-lg font-semibold mb-2 border-b pb-1">{stageKey}</h3>
+                                                <h3 className="text-lg font-semibold mb-2 border-b pb-1">{stageKey.replace('–', ':')}</h3>
                                                 <div className="space-y-4">
                                                     {levels.map(level => (
                                                         <div key={level.name}>
