@@ -7,7 +7,7 @@ import { getMockSermons, getMockWeeklyContent, getAnswersForSermon, saveAnswersF
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
-import { Gamepad2, Headphones, MessageCircleQuestion, Users, User, HeartHandshake, MessageSquare, MicVocal, Languages, BookOpen, HandHeart, Sparkles, Globe, Target, Briefcase, Flower, Puzzle, Search, Brackets, Binary, WholeWord, KeyRound, Type, CheckSquare, Brain, Quote, ListChecks, Star, Wrench, Trophy, Award, Info } from "lucide-react";
+import { Gamepad2, Headphones, MessageCircleQuestion, Users, User, HeartHandshake, MessageSquare, MicVocal, Languages, BookOpen, HandHeart, Sparkles, Globe, Target, Briefcase, Flower, Puzzle, Search, Brackets, Binary, WholeWord, KeyRound, Type, CheckSquare, Brain, Quote, ListChecks, Star, Wrench, Trophy, Award, Info, Heart, Smile, PiggyBank, Leaf, Scale, Cross } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Sermon, WeeklyContent, Game, VerseScrambleItem, BibleReadingPlanItem, SpiritualPractice, OutwardFocusItem, JeopardyCategory } from "@/lib/types";
@@ -241,6 +241,15 @@ function WeeklyPageContent({ sermon, weeklyContent, answers, setAnswers, gameSco
   const verseScrambleGame = weeklyContent.games?.find(g => g.type === 'Verse Scramble') as Game | undefined;
   const verseData = verseScrambleGame?.data as VerseScrambleItem | undefined;
 
+  const flourishingAreas = [
+      { name: 'Character', icon: Scale },
+      { name: 'Relationships', icon: Heart },
+      { name: 'Happiness', icon: Smile },
+      { name: 'Meaning', icon: Brain },
+      { name: 'Health', icon: Leaf },
+      { name: 'Finances', icon: PiggyBank },
+      { name: 'Faith', icon: Cross },
+  ];
 
   return (
     <div className="container mx-auto py-8 px-4 space-y-8">
@@ -404,9 +413,43 @@ function WeeklyPageContent({ sermon, weeklyContent, answers, setAnswers, gameSco
                     <CardDescription>Reflect on your spiritual growth and well-being.</CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <Button className="w-full" disabled>
-                        Flourishing
-                    </Button>
+                     <Dialog>
+                        <DialogTrigger asChild>
+                            <Button className="w-full">
+                                Flourishing
+                            </Button>
+                        </DialogTrigger>
+                        <DialogContent className="max-w-2xl h-[500px] flex flex-col">
+                            <DialogHeader>
+                                <DialogTitle>Flourishing Self-Assessment</DialogTitle>
+                                <DialogDescription>In which area of your life would you like to focus on growth today?</DialogDescription>
+                            </DialogHeader>
+                            <div className="relative flex-1 flex items-center justify-center">
+                                {flourishingAreas.map((area, index) => {
+                                    const angle = (index / flourishingAreas.length) * 2 * Math.PI - (Math.PI / 2);
+                                    const radius = 120; // adjust for size
+                                    const x = Math.cos(angle) * radius;
+                                    const y = Math.sin(angle) * radius;
+                                    const Icon = area.icon;
+
+                                    return (
+                                        <div
+                                            key={area.name}
+                                            className="absolute flex flex-col items-center justify-center"
+                                            style={{
+                                                transform: `translate(${x}px, ${y}px)`
+                                            }}
+                                        >
+                                            <Button variant="outline" className="w-24 h-24 rounded-full flex flex-col items-center justify-center gap-1 shadow-lg hover:scale-105 transition-transform">
+                                                <Icon className="w-8 h-8 text-primary" />
+                                                <span className="text-xs">{area.name}</span>
+                                            </Button>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </DialogContent>
+                    </Dialog>
                 </CardContent>
             </Card>
         </div>
@@ -452,12 +495,12 @@ function WeeklyPageContent({ sermon, weeklyContent, answers, setAnswers, gameSco
                 <CardTitle className="font-headline flex items-center gap-2"><Gamepad2 /> Interactive Games</CardTitle>
                 <CardDescription>Engage with the sermon in a fun new way and earn points!</CardDescription>
               </div>
-              <div className="text-right space-y-1">
+               <div className="text-right space-y-1">
                 <div className="flex items-center gap-2 text-xl font-bold text-primary">
                     <Star className="text-yellow-400 fill-yellow-400" />
                     <span>{totalPoints} / {totalPossiblePoints} Points This Week</span>
                 </div>
-                 <div className="flex items-center justify-end gap-2">
+                <div className="flex items-center justify-end gap-2">
                     <div className="w-64">
                         <TooltipProvider>
                             <Tooltip>
@@ -475,7 +518,7 @@ function WeeklyPageContent({ sermon, weeklyContent, answers, setAnswers, gameSco
                             </Tooltip>
                         </TooltipProvider>
                     </div>
-                        <Dialog>
+                    <Dialog>
                         <DialogTrigger asChild>
                             <Button variant="ghost" size="icon" className="h-8 w-8">
                                 <Info className="h-5 w-5 text-muted-foreground" />
@@ -633,5 +676,7 @@ function WeeklyPageContent({ sermon, weeklyContent, answers, setAnswers, gameSco
     </div>
   );
 }
+
+    
 
     
