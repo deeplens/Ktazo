@@ -565,7 +565,7 @@ function WeeklyPageContent({ sermon, weeklyContent, answers, setAnswers, gameSco
                                 Start Flourishing Assessment
                             </Button>
                         </DialogTrigger>
-                        <DialogContent className="max-w-2xl min-h-[550px] flex flex-col">
+                        <DialogContent className="max-w-3xl min-h-[600px] flex flex-col">
                             {renderFlourishingContent()}
                             {flourishingStep === 'ring' && (
                                 <DialogFooter>
@@ -809,6 +809,7 @@ function WeeklyPageContent({ sermon, weeklyContent, answers, setAnswers, gameSco
     
 
     
+
 
 
 
