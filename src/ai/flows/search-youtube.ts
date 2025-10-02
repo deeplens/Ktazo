@@ -19,12 +19,13 @@ const YouTubeSearchInputSchema = z.object({
 });
 export type YouTubeSearchInput = z.infer<typeof YouTubeSearchInputSchema>;
 
-const YouTubeVideoResultSchema = z.object({
+export const YouTubeVideoResultSchema = z.object({
     id: z.string(),
     title: z.string(),
     channel: z.string(),
     thumbnailUrl: z.string(),
 });
+export type YouTubeVideoResult = z.infer<typeof YouTubeVideoResultSchema>;
 
 const YouTubeChannelResultSchema = z.object({
     id: z.string(),
@@ -97,3 +98,5 @@ const searchYouTubeFlow = ai.defineFlow(
     }
   }
 );
+
+    

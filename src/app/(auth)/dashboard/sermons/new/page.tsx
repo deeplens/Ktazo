@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Loader2, Sparkles, Link as LinkIcon, Search, Youtube } from "lucide-react";
+import { Loader2, Sparkles, Link as LinkIcon, Search, Youtube, ArrowRight } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { addSermon, getTenantSettings } from "@/lib/mock-data";
 import { suggestSermonTitle } from "@/ai/flows/suggest-sermon-title";
@@ -15,7 +15,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescript
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import Image from "next/image";
-import { searchYouTube, YouTubeSearchOutput } from "@/ai/flows/search-youtube";
+import { searchYouTube, YouTubeSearchOutput, YouTubeVideoResult } from "@/ai/flows/search-youtube";
 import { useAuth } from "@/lib/auth";
 
 
@@ -34,6 +34,7 @@ export default function NewSermonPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearching, setIsSearching] = useState(false);
   const [searchResults, setSearchResults] = useState<YouTubeSearchOutput>({});
+  const [suggestedVideo, setSuggestedVideo] = useState<YouTubeVideoResult | null>(null);
 
   const router = useRouter();
   const { toast } = useToast();
@@ -43,15 +44,13 @@ export default function NewSermonPage() {
         if (!user) return;
         const settings = getTenantSettings(user.tenantId);
         if (settings.youtubeChannelUrl) {
-            // Extract a channel ID or handle from the URL to search
             const urlParts = settings.youtubeChannelUrl.split('/');
-            const channelIdFromUrl = urlParts.find(part => part.startsWith('UC')); // Standard Channel ID
+            const channelIdFromUrl = urlParts.find(part => part.startsWith('UC'));
             const handleFromUrl = urlParts.find(part => part.startsWith('@'));
             
             let channelId = channelIdFromUrl;
             let query = '';
 
-            // We need a query, even if searching by channelId, but we can prioritize channelId if found.
             if (handleFromUrl) {
                 query = handleFromUrl.substring(1);
             } else if (!channelIdFromUrl) {
@@ -64,10 +63,10 @@ export default function NewSermonPage() {
                     const results = await searchYouTube({ query: query, type: 'video', channelId: channelId });
                     setSearchResults(results);
 
-                    // Auto-fill with the latest sermon
                     if (results.videos && results.videos.length > 0) {
                         const latestVideo = results.videos[0];
                         setYoutubeUrl(`https://www.youtube.com/watch?v=${latestVideo.id}`);
+                        setSuggestedVideo(latestVideo);
                         toast({
                             title: "Sermon Suggested",
                             description: `The latest video "${latestVideo.title}" has been pre-filled.`
@@ -135,8 +134,9 @@ export default function NewSermonPage() {
     }
   }
 
-  const handleSelectVideo = (videoId: string) => {
-    setYoutubeUrl(`https://www.youtube.com/watch?v=${videoId}`);
+  const handleSelectVideo = (video: YouTubeVideoResult) => {
+    setYoutubeUrl(`https://www.youtube.com/watch?v=${video.id}`);
+    setSuggestedVideo(video);
     setShowYouTubeBrowseDialog(false);
   };
 
@@ -208,6 +208,22 @@ export default function NewSermonPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
+             {suggestedVideo && (
+                <Card className="overflow-hidden">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="md:col-span-1">
+                            <Image src={suggestedVideo.thumbnailUrl} alt={suggestedVideo.title} width={360} height={270} className="w-full h-full object-cover" />
+                        </div>
+                        <div className="md:col-span-2 p-4 flex flex-col justify-between">
+                            <div>
+                                <CardDescription>Suggested Sermon</CardDescription>
+                                <CardTitle className="text-xl leading-tight">{suggestedVideo.title}</CardTitle>
+                            </div>
+                            <p className="text-sm text-muted-foreground">{suggestedVideo.channel}</p>
+                        </div>
+                    </div>
+                </Card>
+            )}
             <div className="space-y-2">
               <Label htmlFor="youtube-url">YouTube URL</Label>
               <div className="flex items-center gap-2">
@@ -248,7 +264,7 @@ export default function NewSermonPage() {
                     <ScrollArea className="h-96">
                         <div className="space-y-4 pr-6">
                             {searchResults.videos?.map(video => (
-                                <div key={video.id} className="flex items-center gap-4 hover:bg-accent/50 p-2 rounded-lg cursor-pointer" onClick={() => handleSelectVideo(video.id)}>
+                                <div key={video.id} className="flex items-center gap-4 hover:bg-accent/50 p-2 rounded-lg cursor-pointer" onClick={() => handleSelectVideo(video)}>
                                     <Image src={video.thumbnailUrl} alt={video.title} width={120} height={90} className="rounded-md" />
                                     <div>
                                         <p className="font-semibold">{video.title}</p>
@@ -384,3 +400,5 @@ export default function NewSermonPage() {
     </div>
   );
 }
+
+    
