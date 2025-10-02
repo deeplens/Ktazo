@@ -6,7 +6,7 @@ import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Church, Globe, Palette, Volume2, Link as LinkIcon, Loader2, MessageSquareQuote, Mail, Smartphone, Youtube, Search } from "lucide-react";
+import { Church, Globe, Palette, Volume2, Link as LinkIcon, Loader2, MessageSquareQuote, Mail, Smartphone, Youtube, Search, Key } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useState, useEffect } from "react";
@@ -30,6 +30,8 @@ export default function SettingsPage() {
     const [searchQuery, setSearchQuery] = useState('');
     const [isSearching, setIsSearching] = useState(false);
     const [searchResults, setSearchResults] = useState<YouTubeSearchOutput>({});
+    const [tempApiKey, setTempApiKey] = useState('');
+
 
     useEffect(() => {
         if (user) {
@@ -42,7 +44,7 @@ export default function SettingsPage() {
         if (!searchQuery.trim()) return;
         setIsSearching(true);
         try {
-            const results = await searchYouTube({ query: searchQuery, type: 'channel' });
+            const results = await searchYouTube({ query: searchQuery, type: 'channel', apiKey: tempApiKey });
             setSearchResults(results);
         } catch (error: any) {
             console.error('[[CLIENT - ERROR]] YouTube channel search failed', error);
@@ -158,6 +160,15 @@ export default function SettingsPage() {
                                         <DialogTitle>Browse YouTube Channels</DialogTitle>
                                         <DialogDescription>Search for your church's YouTube channel.</DialogDescription>
                                     </DialogHeader>
+                                    <div className="flex w-full items-center space-x-2">
+                                        <Key className="text-muted-foreground" />
+                                        <Input 
+                                            type="password"
+                                            placeholder="Temporary YouTube API Key (optional)"
+                                            value={tempApiKey}
+                                            onChange={(e) => setTempApiKey(e.target.value)}
+                                        />
+                                    </div>
                                     <div className="flex w-full items-center space-x-2">
                                         <Input 
                                             type="search" 
@@ -344,7 +355,3 @@ export default function SettingsPage() {
         </div>
     );
 }
-
-    
-
-    

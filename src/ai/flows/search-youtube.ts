@@ -15,7 +15,8 @@ import { google } from 'googleapis';
 const YouTubeSearchInputSchema = z.object({
   query: z.string().describe('The search query.'),
   type: z.enum(['video', 'channel']).describe('The type of resource to search for.'),
-  channelId: z.string().optional().describe('An optional YouTube channel ID to search within.')
+  channelId: z.string().optional().describe('An optional YouTube channel ID to search within.'),
+  apiKey: z.string().optional().describe('An optional YouTube API key to use for the request.'),
 });
 export type YouTubeSearchInput = z.infer<typeof YouTubeSearchInputSchema>;
 
@@ -50,14 +51,14 @@ const searchYouTubeFlow = ai.defineFlow(
     inputSchema: YouTubeSearchInputSchema,
     outputSchema: YouTubeSearchOutputSchema,
   },
-  async ({ query, type, channelId }) => {
+  async ({ query, type, channelId, apiKey: inputApiKey }) => {
     console.log(`[[SERVER - DEBUG]] Starting YouTube search for ${type}s with query: "${query}"`);
     
     const youtube = google.youtube('v3');
-    const apiKey = process.env.YOUTUBE_API_KEY;
+    const apiKey = inputApiKey || process.env.YOUTUBE_API_KEY;
 
     if (!apiKey) {
-      console.warn('[[SERVER - WARN]] YouTube API key is missing. YouTube search functionality will be disabled. Please add a YOUTUBE_API_KEY to your .env file.');
+      console.warn('[[SERVER - WARN]] YouTube API key is missing. YouTube search functionality will be disabled. Please add a YOUTUBE_API_KEY to your .env file or provide it in the UI.');
       return { videos: [], channels: [] }; // Gracefully return empty results
     }
 
