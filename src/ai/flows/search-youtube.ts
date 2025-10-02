@@ -53,7 +53,7 @@ const searchYouTubeFlow = ai.defineFlow(
     outputSchema: YouTubeSearchOutputSchema,
   },
   async ({ query, type, channelId }) => {
-    console.log(`[[SERVER - DEBUG]] Starting YouTube search for ${type}s with query: "${query}"`);
+    console.log(`[[SERVER - DEBUG]] Starting YouTube search for ${type}(s) with query: "${query}"`);
     
     const youtube = google.youtube('v3');
     const apiKey = process.env.YOUTUBE_API_KEY;
@@ -64,15 +64,20 @@ const searchYouTubeFlow = ai.defineFlow(
     }
 
     try {
-      const response = await youtube.search.list({
-        key: apiKey,
-        part: ['snippet'],
-        q: query,
-        type: type,
-        channelId: channelId,
-        order: type === 'video' ? 'date' : 'relevance',
-        maxResults: 10,
-      });
+        const searchParams: any = {
+            key: apiKey,
+            part: ['snippet'],
+            q: query,
+            type: type,
+            order: type === 'video' ? 'date' : 'relevance',
+            maxResults: 10,
+        };
+
+        if (type === 'video' && channelId) {
+            searchParams.channelId = channelId;
+        }
+
+      const response = await youtube.search.list(searchParams);
       
       const items = response.data.items || [];
 
