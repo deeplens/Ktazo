@@ -9,7 +9,6 @@
  */
 
 import {ai} from '@/ai/genkit';
-import {googleAI} from '@genkit-ai/googleai';
 import {z} from 'genkit';
 import { YoutubeTranscript } from 'youtube-transcript';
 
@@ -52,32 +51,11 @@ const transcribeYoutubeVideoFlow = ai.defineFlow(
       throw new Error("No transcript available from YouTube captions.");
 
     } catch (captionError) {
-        console.warn('[[SERVER - WARN]] Could not fetch YouTube captions. Falling back to AI transcription.', (captionError as Error).message);
+        console.error('[[SERVER - ERROR]] Could not fetch YouTube captions.', (captionError as Error).message);
         
-        try {
-            console.log('[[SERVER - DEBUG]] Starting AI transcription fallback using gemini-1.5-flash.');
-            const { text } = await ai.generate({
-                model: 'googleai/gemini-1.5-flash',
-                prompt: [
-                    { text: 'You are an expert audio transcription service. Your only task is to accurately transcribe the audio from the provided video file. Do not add any commentary, analysis, or any text other than the transcription itself. Return only the transcribed text.' },
-                    { media: { url: videoUrl, contentType: 'video/*' } }
-                ]
-            });
-
-            if (!text) {
-                throw new Error('AI transcription failed: No text was returned from the model.');
-            }
-            
-            console.log('[[SERVER - DEBUG]] Finishing transcribeYoutubeVideoFlow via AI fallback.');
-            return { transcript: text };
-
-        } catch (transcriptionError) {
-             let finalMessage = `Failed to process YouTube video. An unexpected error occurred while trying to fetch the video transcript or audio. `;
-             console.error('[[SERVER - ERROR]] AI Transcription fallback failed.', transcriptionError);
-             finalMessage += `Details: ${(transcriptionError as Error).message}`;
-             
-             throw new Error(finalMessage);
-        }
+        let finalMessage = `Failed to process YouTube video. This video does not have captions enabled, and AI transcription is currently unavailable. Please select a video with captions.`;
+        
+        throw new Error(finalMessage);
     }
   }
 );
