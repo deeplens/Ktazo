@@ -10,7 +10,7 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
-import {YoutubeTranscript} from 'youtube-transcript';
+import { YoutubeTranscript } from 'youtube-transcript';
 import {transcribeSermon} from './transcribe-sermon';
 
 const TranscribeYoutubeVideoInputSchema = z.object({
