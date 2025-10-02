@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Loader2, Sparkles, Link as LinkIcon, Search, Youtube, ArrowRight } from "lucide-react";
+import { Loader2, Sparkles, Link as LinkIcon, Search, Youtube, ArrowRight, CheckCircle2, XCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { addSermon, getTenantSettings } from "@/lib/mock-data";
 import { suggestSermonTitle } from "@/ai/flows/suggest-sermon-title";
@@ -15,8 +15,10 @@ import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescript
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import Image from "next/image";
-import { searchYouTube, YouTubeSearchOutput, YouTubeVideoResult } from "@/ai/flows/search-youtube";
+import { searchYouTube, YouTubeVideoResult } from "@/ai/flows/search-youtube";
 import { useAuth } from "@/lib/auth";
+import { checkYoutubeCaptions } from "@/ai/flows/check-youtube-captions";
+import { cn } from "@/lib/utils";
 
 
 export default function NewSermonPage() {
@@ -35,9 +37,29 @@ export default function NewSermonPage() {
   const [isSearching, setIsSearching] = useState(false);
   const [searchResults, setSearchResults] = useState<YouTubeSearchOutput>({});
   const [suggestedVideo, setSuggestedVideo] = useState<YouTubeVideoResult | null>(null);
+  const [captionStatus, setCaptionStatus] = useState<'idle' | 'checking' | 'enabled' | 'disabled'>('idle');
 
   const router = useRouter();
   const { toast } = useToast();
+
+  const handleCaptionCheck = async (videoUrl: string) => {
+    if (!videoUrl) {
+      setCaptionStatus('idle');
+      return;
+    }
+    setCaptionStatus('checking');
+    try {
+      const result = await checkYoutubeCaptions({ videoUrl });
+      setCaptionStatus(result.captionsEnabled ? 'enabled' : 'disabled');
+    } catch (error) {
+      console.error("[[CLIENT - ERROR]] Caption check failed", error);
+      setCaptionStatus('disabled');
+    }
+  };
+  
+  useEffect(() => {
+    handleCaptionCheck(youtubeUrl);
+  }, [youtubeUrl]);
 
   useEffect(() => {
     const fetchAndSearchChannel = async () => {
@@ -60,7 +82,7 @@ export default function NewSermonPage() {
             if (query || channelId) {
                 setIsSearching(true);
                 try {
-                    const results = await searchYouTube({ query: query, type: 'video', channelId: channelId, sortBy: 'date' });
+                    const results = await searchYouTube({ query: query, type: 'video', channelId: channelId });
                     setSearchResults(results);
 
                     if (results.videos && results.videos.length > 0) {
@@ -156,6 +178,11 @@ export default function NewSermonPage() {
          toast({ variant: 'destructive', title: "Invalid URL", description: "Please enter a valid YouTube URL." });
         return;
     }
+    
+    if (captionStatus !== 'enabled') {
+        toast({ variant: 'destructive', title: "Captions Required", description: "The selected YouTube video must have captions enabled for transcription." });
+        return;
+    }
 
     setIsLoading(true);
     
@@ -185,8 +212,9 @@ export default function NewSermonPage() {
   };
   
   const isProcessButtonDisabled = () => {
-    if (isLoading) return true;
+    if (isLoading || isSearching) return true;
     if (!speaker.trim() || !youtubeUrl.trim()) return true;
+    if (captionStatus !== 'enabled') return true;
     return false;
   };
 
@@ -211,16 +239,21 @@ export default function NewSermonPage() {
           <CardContent className="space-y-4">
              {suggestedVideo && (
                 <Card className="overflow-hidden">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div className="md:col-span-1">
-                            <Image src={suggestedVideo.thumbnailUrl} alt={suggestedVideo.title} width={360} height={270} className="w-full h-full object-cover" />
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-0 md:gap-4">
+                        <div className="md:col-span-1 relative min-h-[150px] md:min-h-0">
+                            <Image src={suggestedVideo.thumbnailUrl} alt={suggestedVideo.title} fill className="object-cover" />
                         </div>
                         <div className="md:col-span-2 p-4 flex flex-col justify-between">
                             <div>
                                 <CardDescription>Suggested Sermon</CardDescription>
                                 <CardTitle className="text-xl leading-tight">{suggestedVideo.title}</CardTitle>
+                                <p className="text-sm text-muted-foreground mt-1">{suggestedVideo.channel}</p>
                             </div>
-                            <p className="text-sm text-muted-foreground">{suggestedVideo.channel}</p>
+                            <div className="flex items-center gap-2 text-sm mt-2">
+                                {captionStatus === 'checking' && <><Loader2 className="h-4 w-4 animate-spin"/> Checking for captions...</>}
+                                {captionStatus === 'enabled' && <><CheckCircle2 className="h-4 w-4 text-green-500"/> Captions Enabled</>}
+                                {captionStatus === 'disabled' && <><XCircle className="h-4 w-4 text-red-500"/> Captions Disabled</>}
+                            </div>
                         </div>
                     </div>
                 </Card>
