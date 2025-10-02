@@ -32,15 +32,6 @@ export async function transcribeSermon(
   return transcribeSermonFlow(input);
 }
 
-/* ------------------------- Agents / Prompts ------------------------- */
-
-const transcribeMediaPrompt = ai.definePrompt({
-  name: 'transcribeMediaPrompt',
-  input: { schema: z.object({ mediaUri: z.string(), contentType: z.string().optional() }) },
-  output: { format: 'text' },
-  prompt: 'Transcribe the following audio: {{media url=mediaUri contentType=contentType}}',
-});
-
 /* ------------------------------ Flow ------------------------------- */
 
 const transcribeSermonFlow = ai.defineFlow(
@@ -58,8 +49,9 @@ const transcribeSermonFlow = ai.defineFlow(
         console.log('[[SERVER - DEBUG]] Data URI detected.');
         contentType = mediaUri.slice(5, mediaUri.indexOf(';'));
       } else {
+        // It's a public URL, like from YouTube
         console.log('[[SERVER - DEBUG]] Public URL detected. Setting content type to video.');
-        contentType = 'video/*';
+        contentType = 'video/*'; 
       }
       
       const { text } = await ai.generate({
