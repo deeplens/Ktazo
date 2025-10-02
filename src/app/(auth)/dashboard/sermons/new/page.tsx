@@ -209,7 +209,7 @@ export default function NewSermonPage() {
   const isProcessButtonDisabled = () => {
     if (isLoading || isSearching) return true;
     if (!speaker.trim() || !youtubeUrl.trim()) return true;
-    if (captionStatus !== 'enabled') return true;
+    // The button is now enabled even if captions are disabled, to allow the AI fallback to run.
     return false;
   };
 
@@ -247,7 +247,7 @@ export default function NewSermonPage() {
                             <div className="flex items-center gap-2 text-sm mt-2">
                                 {captionStatus === 'checking' && <><Loader2 className="h-4 w-4 animate-spin"/> Checking for captions...</>}
                                 {captionStatus === 'enabled' && <><CheckCircle2 className="h-4 w-4 text-green-500"/> Captions Enabled</>}
-                                {captionStatus === 'disabled' && <><XCircle className="h-4 w-4 text-red-500"/> Captions Disabled (Processing unavailable)</>}
+                                {captionStatus === 'disabled' && <><XCircle className="h-4 w-4 text-orange-500"/> Captions Disabled (AI fallback will be used)</>}
                             </div>
                         </div>
                     </div>

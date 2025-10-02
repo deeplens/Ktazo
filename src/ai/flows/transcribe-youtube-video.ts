@@ -9,6 +9,7 @@
  */
 
 import {ai} from '@/ai/genkit';
+import {googleAI} from '@genkit-ai/googleai';
 import {z} from 'genkit';
 import { YoutubeTranscript } from 'youtube-transcript';
 
@@ -38,6 +39,7 @@ const transcribeYoutubeVideoFlow = ai.defineFlow(
     
     try {
       // First, try to get the transcript directly from YouTube captions
+      console.log('[[SERVER - DEBUG]] Attempting to fetch transcript from YouTube captions.');
       const transcriptParts = await YoutubeTranscript.fetchTranscript(videoUrl);
       
       if (transcriptParts && transcriptParts.length > 0) {
@@ -49,18 +51,33 @@ const transcribeYoutubeVideoFlow = ai.defineFlow(
       
       throw new Error("No transcript available from YouTube captions.");
 
-    } catch (error) {
-        console.warn('[[SERVER - WARN]] Could not fetch YouTube captions.', (error as Error).message);
+    } catch (captionError) {
+        console.warn('[[SERVER - WARN]] Could not fetch YouTube captions. Falling back to AI transcription.', (captionError as Error).message);
         
-        let finalMessage = `Failed to process YouTube video. `;
-        
-        if ((error as Error).message.includes('disabled on this video')) {
-            finalMessage += `YouTube captions are disabled. Please enable captions on the video or upload them manually.`;
-        } else {
-            finalMessage += `An unexpected error occurred while trying to fetch the video transcript.`;
+        try {
+            console.log('[[SERVER - DEBUG]] Starting AI transcription fallback.');
+            const { text } = await ai.generate({
+                model: 'googleai/gemini-1.5-pro',
+                prompt: [
+                    { text: 'You are an expert audio transcription service. Your only task is to accurately transcribe the audio from the provided video file. Do not add any commentary, analysis, or any text other than the transcription itself. Return only the transcribed text.' },
+                    { media: { url: videoUrl, contentType: 'video/*' } }
+                ]
+            });
+
+            if (!text) {
+                throw new Error('AI transcription failed: No text was returned from the model.');
+            }
+            
+            console.log('[[SERVER - DEBUG]] Finishing transcribeYoutubeVideoFlow via AI fallback.');
+            return { transcript: text };
+
+        } catch (transcriptionError) {
+             let finalMessage = `Failed to process YouTube video. An unexpected error occurred while trying to fetch the video transcript or audio. `;
+             console.error('[[SERVER - ERROR]] AI Transcription fallback failed.', transcriptionError);
+             finalMessage += `Details: ${(transcriptionError as Error).message}`;
+             
+             throw new Error(finalMessage);
         }
-        
-        throw new Error(finalMessage);
     }
   }
 );
