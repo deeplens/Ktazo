@@ -209,6 +209,7 @@ export default function NewSermonPage() {
   const isProcessButtonDisabled = () => {
     if (isLoading || isSearching) return true;
     if (!speaker.trim() || !youtubeUrl.trim()) return true;
+    if (captionStatus !== 'enabled') return true;
     return false;
   };
 
@@ -227,7 +228,7 @@ export default function NewSermonPage() {
             <CardTitle>Sermon Details</CardTitle>
             <CardDescription>
               Provide the details for the new sermon. A title will be suggested if left blank.
-              If the YouTube video does not have captions, AI transcription will be used as a fallback.
+              The YouTube video must have captions enabled for transcription.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -246,7 +247,7 @@ export default function NewSermonPage() {
                             <div className="flex items-center gap-2 text-sm mt-2">
                                 {captionStatus === 'checking' && <><Loader2 className="h-4 w-4 animate-spin"/> Checking for captions...</>}
                                 {captionStatus === 'enabled' && <><CheckCircle2 className="h-4 w-4 text-green-500"/> Captions Enabled</>}
-                                {captionStatus === 'disabled' && <><XCircle className="h-4 w-4 text-red-500"/> Captions Disabled (AI fallback will be used)</>}
+                                {captionStatus === 'disabled' && <><XCircle className="h-4 w-4 text-red-500"/> Captions Disabled (Processing unavailable)</>}
                             </div>
                         </div>
                     </div>
@@ -428,5 +429,3 @@ export default function NewSermonPage() {
     </div>
   );
 }
-
-    

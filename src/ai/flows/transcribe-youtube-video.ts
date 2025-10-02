@@ -50,41 +50,17 @@ const transcribeYoutubeVideoFlow = ai.defineFlow(
       throw new Error("No transcript available from YouTube captions.");
 
     } catch (error) {
-        console.warn('[[SERVER - WARN]] Could not fetch YouTube captions, attempting AI transcription fallback.', (error as Error).message);
+        console.warn('[[SERVER - WARN]] Could not fetch YouTube captions.', (error as Error).message);
         
-        try {
-            console.log('[[SERVER - DEBUG]] Calling AI transcription for the YouTube video URL.');
-            
-            // Call the AI model directly with the video URL
-            const { text } = await ai.generate({
-                model: 'googleai/gemini-2.5-flash',
-                prompt: [
-                    { text: 'You are an expert audio transcription service. Your only task is to accurately transcribe the audio from the provided file. Do not add any commentary, analysis, or any text other than the transcription itself. Return only the transcribed text.' },
-                    { media: { url: videoUrl, contentType: 'video/*' } }
-                ]
-            });
-            
-            if (!text) {
-                throw new Error('AI transcription returned an empty result.');
-            }
-
-            console.log('[[SERVER - DEBUG]] Finishing transcribeYoutubeVideoFlow via AI fallback.');
-            return { transcript: text };
-
-        } catch (transcriptionError) {
-             console.error('[[SERVER - ERROR]] Both YouTube captions and AI transcription failed:', transcriptionError);
-             let finalMessage = `Failed to process YouTube video. `;
-             
-             if ((error as Error).message.includes('disabled on this video')) {
-                 finalMessage += `YouTube captions are disabled, and the AI transcription fallback also failed. `;
-             } else {
-                 finalMessage += `An unexpected error occurred while trying to fetch the video transcript or audio. `;
-             }
-
-             finalMessage += `Details: ${(transcriptionError as Error).message}`;
-             
-             throw new Error(finalMessage);
+        let finalMessage = `Failed to process YouTube video. `;
+        
+        if ((error as Error).message.includes('disabled on this video')) {
+            finalMessage += `YouTube captions are disabled. Please enable captions on the video or upload them manually.`;
+        } else {
+            finalMessage += `An unexpected error occurred while trying to fetch the video transcript.`;
         }
+        
+        throw new Error(finalMessage);
     }
   }
 );
