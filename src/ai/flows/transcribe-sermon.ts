@@ -43,25 +43,14 @@ const transcribeSermonFlow = ai.defineFlow(
   async ({ mediaUri }) => {
     try {
       console.log('[[SERVER - DEBUG]] Starting transcribeSermonFlow for:', mediaUri.substring(0, 100) + '...');
-      let contentType: string | undefined = undefined;
-
-      if (mediaUri.startsWith('data:')) {
-        console.log('[[SERVER - DEBUG]] Data URI detected.');
-        contentType = mediaUri.slice(5, mediaUri.indexOf(';'));
-      } else {
-        // It's a public URL, like from YouTube
-        console.log('[[SERVER - DEBUG]] Public URL detected. Setting content type to video.');
-        contentType = 'video/*'; 
-      }
       
       const { text } = await ai.generate({
         model: 'googleai/gemini-2.5-flash',
-        prompt: `You are an expert audio transcription service. Your only task is to accurately transcribe the audio from the provided file. Do not add any commentary, analysis, or any text other than the transcription itself. Return only the transcribed text.
-
-        Here is the media file:
-        {{media url="${mediaUri}" contentType="${contentType}"}}`,
+        prompt: [
+            { text: 'You are an expert audio transcription service. Your only task is to accurately transcribe the audio from the provided file. Do not add any commentary, analysis, or any text other than the transcription itself. Return only the transcribed text.' },
+            { media: { url: mediaUri } }
+        ]
       });
-
 
       if (!text) {
         throw new Error(
