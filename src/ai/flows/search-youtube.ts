@@ -57,8 +57,8 @@ const searchYouTubeFlow = ai.defineFlow(
     const apiKey = process.env.YOUTUBE_API_KEY;
 
     if (!apiKey) {
-      console.error('[[SERVER - ERROR]] YouTube API key is missing.');
-      throw new Error('The YouTube API key is not configured on the server.');
+      console.warn('[[SERVER - WARN]] YouTube API key is missing. YouTube search functionality will be disabled. Please add a YOUTUBE_API_KEY to your .env file.');
+      return { videos: [], channels: [] }; // Gracefully return empty results
     }
 
     try {
@@ -99,5 +99,3 @@ const searchYouTubeFlow = ai.defineFlow(
     }
   }
 );
-
-    
