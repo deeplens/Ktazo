@@ -60,7 +60,7 @@ export default function NewSermonPage() {
             if (query || channelId) {
                 setIsSearching(true);
                 try {
-                    const results = await searchYouTube({ query: query, type: 'video', channelId: channelId });
+                    const results = await searchYouTube({ query: query, type: 'video', channelId: channelId, sortBy: 'date' });
                     setSearchResults(results);
 
                     if (results.videos && results.videos.length > 0) {
@@ -205,6 +205,7 @@ export default function NewSermonPage() {
             <CardTitle>Sermon Details</CardTitle>
             <CardDescription>
               Provide the details for the new sermon. A title will be suggested if left blank.
+              The YouTube video must have captions enabled for transcription.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
