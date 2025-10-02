@@ -37,7 +37,7 @@ const transcribeMediaPrompt = ai.definePrompt({
   name: 'transcribeMediaPrompt',
   input: { schema: z.object({ mediaUri: z.string(), contentType: z.string().optional() }) },
   output: { format: 'text' },
-  prompt: 'Transcribe the following audio: {{media uri=mediaUri contentType=contentType}}',
+  prompt: 'Transcribe the following audio: {{media url=mediaUri contentType=contentType}}',
 });
 
 /* ------------------------------ Flow ------------------------------- */
@@ -57,8 +57,8 @@ const transcribeSermonFlow = ai.defineFlow(
         console.log('[[SERVER - DEBUG]] Data URI detected.');
         contentType = mediaUri.slice(5, mediaUri.indexOf(';'));
       } else {
-        console.log('[[SERVER - DEBUG]] Public URL detected.');
-        // For public URLs, Genkit can often infer the content type.
+        console.log('[[SERVER - DEBUG]] Public URL detected. Setting content type to video.');
+        contentType = 'video/*';
       }
       
       const { text } = await transcribeMediaPrompt({
