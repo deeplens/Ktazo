@@ -11,6 +11,7 @@
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 import { YoutubeTranscript } from 'youtube-transcript';
+import { transcribeSermon } from './transcribe-sermon';
 
 const TranscribeYoutubeVideoInputSchema = z.object({
   videoUrl: z.string().url().describe('A valid YouTube video URL.'),
@@ -51,11 +52,20 @@ const transcribeYoutubeVideoFlow = ai.defineFlow(
       throw new Error("No transcript available from YouTube captions.");
 
     } catch (captionError) {
-        console.error('[[SERVER - ERROR]] Could not fetch YouTube captions.', (captionError as Error).message);
+        console.warn('[[SERVER - WARN]] Could not fetch YouTube captions, falling back to AI transcription.', (captionError as Error).message);
         
-        let finalMessage = `Failed to process YouTube video. This video does not have captions enabled, and AI transcription is currently unavailable. Please select a video with captions.`;
-        
-        throw new Error(finalMessage);
+        try {
+            console.log('[[SERVER - DEBUG]] Calling AI transcription fallback.');
+            const transcriptionResult = await transcribeSermon({ mediaUri: videoUrl });
+            console.log('[[SERVER - DEBUG]] Finishing transcribeYoutubeVideoFlow via AI fallback.');
+            return { transcript: transcriptionResult.transcript };
+        } catch (transcriptionError) {
+             console.error("[[SERVER - ERROR]] AI transcription fallback failed:", transcriptionError);
+             let finalMessage = `Failed to process YouTube video. An unexpected error occurred while trying to fetch the video transcript or audio. `;
+             finalMessage += `Details: ${(transcriptionError as Error).message}`;
+             
+             throw new Error(finalMessage);
+        }
     }
   }
 );
