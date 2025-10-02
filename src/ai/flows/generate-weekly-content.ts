@@ -197,7 +197,7 @@ const GenerateWeeklyContentOutputSchema = z.object({
       friday: z.string().describe('A devotional for Friday, approximately 200 words.'),
   }).describe('An object containing five daily devotionals for Mon-Fri.'),
   reflectionQuestions: z.array(ReflectionQuestionGroupSchema).describe('An array of reflection question groups for different audiences.'),
-  games: z.array(GameSchema).describe("An array of interactive games based on the sermon. Generate a good variety of 5-7 games. One game MUST be a 'Jeopardy' game. One game MUST be a 'Verse Scramble' game. Include a mix of other types like Quiz, Word Search, Fill in the Blank, Matching, Word Guess, or Wordle. For Quizzes, provide 3-4 questions with 4 multiple-choice options each. For Matching games, provide 4-6 pairs of terms and definitions. For Fill in the Blank, provide four key sentences with an important word missing. For Word Guess, provide four key words from the sermon, each with a hint. For the required Jeopardy game, create 2-3 categories with 3 questions each, with point values of 200, 400, and 600."),
+  games: z.array(GameSchema).describe("An array of 12 interactive games based on the sermon. Generate a wide variety of game types. One game MUST be a 'Jeopardy' game. One game MUST be a 'Verse Scramble' game. For Quizzes, provide 3-4 questions with 4 multiple-choice options each. For Matching games, provide 4-6 pairs of terms and definitions. For Fill in the Blank, provide four key sentences with an important word missing. For Word Guess, provide four key words from the sermon, each with a hint. For the required Jeopardy game, create 2-3 categories with 3 questions each, with point values of 200, 400, and 600."),
   bibleReadingPlan: z.array(BibleReadingPlanItemSchema).describe('An array of 2-3 thematic Bible reading connections based on the sermon, including cross-references and Old/New Testament echoes.'),
   spiritualPractices: z.array(SpiritualPracticeSchema).describe('An array of 2-3 small, practical spiritual practice challenges related to the sermon theme (e.g., fasting one meal, practicing hospitality, journaling gratitude).'),
   outwardFocus: z.object({
@@ -229,10 +229,10 @@ const generateWeeklyContentPrompt = ai.definePrompt({
 
   Your task is to generate the full JSON object based on the provided schema definitions. Ensure all fields are populated with high-quality, relevant content derived from the sermon transcript.
 
-  - For the 'games' array: Generate a good variety of 5-7 games. This is an important requirement.
+  - For the 'games' array: Generate exactly 12 games. This is an important requirement.
     - One game MUST be 'Jeopardy'.
     - One game MUST be 'Verse Scramble'.
-    - Fill the remaining slots with a mix of 'Quiz', 'Word Search', 'Fill in the Blank', 'Matching', or 'Word Guess'.
+    - Fill the remaining 10 slots with a wide variety of the other available game types, avoiding repetition where possible.
   `,
 });
 
