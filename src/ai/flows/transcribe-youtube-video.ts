@@ -12,6 +12,7 @@ import {ai} from '@/ai/genkit';
 import {googleAI} from '@genkit-ai/googleai';
 import {z} from 'genkit';
 import { YoutubeTranscript } from 'youtube-transcript';
+import { transcribeSermon } from './transcribe-sermon';
 
 const TranscribeYoutubeVideoInputSchema = z.object({
   videoUrl: z.string().url().describe('A valid YouTube video URL.'),
@@ -55,20 +56,16 @@ const transcribeYoutubeVideoFlow = ai.defineFlow(
         console.warn('[[SERVER - WARN]] Could not fetch YouTube captions, falling back to AI transcription.', (captionError as Error).message);
         
         try {
-            console.log('[[SERVER - DEBUG]] Calling AI transcription fallback with gemini-2.5-flash.');
-            const { text } = await ai.generate({
-                model: 'googleai/gemini-2.5-flash',
-                prompt: [
-                    { text: 'You are an expert audio transcription service. Your only task is to accurately transcribe the audio from the provided video URL. Do not add any commentary, analysis, or any text other than the transcription itself. Return only the transcribed text.' },
-                    { media: { url: videoUrl, contentType: 'video/mp4' } }
-                ]
-            });
-    
-            if (!text) {
+            console.log('[[SERVER - DEBUG]] Calling AI transcription fallback with transcribeSermon flow.');
+            
+            // Call the dedicated transcription flow for the fallback
+            const result = await transcribeSermon({ mediaUri: videoUrl });
+
+            if (!result.transcript) {
                 throw new Error('AI transcription fallback failed: No text was returned from the model.');
             }
             console.log('[[SERVER - DEBUG]] Finishing transcribeYoutubeVideoFlow via AI fallback.');
-            return { transcript: text };
+            return { transcript: result.transcript };
         } catch (transcriptionError) {
              console.error("[[SERVER - ERROR]] AI transcription fallback failed:", transcriptionError);
              let finalMessage = `Failed to process YouTube video. An unexpected error occurred while trying to fetch the video transcript or audio. `;
