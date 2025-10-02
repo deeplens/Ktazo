@@ -44,14 +44,14 @@ export default function SermonDetailPage() {
     const langCode = targetLang.toLowerCase().startsWith('span') ? 'es' : 'en';
 
     try {
-        console.log('[[DEBUG]] Calling generateWeeklyContent');
+        console.log('[[CLIENT - DEBUG]] Calling generateWeeklyContent');
         const generated = await generateWeeklyContent({ 
             sermonId: sermon.id, 
             tenantId: user.tenantId,
             sermonTranscript: transcript,
             targetLanguage: targetLang
         });
-        console.log('[[DEBUG]] Received content from generateWeeklyContent', generated);
+        console.log('[[CLIENT - DEBUG]] Received content from generateWeeklyContent', generated);
         
         const newContent: WeeklyContent = {
             id: `wc-${sermon.id}-${langCode}-${Date.now()}`,

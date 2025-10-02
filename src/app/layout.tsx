@@ -12,7 +12,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   useEffect(() => {
-    console.log("Starting Ktazo");
+    console.log("[[CLIENT]] Starting Ktazo");
   }, []);
 
   return (

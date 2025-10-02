@@ -51,11 +51,11 @@ const transcribeSermonFlow = ai.defineFlow(
   },
   async ({ audioDataUri }) => {
     try {
-      console.log('[[DEBUG]] Starting transcribeSermonFlow for:', audioDataUri.substring(0, 50) + '...');
+      console.log('[[SERVER - DEBUG]] Starting transcribeSermonFlow for:', audioDataUri.substring(0, 50) + '...');
 
       // Data URI: MIME is embedded; extract and pass through
       if (audioDataUri.startsWith('data:')) {
-        console.log('[[DEBUG]] Data URI detected. Transcribing directly.');
+        console.log('[[SERVER - DEBUG]] Data URI detected. Transcribing directly.');
         const ct = audioDataUri.slice(5, audioDataUri.indexOf(';'));
         const { text } = await transcribeMediaPrompt({
           mediaUri: audioDataUri,
@@ -66,14 +66,14 @@ const transcribeSermonFlow = ai.defineFlow(
             'AI transcription failed: No text was returned from the model for the data URI.'
           );
         }
-        console.log('[[DEBUG]] Finishing transcribeSermonFlow for data URI.');
+        console.log('[[SERVER - DEBUG]] Finishing transcribeSermonFlow for data URI.');
         return { transcript: text };
       }
       
       throw new Error(`Unsupported source for transcription. Please provide a direct file upload.`);
 
     } catch (error) {
-      console.error('[[ERROR]] in transcribeSermonFlow:', error);
+      console.error('[[SERVER - ERROR]] in transcribeSermonFlow:', error);
       // Re-throw the original error or a new one to be caught by the calling function.
       throw new Error(`Failed to transcribe sermon: ${(error as Error).message}`);
     }

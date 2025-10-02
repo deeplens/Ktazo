@@ -36,20 +36,21 @@ const generateSermonArtworkFlow = ai.defineFlow(
   },
   async ({prompt}) => {
     try {
-      console.log('[[DEBUG]] Starting generateSermonArtworkFlow');
+      console.log('[[SERVER - DEBUG]] Starting generateSermonArtworkFlow');
+      
       const {media} = await ai.generate({
         model: 'googleai/imagen-4.0-fast-generate-001',
-        prompt: prompt
+        prompt: prompt,
       });
 
       if (!media.url) {
         throw new Error('Image generation failed to produce a URL.');
       }
       
-      console.log('[[DEBUG]] Finishing generateSermonArtworkFlow.');
+      console.log('[[SERVER - DEBUG]] Finishing generateSermonArtworkFlow.');
       return {artworkUrl: media.url};
     } catch (error) {
-        console.error('[[ERROR]] in generateSermonArtworkFlow:', error);
+        console.error('[[SERVER - ERROR]] in generateSermonArtworkFlow:', error);
         throw new Error('Failed to generate sermon artwork due to a server-side AI error.');
     }
   }

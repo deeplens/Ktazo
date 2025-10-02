@@ -247,7 +247,7 @@ const generateWeeklyContentFlow = ai.defineFlow(
   },
   async input => {
     try {
-        console.log('[[DEBUG]] Starting generateWeeklyContentFlow');
+        console.log('[[SERVER - DEBUG]] Starting generateWeeklyContentFlow');
         
         const response = await generateWeeklyContentPrompt(input);
         const output = response.output;
@@ -261,16 +261,16 @@ const generateWeeklyContentFlow = ai.defineFlow(
             if (game.type === 'Jeopardy') {
                 // Ensure Jeopardy data is an array
                 if (game.data && !Array.isArray(game.data)) {
-                    console.warn('[[WARN]] Jeopardy data was not an array, wrapping it.');
+                    console.warn('[[SERVER - WARN]] Jeopardy data was not an array, wrapping it.');
                     game.data = [game.data as any];
                 }
             }
         });
 
-        console.log('[[DEBUG]] Finishing generateWeeklyContentFlow.');
+        console.log('[[SERVER - DEBUG]] Finishing generateWeeklyContentFlow.');
         return output;
     } catch (error: any) {
-        console.error('[[ERROR]] in generateWeeklyContentFlow:', error);
+        console.error('[[SERVER - ERROR]] in generateWeeklyContentFlow:', error);
         
         let finalMessage = 'AI content generation failed. ';
 

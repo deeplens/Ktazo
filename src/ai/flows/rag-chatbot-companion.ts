@@ -73,7 +73,7 @@ const ragChatbotCompanionFlow = ai.defineFlow(
   },
   async input => {
     try {
-        console.log('[[DEBUG]] Starting ragChatbotCompanionFlow');
+        console.log('[[SERVER - DEBUG]] Starting ragChatbotCompanionFlow');
         
         // In a real implementation, this would query a RAG system and retrieve
         // relevant documents. For this demo, we will simulate it.
@@ -89,10 +89,10 @@ const ragChatbotCompanionFlow = ai.defineFlow(
         }
 
 
-        console.log('[[DEBUG]] Finishing ragChatbotCompanionFlow.');
+        console.log('[[SERVER - DEBUG]] Finishing ragChatbotCompanionFlow.');
         return output;
     } catch (error) {
-        console.error('[[ERROR]] in ragChatbotCompanionFlow:', error);
+        console.error('[[SERVER - ERROR]] in ragChatbotCompanionFlow:', error);
         throw new Error('Failed to get a response from the chatbot due to a server-side AI error.');
     }
   }
