@@ -1,6 +1,6 @@
 
 'use client';
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2, Sparkles, Link as LinkIcon, Search, Youtube } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { addSermon } from "@/lib/mock-data";
+import { addSermon, getTenantSettings } from "@/lib/mock-data";
 import { suggestSermonTitle } from "@/ai/flows/suggest-sermon-title";
 import { transcribeYoutubeVideo } from "@/ai/flows/transcribe-youtube-video";
 import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
@@ -16,9 +16,11 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import Image from "next/image";
 import { searchYouTube, YouTubeSearchOutput } from "@/ai/flows/search-youtube";
+import { useAuth } from "@/lib/auth";
 
 
 export default function NewSermonPage() {
+  const { user } = useAuth();
   const [youtubeUrl, setYoutubeUrl] = useState('');
   const [title, setTitle] = useState('');
   const [series, setSeries] = useState('');
@@ -35,6 +37,39 @@ export default function NewSermonPage() {
 
   const router = useRouter();
   const { toast } = useToast();
+
+  useEffect(() => {
+    const fetchAndSearchChannel = async () => {
+        if (!user) return;
+        const settings = getTenantSettings(user.tenantId);
+        if (settings.youtubeChannelUrl) {
+            // Extract a search term from the URL. This is a simple heuristic.
+            const urlParts = settings.youtubeChannelUrl.split('/');
+            const potentialHandle = urlParts.find(part => part.startsWith('@'));
+            const channelName = potentialHandle ? potentialHandle.substring(1) : urlParts.pop() || '';
+            
+            if (channelName) {
+                setSearchQuery(channelName);
+                setIsSearching(true);
+                try {
+                    const results = await searchYouTube({ query: channelName, type: 'video' });
+                    setSearchResults(results);
+                    setShowYouTubeBrowseDialog(true); // Open the dialog to show results
+                } catch (error) {
+                     console.error('[[CLIENT - ERROR]] YouTube video search failed on load', error);
+                     toast({
+                        variant: 'destructive',
+                        title: 'Auto-Search Failed',
+                        description: (error as Error).message || 'Could not fetch videos from your configured channel.'
+                    });
+                } finally {
+                    setIsSearching(false);
+                }
+            }
+        }
+    };
+    fetchAndSearchChannel();
+  }, [user, toast]);
 
   const handleConfirmSermon = (finalTranscript: string, sourceUrl: string) => {
     const newSermon = {
