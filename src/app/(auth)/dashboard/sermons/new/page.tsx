@@ -211,7 +211,7 @@ export default function NewSermonPage() {
   
   const isProcessButtonDisabled = () => {
     if (isLoading || isSearching || !speaker.trim() || !youtubeUrl.trim()) return true;
-    if (captionStatus === 'checking' || captionStatus === 'disabled') return true;
+    if (captionStatus === 'disabled') return true;
     return false;
   };
 
