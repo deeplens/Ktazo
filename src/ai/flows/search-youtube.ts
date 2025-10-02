@@ -33,6 +33,8 @@ const YouTubeChannelResultSchema = z.object({
     handle: z.string(),
     thumbnailUrl: z.string(),
 });
+export type YouTubeChannelResult = z.infer<typeof YouTubeChannelResultSchema>;
+
 
 const YouTubeSearchOutputSchema = z.object({
     videos: z.array(YouTubeVideoResultSchema).optional(),
