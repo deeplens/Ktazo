@@ -96,7 +96,12 @@ const transcribeYoutubeVideoFlow = ai.defineFlow(
           } else {
               finalMessage += 'An error occurred while fetching video data. ';
           }
-          finalMessage += `Details: ${(transcriptionError as Error).message}`;
+
+          if ((transcriptionError as Error).message.includes('Could not extract functions')) {
+              finalMessage += 'The YouTube download library may need an update. If this persists, run `npm install` to apply patches.'
+          } else {
+             finalMessage += `Details: ${(transcriptionError as Error).message}`;
+          }
           
           throw new Error(finalMessage);
       }
