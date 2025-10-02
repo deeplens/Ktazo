@@ -56,14 +56,21 @@ const transcribeYoutubeVideoFlow = ai.defineFlow(
         try {
             console.log('[[SERVER - DEBUG]] Calling AI transcription for the YouTube video URL.');
             
-            const transcriptionResult = await transcribeSermon({ mediaUri: videoUrl });
+            // Call the AI model directly with the video URL
+            const { text } = await ai.generate({
+                model: 'googleai/gemini-2.5-flash',
+                prompt: [
+                    { text: 'You are an expert audio transcription service. Your only task is to accurately transcribe the audio from the provided file. Do not add any commentary, analysis, or any text other than the transcription itself. Return only the transcribed text.' },
+                    { media: { url: videoUrl, contentType: 'video/*' } }
+                ]
+            });
             
-            if (!transcriptionResult.transcript) {
+            if (!text) {
                 throw new Error('AI transcription returned an empty result.');
             }
 
             console.log('[[SERVER - DEBUG]] Finishing transcribeYoutubeVideoFlow via AI fallback.');
-            return { transcript: transcriptionResult.transcript };
+            return { transcript: text };
 
         } catch (transcriptionError) {
              console.error('[[SERVER - ERROR]] Both YouTube captions and AI transcription failed:', transcriptionError);
