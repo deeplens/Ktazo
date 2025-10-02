@@ -4,12 +4,17 @@ import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
 import { cn } from '@/lib/utils';
 import { AuthProvider } from '@/lib/auth';
+import { useEffect } from 'react';
 
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  useEffect(() => {
+    console.log("Starting Ktazo");
+  }, []);
+
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
