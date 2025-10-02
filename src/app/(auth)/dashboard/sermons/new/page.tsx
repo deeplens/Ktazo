@@ -1,6 +1,6 @@
 
 'use client';
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,16 +13,9 @@ import { suggestSermonTitle } from "@/ai/flows/suggest-sermon-title";
 import { transcribeYoutubeVideo } from "@/ai/flows/transcribe-youtube-video";
 import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import Image from "next/image";
-
-// Mock YouTube search results
-const mockSearchResults = [
-  { id: 'dQw4w9WgXcQ', title: 'Official Music Video', channel: 'Official Channel', thumbnailUrl: 'https://i.ytimg.com/vi/dQw4w9WgXcQ/hqdefault.jpg' },
-  { id: 'o-YBDTqX_ZU', title: 'lofi hip hop radio 📚 - beats to relax/study to', channel: 'Lofi Girl', thumbnailUrl: 'https://i.ytimg.com/vi/o-YBDTqX_ZU/hqdefault.jpg' },
-  { id: 'jfKfPfyJRdk', title: 'lofi hip hop radio 💤 - beats to sleep/chill to', channel: 'Lofi Girl', thumbnailUrl: 'https://i.ytimg.com/vi/jfKfPfyJRdk/hqdefault.jpg' },
-  { id: '5qap5aO4i9A', title: 'lofi hip hop radio 😴 - calm/sleep/study beats', channel: 'Lofi Girl', thumbnailUrl: 'https://i.ytimg.com/vi/5qap5aO4i9A/hqdefault.jpg' },
-];
+import { searchYouTube, YouTubeSearchOutput } from "@/ai/flows/search-youtube";
 
 
 export default function NewSermonPage() {
@@ -37,6 +30,8 @@ export default function NewSermonPage() {
   const [showTranscriptDialog, setShowTranscriptDialog] = useState(false);
   const [showYouTubeBrowseDialog, setShowYouTubeBrowseDialog] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [isSearching, setIsSearching] = useState(false);
+  const [searchResults, setSearchResults] = useState<YouTubeSearchOutput>({});
 
   const router = useRouter();
   const { toast } = useToast();
@@ -67,6 +62,24 @@ export default function NewSermonPage() {
     setIsLoading(false);
     router.push(`/dashboard/sermons/${newSermon.id}`);
   };
+  
+  const handleSearch = async () => {
+    if (!searchQuery.trim()) return;
+    setIsSearching(true);
+    try {
+        const results = await searchYouTube({ query: searchQuery, type: 'video' });
+        setSearchResults(results);
+    } catch (error) {
+        console.error('[[CLIENT - ERROR]] YouTube video search failed', error);
+        toast({
+            variant: 'destructive',
+            title: 'Search Failed',
+            description: (error as Error).message || 'Could not fetch YouTube videos.'
+        });
+    } finally {
+        setIsSearching(false);
+    }
+  }
 
   const handleSelectVideo = (videoId: string) => {
     setYoutubeUrl(`https://www.youtube.com/watch?v=${videoId}`);
@@ -171,15 +184,16 @@ export default function NewSermonPage() {
                             placeholder="Search for a sermon..." 
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
+                            onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
                         />
-                        <Button type="button" onClick={() => console.log('[[CLIENT - DEBUG]] Searching YouTube for:', searchQuery)}>
-                            <Search className="mr-2" />
+                        <Button type="button" onClick={handleSearch} disabled={isSearching}>
+                            {isSearching ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Search className="mr-2" />}
                             Search
                         </Button>
                     </div>
                     <ScrollArea className="h-96">
                         <div className="space-y-4 pr-6">
-                            {mockSearchResults.map(video => (
+                            {searchResults.videos?.map(video => (
                                 <div key={video.id} className="flex items-center gap-4 hover:bg-accent/50 p-2 rounded-lg cursor-pointer" onClick={() => handleSelectVideo(video.id)}>
                                     <Image src={video.thumbnailUrl} alt={video.title} width={120} height={90} className="rounded-md" />
                                     <div>
@@ -188,6 +202,8 @@ export default function NewSermonPage() {
                                     </div>
                                 </div>
                             ))}
+                            {isSearching && <div className="flex justify-center p-8"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>}
+                            {!isSearching && !searchResults.videos?.length && <div className="text-center text-muted-foreground p-8">No videos found. Try a different search.</div>}
                         </div>
                     </ScrollArea>
                   </DialogContent>

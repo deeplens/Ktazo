@@ -1,0 +1,96 @@
+
+'use server';
+/**
+ * @fileOverview Searches YouTube for videos or channels.
+ * 
+ * - searchYouTube - A function that searches YouTube.
+ * - YouTubeSearchInput - The input type for the function.
+ * - YouTubeSearchOutput - The return type for the function.
+ */
+
+import { ai } from '@/ai/genkit';
+import { z } from 'genkit';
+import { google } from 'googleapis';
+
+const YouTubeSearchInputSchema = z.object({
+  query: z.string().describe('The search query.'),
+  type: z.enum(['video', 'channel']).describe('The type of resource to search for.'),
+});
+export type YouTubeSearchInput = z.infer<typeof YouTubeSearchInputSchema>;
+
+const YouTubeVideoResultSchema = z.object({
+    id: z.string(),
+    title: z.string(),
+    channel: z.string(),
+    thumbnailUrl: z.string(),
+});
+
+const YouTubeChannelResultSchema = z.object({
+    id: z.string(),
+    name: z.string(),
+    handle: z.string(),
+    thumbnailUrl: z.string(),
+});
+
+const YouTubeSearchOutputSchema = z.object({
+    videos: z.array(YouTubeVideoResultSchema).optional(),
+    channels: z.array(YouTubeChannelResultSchema).optional(),
+});
+export type YouTubeSearchOutput = z.infer<typeof YouTubeSearchOutputSchema>;
+
+export async function searchYouTube(input: YouTubeSearchInput): Promise<YouTubeSearchOutput> {
+  return searchYouTubeFlow(input);
+}
+
+const searchYouTubeFlow = ai.defineFlow(
+  {
+    name: 'searchYouTubeFlow',
+    inputSchema: YouTubeSearchInputSchema,
+    outputSchema: YouTubeSearchOutputSchema,
+  },
+  async ({ query, type }) => {
+    console.log(`[[SERVER - DEBUG]] Starting YouTube search for ${type}s with query: "${query}"`);
+    
+    const youtube = google.youtube('v3');
+    const apiKey = process.env.YOUTUBE_API_KEY;
+
+    if (!apiKey) {
+      console.error('[[SERVER - ERROR]] YouTube API key is missing.');
+      throw new Error('The YouTube API key is not configured on the server.');
+    }
+
+    try {
+      const response = await youtube.search.list({
+        key: apiKey,
+        part: ['snippet'],
+        q: query,
+        type: type,
+        maxResults: 10,
+      });
+      
+      const items = response.data.items || [];
+
+      if (type === 'video') {
+        const videos = items.map(item => ({
+          id: item.id?.videoId || '',
+          title: item.snippet?.title || 'No Title',
+          channel: item.snippet?.channelTitle || 'Unknown Channel',
+          thumbnailUrl: item.snippet?.thumbnails?.high?.url || '',
+        }));
+        return { videos };
+      } else { // channel
+        const channels = items.map(item => ({
+            id: item.snippet?.channelId || '',
+            name: item.snippet?.title || 'No Name',
+            handle: item.snippet?.customUrl || '', // Note: customUrl might not be the @handle
+            thumbnailUrl: item.snippet?.thumbnails?.high?.url || '',
+        }));
+        return { channels };
+      }
+
+    } catch (error: any) {
+      console.error('[[SERVER - ERROR]] YouTube API search failed:', error.response?.data || error.message);
+      throw new Error('Failed to search YouTube due to a server error.');
+    }
+  }
+);

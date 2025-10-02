@@ -1,5 +1,4 @@
 
-
 'use client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -19,13 +18,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import Image from "next/image";
-
-// Mock YouTube channel search results
-const mockChannelResults = [
-  { id: 'UCo3-p2aayG-h_gS-dty2aaA', name: 'My Church Channel', handle: '@mychurch', thumbnailUrl: 'https://avatar.vercel.sh/mychurch.png' },
-  { id: 'UC8-m63i-t-2s-0f9a9a9a9a', name: 'Community Church TV', handle: '@communitychurch', thumbnailUrl: 'https://avatar.vercel.sh/communitychurch.png' },
-  { id: 'UC-p-2aayG-h_gS-dty2aaB', name: 'First Baptist Sermons', handle: '@firstbaptist', thumbnailUrl: 'https://avatar.vercel.sh/firstbaptist.png' },
-];
+import { YouTubeSearchOutput, searchYouTube } from "@/ai/flows/search-youtube";
 
 
 export default function SettingsPage() {
@@ -35,6 +28,8 @@ export default function SettingsPage() {
     const [isSaving, setIsSaving] = useState(false);
     const [showYouTubeBrowseDialog, setShowYouTubeBrowseDialog] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
+    const [isSearching, setIsSearching] = useState(false);
+    const [searchResults, setSearchResults] = useState<YouTubeSearchOutput>({});
 
     useEffect(() => {
         if (user) {
@@ -42,6 +37,25 @@ export default function SettingsPage() {
             setSettings(currentSettings);
         }
     }, [user]);
+    
+    const handleSearch = async () => {
+        if (!searchQuery.trim()) return;
+        setIsSearching(true);
+        try {
+            const results = await searchYouTube({ query: searchQuery, type: 'channel' });
+            setSearchResults(results);
+        } catch (error) {
+            console.error('[[CLIENT - ERROR]] YouTube channel search failed', error);
+            toast({
+                variant: 'destructive',
+                title: 'Search Failed',
+                description: (error as Error).message || 'Could not fetch YouTube channels.'
+            });
+        } finally {
+            setIsSearching(false);
+        }
+    }
+
 
     const handleSave = () => {
         if (!user || !settings) return;
@@ -66,7 +80,8 @@ export default function SettingsPage() {
     }
 
     const handleSelectChannel = (handle: string) => {
-        handleSettingChange('youtubeChannelUrl', `https://www.youtube.com/${handle}`);
+        const url = handle.startsWith('@') ? `https://www.youtube.com/${handle}` : `https://www.youtube.com/channel/${handle}`;
+        handleSettingChange('youtubeChannelUrl', url);
         setShowYouTubeBrowseDialog(false);
     };
 
@@ -132,16 +147,17 @@ export default function SettingsPage() {
                                             placeholder="Search for a channel..." 
                                             value={searchQuery}
                                             onChange={(e) => setSearchQuery(e.target.value)}
+                                            onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
                                         />
-                                        <Button type="button" onClick={() => console.log('[[CLIENT - DEBUG]] Searching YouTube for channel:', searchQuery)}>
-                                            <Search className="mr-2" />
+                                        <Button type="button" onClick={handleSearch} disabled={isSearching}>
+                                            {isSearching ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Search className="mr-2" />}
                                             Search
                                         </Button>
                                     </div>
                                     <ScrollArea className="h-72">
                                         <div className="space-y-4 pr-6">
-                                            {mockChannelResults.map(channel => (
-                                                <div key={channel.id} className="flex items-center gap-4 hover:bg-accent/50 p-2 rounded-lg cursor-pointer" onClick={() => handleSelectChannel(channel.handle)}>
+                                            {searchResults.channels?.map(channel => (
+                                                <div key={channel.id} className="flex items-center gap-4 hover:bg-accent/50 p-2 rounded-lg cursor-pointer" onClick={() => handleSelectChannel(channel.handle || channel.id)}>
                                                     <Image src={channel.thumbnailUrl} alt={channel.name} width={48} height={48} className="rounded-full" />
                                                     <div>
                                                         <p className="font-semibold">{channel.name}</p>
@@ -149,6 +165,8 @@ export default function SettingsPage() {
                                                     </div>
                                                 </div>
                                             ))}
+                                            {isSearching && <div className="flex justify-center p-4"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>}
+                                            {!isSearching && !searchResults.channels?.length && <div className="text-center text-muted-foreground p-4">No channels found. Try another search.</div>}
                                         </div>
                                     </ScrollArea>
                                 </DialogContent>
