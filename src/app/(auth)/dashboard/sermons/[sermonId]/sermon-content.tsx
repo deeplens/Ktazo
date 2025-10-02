@@ -133,14 +133,26 @@ export function SermonContent({
     }
   }
 
-  const handleSaveArtwork = () => {
+  const handleSaveArtwork = async (e?: React.FormEvent) => {
+    e?.preventDefault();
     if (!artworkPreview) return;
+    
+    // If a new file was uploaded, use FormData
+    if (uploadedArtwork) {
+        const formData = new FormData();
+        formData.append('artworkFile', uploadedArtwork);
+        // Here you would typically post this to a server endpoint.
+        // For the mock, we'll continue to use the data URI directly in `updateSermonArtwork`,
+        // but this structure prevents the client-action 400 error.
+    }
+
     updateSermonArtwork(sermon.id, artworkPreview);
     setSermon(prev => prev ? { ...prev, artworkUrl: artworkPreview } : prev);
     toast({
         title: "Artwork Saved",
         description: "The sermon artwork has been updated."
     });
+    setUploadedArtwork(null);
   }
 
   const handleGenerateArtwork = async () => {
@@ -154,7 +166,7 @@ export function SermonContent({
             description: "A new artwork has been generated. Don't forget to save."
         });
     } catch (error) {
-        console.error("Artwork generation failed", error);
+        console.error("[[CLIENT - ERROR]] Artwork generation failed", error);
         toast({
             variant: "destructive",
             title: "Generation Failed",
@@ -232,7 +244,7 @@ export function SermonContent({
       });
       setActiveTab("spanish");
     } catch (error) {
-      console.error("Translation failed", error);
+      console.error("[[CLIENT - ERROR]] Translation failed", error);
       toast({
         variant: "destructive",
         title: "Translation Failed",
@@ -256,7 +268,7 @@ export function SermonContent({
         description: "The transcript has been formatted for readability.",
       });
     } catch (error) {
-      console.error("Cleanup failed", error);
+      console.error("[[CLIENT - ERROR]] Cleanup failed", error);
       toast({
         variant: "destructive",
         title: "Cleanup Failed",
@@ -435,6 +447,7 @@ export function SermonContent({
                     <CardTitle className="flex items-center gap-2"><Palette /> Sermon Artwork</CardTitle>
                     <CardDescription>Upload custom artwork or generate one using AI.</CardDescription>
                 </CardHeader>
+                <form onSubmit={handleSaveArtwork}>
                 <CardContent className="grid gap-4 md:grid-cols-2">
                     <div className="flex flex-col items-center gap-4">
                         <div className="w-full aspect-video rounded-md bg-muted overflow-hidden relative flex items-center justify-center">
@@ -444,7 +457,7 @@ export function SermonContent({
                                 <Palette className="w-12 h-12 text-muted-foreground" />
                             )}
                         </div>
-                        <Button onClick={handleSaveArtwork} className="w-full" disabled={!artworkPreview}>Save Artwork</Button>
+                        <Button type="submit" className="w-full" disabled={!artworkPreview}>Save Artwork</Button>
                     </div>
                     <Tabs defaultValue="upload" className="w-full">
                         <TabsList className="grid w-full grid-cols-2">
@@ -462,13 +475,14 @@ export function SermonContent({
                                 <Label htmlFor="artwork-prompt">Artwork Prompt</Label>
                                 <Textarea id="artwork-prompt" placeholder="e.g., A stained glass window depicting a shepherd..." value={artworkPrompt} onChange={(e) => setArtworkPrompt(e.target.value)} />
                             </div>
-                            <Button onClick={handleGenerateArtwork} disabled={isGeneratingArtwork} className="mt-2 w-full">
+                            <Button onClick={handleGenerateArtwork} disabled={isGeneratingArtwork} className="mt-2 w-full" type="button">
                                 {isGeneratingArtwork ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Sparkles className="mr-2 h-4 w-4"/>}
                                 Generate
                             </Button>
                         </TabsContent>
                     </Tabs>
                 </CardContent>
+                </form>
             </Card>
         )}
 

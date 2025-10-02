@@ -101,6 +101,9 @@ export default function NewSermonPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const form = e.target as HTMLFormElement;
+    const formData = new FormData(form);
+
     if (!speaker) {
       toast({
         variant: 'destructive',
@@ -155,7 +158,7 @@ export default function NewSermonPage() {
         setShowTranscriptDialog(true);
 
     } catch (error) {
-        console.error("Processing failed", error);
+        console.error("[[CLIENT - ERROR]] Processing failed", error);
         toast({
             variant: 'destructive',
             title: "Processing Failed",
@@ -239,6 +242,7 @@ export default function NewSermonPage() {
               <div className="flex gap-2 items-center">
                 <Input
                   id="title"
+                  name="title"
                   placeholder="e.g., The Good Shepherd"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
@@ -256,6 +260,7 @@ export default function NewSermonPage() {
               <Label htmlFor="speaker">Speaker</Label>
               <Input
                 id="speaker"
+                name="speaker"
                 placeholder="e.g., Pastor John Doe"
                 value={speaker}
                 onChange={(e) => setSpeaker(e.target.value)}
@@ -268,6 +273,7 @@ export default function NewSermonPage() {
                 <Label htmlFor="series">Series (Optional)</Label>
                 <Input
                   id="series"
+                  name="series"
                   placeholder="e.g., Psalms"
                   value={series}
                   onChange={(e) => setSeries(e.target.value)}
@@ -278,6 +284,7 @@ export default function NewSermonPage() {
                 <Label htmlFor="date">Date (Optional)</Label>
                 <Input
                   id="date"
+                  name="date"
                   type="date"
                   value={date}
                   onChange={(e) => setDate(e.target.value)}
@@ -334,6 +341,7 @@ export default function NewSermonPage() {
                       </div>
                       <Input
                         id="audio-file"
+                        name="audioFile"
                         type="file"
                         className="hidden"
                         accept=".mp3,audio/mpeg"
@@ -378,6 +386,7 @@ export default function NewSermonPage() {
                       </div>
                       <Input
                         id="text-file"
+                        name="textFile"
                         type="file"
                         className="hidden"
                         accept=".txt,.md"
