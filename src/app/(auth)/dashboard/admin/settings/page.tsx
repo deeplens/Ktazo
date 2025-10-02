@@ -1,6 +1,6 @@
 
 'use client';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
@@ -55,6 +55,20 @@ export default function SettingsPage() {
             setIsSearching(false);
         }
     }
+
+    const handleSaveIdentity = () => {
+        if (!user || !settings) return;
+        setIsSaving(true);
+        saveTenantSettings(user.tenantId, settings);
+        
+        setTimeout(() => {
+            setIsSaving(false);
+            toast({
+                title: "Identity Settings Saved",
+                description: "Your congregation's identity settings have been updated.",
+            });
+        }, 500);
+    };
 
 
     const handleSave = () => {
@@ -182,6 +196,12 @@ export default function SettingsPage() {
                         />
                     </div>
                 </CardContent>
+                <CardFooter>
+                    <Button onClick={handleSaveIdentity} disabled={isSaving}>
+                        {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                        Save Identity
+                    </Button>
+                </CardFooter>
             </Card>
             
             <Card>
