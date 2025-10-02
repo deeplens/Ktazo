@@ -144,10 +144,10 @@ export function SermonContent({
   }
 
   const handleGenerateArtwork = async () => {
-    if (!artworkPrompt) return;
+    const prompt = artworkPrompt.trim() || 'A beautiful and generic spiritual or inspirational abstract image. No text.';
     setIsGeneratingArtwork(true);
     try {
-        const result = await generateSermonArtwork({ prompt: artworkPrompt });
+        const result = await generateSermonArtwork({ prompt });
         setArtworkPreview(result.artworkUrl);
         toast({
             title: "Artwork Generated",
@@ -462,7 +462,7 @@ export function SermonContent({
                                 <Label htmlFor="artwork-prompt">Artwork Prompt</Label>
                                 <Textarea id="artwork-prompt" placeholder="e.g., A stained glass window depicting a shepherd..." value={artworkPrompt} onChange={(e) => setArtworkPrompt(e.target.value)} />
                             </div>
-                            <Button onClick={handleGenerateArtwork} disabled={isGeneratingArtwork || !artworkPrompt} className="mt-2 w-full">
+                            <Button onClick={handleGenerateArtwork} disabled={isGeneratingArtwork} className="mt-2 w-full">
                                 {isGeneratingArtwork ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Sparkles className="mr-2 h-4 w-4"/>}
                                 Generate
                             </Button>
