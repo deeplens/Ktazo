@@ -55,7 +55,7 @@ const transcribeSermonFlow = ai.defineFlow(
       }
       
       const { text } = await ai.generate({
-        model: 'googleai/gemini-1.5-pro',
+        model: 'googleai/gemini-2.5-flash',
         prompt: `Transcribe the following audio: {{media url="${mediaUri}" contentType="${contentType}"}}`,
       });
 
