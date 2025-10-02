@@ -19,7 +19,7 @@ const YouTubeSearchInputSchema = z.object({
 });
 export type YouTubeSearchInput = z.infer<typeof YouTubeSearchInputSchema>;
 
-export const YouTubeVideoResultSchema = z.object({
+const YouTubeVideoResultSchema = z.object({
     id: z.string(),
     title: z.string(),
     channel: z.string(),
