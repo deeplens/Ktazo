@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Loader2, Sparkles, Link as LinkIcon, Search, Youtube, ArrowRight, CheckCircle2, XCircle } from "lucide-react";
+import { Loader2, Sparkles, Link as LinkIcon, Search, Youtube, UploadCloud, FileText, CheckCircle2, XCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { addSermon, getTenantSettings } from "@/lib/mock-data";
 import { suggestSermonTitle } from "@/ai/flows/suggest-sermon-title";
@@ -18,8 +18,9 @@ import Image from "next/image";
 import { searchYouTube, YouTubeVideoResult, YouTubeSearchOutput } from "@/ai/flows/search-youtube";
 import { useAuth } from "@/lib/auth";
 import { checkYoutubeCaptions } from "@/ai/flows/check-youtube-captions";
-import { cn } from "@/lib/utils";
-
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Textarea } from "@/components/ui/textarea";
+import { transcribeSermon } from "@/ai/flows/transcribe-sermon";
 
 export default function NewSermonPage() {
   const { user } = useAuth();
@@ -38,6 +39,11 @@ export default function NewSermonPage() {
   const [searchResults, setSearchResults] = useState<YouTubeSearchOutput>({});
   const [suggestedVideo, setSuggestedVideo] = useState<YouTubeVideoResult | null>(null);
   const [captionStatus, setCaptionStatus] = useState<'idle' | 'checking' | 'enabled' | 'disabled'>('idle');
+  const [uploadTab, setUploadTab] = useState('youtube');
+  const [audioFile, setAudioFile] = useState<File | null>(null);
+  const [pastedTranscript, setPastedTranscript] = useState('');
+  const [sourceUrl, setSourceUrl] = useState('');
+
 
   const router = useRouter();
   const { toast } = useToast();
@@ -119,7 +125,7 @@ export default function NewSermonPage() {
     fetchAndSearchChannel();
   }, [user, toast]);
 
-  const handleConfirmSermon = (finalTranscript: string, sourceUrl: string) => {
+  const handleConfirmSermon = (finalTranscript: string) => {
     const newSermon = {
       id: `sermon-${Date.now()}`,
       tenantId: 'tenant-1',
@@ -174,6 +180,15 @@ export default function NewSermonPage() {
     setSuggestedVideo(video);
     setShowYouTubeBrowseDialog(false);
   };
+  
+  const fileToDataURI = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+    });
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -187,27 +202,49 @@ export default function NewSermonPage() {
       return;
     }
     
-    if (!youtubeUrl || !youtubeUrl.includes('youtube.com')) {
-         toast({ variant: 'destructive', title: "Invalid URL", description: "Please enter a valid YouTube URL." });
-        return;
-    }
-
     setIsLoading(true);
+    let currentTranscript = '';
     
     try {
-        setLoadingMessage('Transcribing...');
+      if (uploadTab === 'youtube') {
+        if (!youtubeUrl || !youtubeUrl.includes('youtube.com')) {
+          toast({ variant: 'destructive', title: "Invalid URL", description: "Please enter a valid YouTube URL." });
+          setIsLoading(false);
+          return;
+        }
+        setSourceUrl(youtubeUrl);
+        setLoadingMessage('Transcribing from YouTube...');
         const transcriptionResult = await transcribeYoutubeVideo({ videoUrl: youtubeUrl });
-        const currentTranscript = transcriptionResult.transcript;
-        setTranscript(currentTranscript);
-
-        if (!title) {
-            setLoadingMessage('Suggesting title...');
-            const titleResult = await suggestSermonTitle({ transcript: currentTranscript });
-            setTitle(titleResult.suggestedTitle);
+        currentTranscript = transcriptionResult.transcript;
+      } else { // File Upload
+        if (!audioFile && !pastedTranscript) {
+            toast({ variant: 'destructive', title: "Missing Input", description: "Please upload an MP3 file or paste a transcript." });
+            setIsLoading(false);
+            return;
         }
 
-        setShowTranscriptDialog(true);
-
+        if (audioFile) {
+            setLoadingMessage('Transcribing audio file...');
+            const audioDataUri = await fileToDataURI(audioFile);
+            setSourceUrl(audioDataUri);
+            const transcriptionResult = await transcribeSermon({ mediaUri: audioDataUri });
+            currentTranscript = transcriptionResult.transcript;
+        } else {
+            currentTranscript = pastedTranscript;
+            setSourceUrl('');
+        }
+      }
+      
+      setTranscript(currentTranscript);
+      
+      if (!title && currentTranscript) {
+        setLoadingMessage('Suggesting title...');
+        const titleResult = await suggestSermonTitle({ transcript: currentTranscript });
+        setTitle(titleResult.suggestedTitle);
+      }
+      
+      setShowTranscriptDialog(true);
+      
     } catch (error) {
         console.error("[[CLIENT - ERROR]] Processing failed", error);
         toast({
@@ -220,7 +257,9 @@ export default function NewSermonPage() {
   };
   
   const isProcessButtonDisabled = () => {
-    if (isLoading || isSearching || !speaker.trim() || !youtubeUrl.trim()) return true;
+    if (isLoading || !speaker.trim()) return true;
+    if (uploadTab === 'youtube' && !youtubeUrl.trim()) return true;
+    if (uploadTab === 'file' && !audioFile && !pastedTranscript.trim()) return true;
     return false;
   };
 
@@ -229,7 +268,7 @@ export default function NewSermonPage() {
       <div>
         <h1 className="text-3xl font-bold tracking-tight font-headline">Upload New Sermon</h1>
         <p className="text-muted-foreground">
-          Add a new sermon to your congregation&apos;s library by providing a YouTube URL.
+          Add a new sermon to your congregation&apos;s library.
         </p>
       </div>
 
@@ -239,91 +278,11 @@ export default function NewSermonPage() {
             <CardTitle>Sermon Details</CardTitle>
             <CardDescription>
               Provide the details for the new sermon. A title will be suggested if left blank.
-              The YouTube video must have captions enabled for transcription.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-             {suggestedVideo && (
-                <Card className="overflow-hidden">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-0 md:gap-4">
-                        <div className="md:col-span-1 relative min-h-[150px] md:min-h-0">
-                            <Image src={suggestedVideo.thumbnailUrl} alt={suggestedVideo.title} fill className="object-cover" />
-                        </div>
-                        <div className="md:col-span-2 p-4 flex flex-col justify-between">
-                            <div>
-                                <CardDescription>Suggested Sermon</CardDescription>
-                                <CardTitle className="text-xl leading-tight">{suggestedVideo.title}</CardTitle>
-                                <p className="text-sm text-muted-foreground mt-1">{suggestedVideo.channel}</p>
-                            </div>
-                            <div className="flex items-center gap-2 text-sm mt-2">
-                                {captionStatus === 'checking' && <><Loader2 className="h-4 w-4 animate-spin"/> Checking for captions...</>}
-                                {captionStatus === 'enabled' && <><CheckCircle2 className="h-4 w-4 text-green-500"/> Captions Enabled</>}
-                                {captionStatus === 'disabled' && <><XCircle className="h-4 w-4 text-destructive"/> Captions Disabled (AI Fallback)</>}
-                            </div>
-                        </div>
-                    </div>
-                </Card>
-            )}
-            <div className="space-y-2">
-              <Label htmlFor="youtube-url">YouTube URL</Label>
-              <div className="flex items-center gap-2">
-                <LinkIcon className="text-muted-foreground" />
-                <Input
-                  id="youtube-url"
-                  name="youtubeUrl"
-                  placeholder="https://www.youtube.com/watch?v=..."
-                  value={youtubeUrl}
-                  onChange={(e) => setYoutubeUrl(e.target.value)}
-                  required
-                  disabled={isLoading}
-                />
-                <Dialog open={showYouTubeBrowseDialog} onOpenChange={setShowYouTubeBrowseDialog}>
-                  <DialogTrigger asChild>
-                    <Button type="button" variant="outline" disabled={isLoading}>
-                      <Youtube className="mr-2" /> Browse
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="max-w-4xl">
-                    <DialogHeader>
-                      <DialogTitle>Browse YouTube</DialogTitle>
-                      <DialogDescription>Search for a sermon video on YouTube.</DialogDescription>
-                    </DialogHeader>
-                    <div className="flex w-full items-center space-x-2">
-                        <Input 
-                            type="search" 
-                            placeholder="Search for a sermon..." 
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                        />
-                        <Button type="button" onClick={handleSearch} disabled={isSearching}>
-                            {isSearching ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Search className="mr-2" />}
-                            Search
-                        </Button>
-                    </div>
-                    <ScrollArea className="h-96">
-                        <div className="space-y-4 pr-6">
-                            {searchResults.videos?.map(video => (
-                                <div key={video.id} className="flex items-center gap-4 hover:bg-accent/50 p-2 rounded-lg cursor-pointer" onClick={() => handleSelectVideo(video)}>
-                                    <Image src={video.thumbnailUrl} alt={video.title} width={120} height={90} className="rounded-md" />
-                                    <div>
-                                        <p className="font-semibold">{video.title}</p>
-                                        <p className="text-sm text-muted-foreground">{video.channel}</p>
-                                    </div>
-                                </div>
-                            ))}
-                            {isSearching && <div className="flex justify-center p-8"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>}
-                            {!isSearching && !searchResults.videos?.length && <div className="text-center text-muted-foreground p-8">No videos found. Try a different search.</div>}
-                        </div>
-                    </ScrollArea>
-                  </DialogContent>
-                </Dialog>
-              </div>
-            </div>
-
             <div className="space-y-2">
               <Label htmlFor="title">Sermon Title (Optional)</Label>
-              <div className="flex gap-2 items-center">
                 <Input
                   id="title"
                   name="title"
@@ -332,13 +291,6 @@ export default function NewSermonPage() {
                   onChange={(e) => setTitle(e.target.value)}
                   disabled={isLoading}
                 />
-                {isLoading && loadingMessage === 'Suggesting title...' && (
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Sparkles className="h-4 w-4 animate-pulse" />
-                    <span>Suggesting...</span>
-                  </div>
-                )}
-              </div>
             </div>
             <div className="space-y-2">
               <Label htmlFor="speaker">Speaker</Label>
@@ -378,6 +330,139 @@ export default function NewSermonPage() {
             </div>
           </CardContent>
         </Card>
+
+        <Tabs defaultValue="youtube" className="mt-6" onValueChange={setUploadTab}>
+            <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="youtube"><Youtube className="mr-2"/> From YouTube</TabsTrigger>
+                <TabsTrigger value="file"><UploadCloud className="mr-2"/> From File</TabsTrigger>
+            </TabsList>
+            <TabsContent value="youtube">
+                <Card>
+                    <CardHeader>
+                        <CardTitle>YouTube Import</CardTitle>
+                        <CardDescription>Provide a link to a YouTube video. If captions are available, they will be used. Otherwise, the audio will be transcribed by AI.</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        {suggestedVideo && (
+                            <Card className="overflow-hidden">
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-0 md:gap-4">
+                                    <div className="md:col-span-1 relative min-h-[150px] md:min-h-0">
+                                        <Image src={suggestedVideo.thumbnailUrl} alt={suggestedVideo.title} fill className="object-cover" />
+                                    </div>
+                                    <div className="md:col-span-2 p-4 flex flex-col justify-between">
+                                        <div>
+                                            <CardDescription>Suggested Sermon</CardDescription>
+                                            <CardTitle className="text-xl leading-tight">{suggestedVideo.title}</CardTitle>
+                                            <p className="text-sm text-muted-foreground mt-1">{suggestedVideo.channel}</p>
+                                        </div>
+                                        <div className="flex items-center gap-2 text-sm mt-2">
+                                            {captionStatus === 'checking' && <><Loader2 className="h-4 w-4 animate-spin"/> Checking for captions...</>}
+                                            {captionStatus === 'enabled' && <><CheckCircle2 className="h-4 w-4 text-green-500"/> Captions Enabled</>}
+                                            {captionStatus === 'disabled' && <><XCircle className="h-4 w-4 text-destructive"/> Captions Disabled (AI Fallback)</>}
+                                        </div>
+                                    </div>
+                                </div>
+                            </Card>
+                        )}
+                        <div className="space-y-2">
+                        <Label htmlFor="youtube-url">YouTube URL</Label>
+                        <div className="flex items-center gap-2">
+                            <LinkIcon className="text-muted-foreground" />
+                            <Input
+                            id="youtube-url"
+                            name="youtubeUrl"
+                            placeholder="https://www.youtube.com/watch?v=..."
+                            value={youtubeUrl}
+                            onChange={(e) => setYoutubeUrl(e.target.value)}
+                            required
+                            disabled={isLoading}
+                            />
+                            <Dialog open={showYouTubeBrowseDialog} onOpenChange={setShowYouTubeBrowseDialog}>
+                            <DialogTrigger asChild>
+                                <Button type="button" variant="outline" disabled={isLoading}>
+                                <Youtube className="mr-2" /> Browse
+                                </Button>
+                            </DialogTrigger>
+                            <DialogContent className="max-w-4xl">
+                                <DialogHeader>
+                                <DialogTitle>Browse YouTube</DialogTitle>
+                                <DialogDescription>Search for a sermon video on YouTube.</DialogDescription>
+                                </DialogHeader>
+                                <div className="flex w-full items-center space-x-2">
+                                    <Input 
+                                        type="search" 
+                                        placeholder="Search for a sermon..." 
+                                        value={searchQuery}
+                                        onChange={(e) => setSearchQuery(e.target.value)}
+                                        onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                                    />
+                                    <Button type="button" onClick={handleSearch} disabled={isSearching}>
+                                        {isSearching ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Search className="mr-2" />}
+                                        Search
+                                    </Button>
+                                </div>
+                                <ScrollArea className="h-96">
+                                    <div className="space-y-4 pr-6">
+                                        {searchResults.videos?.map(video => (
+                                            <div key={video.id} className="flex items-center gap-4 hover:bg-accent/50 p-2 rounded-lg cursor-pointer" onClick={() => handleSelectVideo(video)}>
+                                                <Image src={video.thumbnailUrl} alt={video.title} width={120} height={90} className="rounded-md" />
+                                                <div>
+                                                    <p className="font-semibold">{video.title}</p>
+                                                    <p className="text-sm text-muted-foreground">{video.channel}</p>
+                                                </div>
+                                            </div>
+                                        ))}
+                                        {isSearching && <div className="flex justify-center p-8"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>}
+                                        {!isSearching && !searchResults.videos?.length && <div className="text-center text-muted-foreground p-8">No videos found. Try a different search.</div>}
+                                    </div>
+                                </ScrollArea>
+                            </DialogContent>
+                            </Dialog>
+                        </div>
+                        </div>
+                    </CardContent>
+                </Card>
+            </TabsContent>
+            <TabsContent value="file">
+                <Card>
+                    <CardHeader>
+                        <CardTitle>File Upload</CardTitle>
+                        <CardDescription>Upload an MP3 audio file for AI transcription, or paste the transcript text directly.</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <div className="space-y-2">
+                            <Label htmlFor="audio-file" className="flex items-center gap-2"><UploadCloud/> Upload Audio File (MP3)</Label>
+                            <Input
+                                id="audio-file"
+                                type="file"
+                                accept=".mp3"
+                                onChange={(e) => setAudioFile(e.target.files?.[0] || null)}
+                                disabled={isLoading}
+                            />
+                        </div>
+                        <div className="relative">
+                            <div className="absolute inset-0 flex items-center">
+                                <span className="w-full border-t" />
+                            </div>
+                            <div className="relative flex justify-center text-xs uppercase">
+                                <span className="bg-card px-2 text-muted-foreground">Or</span>
+                            </div>
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="pasted-transcript" className="flex items-center gap-2"><FileText/> Paste Transcript</Label>
+                            <Textarea
+                                id="pasted-transcript"
+                                placeholder="Paste the full sermon transcript here..."
+                                rows={8}
+                                value={pastedTranscript}
+                                onChange={(e) => setPastedTranscript(e.target.value)}
+                                disabled={isLoading}
+                            />
+                        </div>
+                    </CardContent>
+                </Card>
+            </TabsContent>
+        </Tabs>
 
         <CardFooter className="flex justify-end gap-2 mt-4 px-0">
           <Button variant="outline" type="button" onClick={() => router.back()} disabled={isLoading}>
@@ -430,7 +515,7 @@ export default function NewSermonPage() {
               Cancel
             </Button>
             <AlertDialogAction onClick={() => {
-                handleConfirmSermon(transcript, youtubeUrl);
+                handleConfirmSermon(transcript);
             }}>
               Confirm and Add Sermon
             </AlertDialogAction>
@@ -440,3 +525,5 @@ export default function NewSermonPage() {
     </div>
   );
 }
+
+    
