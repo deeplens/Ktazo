@@ -7,7 +7,7 @@ import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Church, Globe, Palette, Volume2, Link as LinkIcon, Loader2, MessageSquareQuote, Mail, Smartphone, Youtube } from "lucide-react";
+import { Church, Globe, Palette, Volume2, Link as LinkIcon, Loader2, MessageSquareQuote, Mail, Smartphone, Youtube, Search } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useState, useEffect } from "react";
@@ -16,12 +16,25 @@ import { useAuth } from "@/lib/auth";
 import { TenantSettings } from "@/lib/types";
 import { useToast } from "@/hooks/use-toast";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import Image from "next/image";
+
+// Mock YouTube channel search results
+const mockChannelResults = [
+  { id: 'UCo3-p2aayG-h_gS-dty2aaA', name: 'My Church Channel', handle: '@mychurch', thumbnailUrl: 'https://avatar.vercel.sh/mychurch.png' },
+  { id: 'UC8-m63i-t-2s-0f9a9a9a9a', name: 'Community Church TV', handle: '@communitychurch', thumbnailUrl: 'https://avatar.vercel.sh/communitychurch.png' },
+  { id: 'UC-p-2aayG-h_gS-dty2aaB', name: 'First Baptist Sermons', handle: '@firstbaptist', thumbnailUrl: 'https://avatar.vercel.sh/firstbaptist.png' },
+];
+
 
 export default function SettingsPage() {
     const { user } = useAuth();
     const { toast } = useToast();
     const [settings, setSettings] = useState<TenantSettings | null>(null);
     const [isSaving, setIsSaving] = useState(false);
+    const [showYouTubeBrowseDialog, setShowYouTubeBrowseDialog] = useState(false);
+    const [searchQuery, setSearchQuery] = useState('');
 
     useEffect(() => {
         if (user) {
@@ -51,6 +64,11 @@ export default function SettingsPage() {
             return { ...prev, [key]: value };
         });
     }
+
+    const handleSelectChannel = (handle: string) => {
+        handleSettingChange('youtubeChannelUrl', `https://www.youtube.com/${handle}`);
+        setShowYouTubeBrowseDialog(false);
+    };
 
     if (!settings) {
         return <div>Loading settings...</div>; // Or a skeleton loader
@@ -93,10 +111,48 @@ export default function SettingsPage() {
                             <Youtube className="text-muted-foreground" />
                             <Input 
                                 id="youtube-channel-url" 
-                                placeholder="https://www.youtube.com/c/YourChannel" 
+                                placeholder="https://www.youtube.com/@YourChannel" 
                                 value={settings.youtubeChannelUrl || ''}
                                 onChange={e => handleSettingChange('youtubeChannelUrl', e.target.value)}
                             />
+                             <Dialog open={showYouTubeBrowseDialog} onOpenChange={setShowYouTubeBrowseDialog}>
+                                <DialogTrigger asChild>
+                                    <Button type="button" variant="outline">
+                                        <Search className="mr-2 h-4 w-4" /> Browse
+                                    </Button>
+                                </DialogTrigger>
+                                <DialogContent className="max-w-2xl">
+                                    <DialogHeader>
+                                        <DialogTitle>Browse YouTube Channels</DialogTitle>
+                                        <DialogDescription>Search for your church's YouTube channel.</DialogDescription>
+                                    </DialogHeader>
+                                    <div className="flex w-full items-center space-x-2">
+                                        <Input 
+                                            type="search" 
+                                            placeholder="Search for a channel..." 
+                                            value={searchQuery}
+                                            onChange={(e) => setSearchQuery(e.target.value)}
+                                        />
+                                        <Button type="button">
+                                            <Search className="mr-2" />
+                                            Search
+                                        </Button>
+                                    </div>
+                                    <ScrollArea className="h-72">
+                                        <div className="space-y-4 pr-6">
+                                            {mockChannelResults.map(channel => (
+                                                <div key={channel.id} className="flex items-center gap-4 hover:bg-accent/50 p-2 rounded-lg cursor-pointer" onClick={() => handleSelectChannel(channel.handle)}>
+                                                    <Image src={channel.thumbnailUrl} alt={channel.name} width={48} height={48} className="rounded-full" />
+                                                    <div>
+                                                        <p className="font-semibold">{channel.name}</p>
+                                                        <p className="text-sm text-muted-foreground">{channel.handle}</p>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </ScrollArea>
+                                </DialogContent>
+                            </Dialog>
                         </div>
                     </div>
                     <div className="space-y-2">
@@ -247,3 +303,5 @@ export default function SettingsPage() {
         </div>
     );
 }
+
+    
