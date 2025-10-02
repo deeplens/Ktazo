@@ -12,10 +12,10 @@ import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
 
 const TranscribeSermonInputSchema = z.object({
-  audioDataUri: z
+  mediaUri: z
     .string()
     .describe(
-      "A data URI of an audio file. Expected data URI format: 'data:<mimetype>;base64,<encoded_data>'."
+      "A data URI or public URL of an audio/video file. For data URIs, expected format: 'data:<mimetype>;base64,<encoded_data>'."
     ),
 });
 export type TranscribeSermonInput = z.infer<typeof TranscribeSermonInputSchema>;
@@ -35,9 +35,8 @@ export async function transcribeSermon(
 
 const transcribeMediaPrompt = ai.definePrompt({
   name: 'transcribeMediaPrompt',
-  input: { schema: z.object({ mediaUri: z.string(), contentType: z.string() }) },
+  input: { schema: z.object({ mediaUri: z.string(), contentType: z.string().optional() }) },
   output: { format: 'text' },
-  // NOTE: for data URIs, Gemini requires an explicit contentType
   prompt: 'Transcribe the following audio: {{media uri=mediaUri contentType=contentType}}',
 });
 
@@ -49,33 +48,37 @@ const transcribeSermonFlow = ai.defineFlow(
     inputSchema: TranscribeSermonInputSchema,
     outputSchema: TranscribeSermonOutputSchema,
   },
-  async ({ audioDataUri }) => {
+  async ({ mediaUri }) => {
     try {
-      console.log('[[SERVER - DEBUG]] Starting transcribeSermonFlow for:', audioDataUri.substring(0, 50) + '...');
+      console.log('[[SERVER - DEBUG]] Starting transcribeSermonFlow for:', mediaUri.substring(0, 100) + '...');
+      let contentType: string | undefined = undefined;
 
-      // Data URI: MIME is embedded; extract and pass through
-      if (audioDataUri.startsWith('data:')) {
-        console.log('[[SERVER - DEBUG]] Data URI detected. Transcribing directly.');
-        const ct = audioDataUri.slice(5, audioDataUri.indexOf(';'));
-        const { text } = await transcribeMediaPrompt({
-          mediaUri: audioDataUri,
-          contentType: ct,
-        });
-        if (!text) {
-          throw new Error(
-            'AI transcription failed: No text was returned from the model for the data URI.'
-          );
-        }
-        console.log('[[SERVER - DEBUG]] Finishing transcribeSermonFlow for data URI.');
-        return { transcript: text };
+      if (mediaUri.startsWith('data:')) {
+        console.log('[[SERVER - DEBUG]] Data URI detected.');
+        contentType = mediaUri.slice(5, mediaUri.indexOf(';'));
+      } else {
+        console.log('[[SERVER - DEBUG]] Public URL detected.');
+        // For public URLs, Genkit can often infer the content type.
       }
       
-      throw new Error(`Unsupported source for transcription. Please provide a direct file upload.`);
+      const { text } = await transcribeMediaPrompt({
+        mediaUri: mediaUri,
+        contentType: contentType,
+      });
 
+      if (!text) {
+        throw new Error(
+          'AI transcription failed: No text was returned from the model.'
+        );
+      }
+
+      console.log('[[SERVER - DEBUG]] Finishing transcribeSermonFlow.');
+      return { transcript: text };
+      
     } catch (error) {
       console.error('[[SERVER - ERROR]] in transcribeSermonFlow:', error);
       // Re-throw the original error or a new one to be caught by the calling function.
-      throw new Error(`Failed to transcribe sermon: ${(error as Error).message}`);
+      throw new Error(`Failed to transcribe media: ${(error as Error).message}`);
     }
   }
 );

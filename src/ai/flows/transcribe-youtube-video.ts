@@ -48,34 +48,15 @@ const transcribeYoutubeVideoFlow = ai.defineFlow(
         return { transcript: fullTranscript };
       }
       
-      // If the above throws an error or returns no transcript, it will be caught
       throw new Error("No transcript available from YouTube captions.");
 
     } catch (error) {
         console.warn('[[SERVER - WARN]] Could not fetch YouTube captions, attempting AI transcription fallback.', (error as Error).message);
         
-        // Fallback: Use a generic transcription model
         try {
-            console.log('[[SERVER - DEBUG]] Calling AI transcription for the YouTube video audio.');
-
-            // This is a placeholder for fetching and converting YouTube audio.
-            // In a real app, you would use a library like ytdl-core to get the audio stream,
-            // then convert it to a format like MP3 or WAV before creating a data URI.
-            // For this demo, we'll simulate an error if captions aren't available,
-            // as we can't reliably download audio in this environment without robust dependencies.
+            console.log('[[SERVER - DEBUG]] Calling AI transcription for the YouTube video URL.');
             
-             if ((error as Error).message.includes('disabled on this video') || (error as Error).message.includes('No transcripts')) {
-                throw new Error("YouTube captions are disabled, and AI audio transcription fallback is not implemented in this demo.");
-            }
-            
-            // The following code is what you MIGHT do, but is prone to breaking.
-            // For now, we will rely on the error above.
-            const response = await fetch(videoUrl);
-            const blob = await response.blob();
-            const buffer = Buffer.from(await blob.arrayBuffer());
-            const audioDataUri = `data:${blob.type};base64,${buffer.toString('base64')}`;
-            
-            const transcriptionResult = await transcribeSermon({ audioDataUri });
+            const transcriptionResult = await transcribeSermon({ mediaUri: videoUrl });
             
             if (!transcriptionResult.transcript) {
                 throw new Error('AI transcription returned an empty result.');
@@ -101,5 +82,3 @@ const transcribeYoutubeVideoFlow = ai.defineFlow(
     }
   }
 );
-
-    
