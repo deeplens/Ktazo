@@ -93,8 +93,9 @@ const searchYouTubeFlow = ai.defineFlow(
       }
 
     } catch (error: any) {
-      console.error('[[SERVER - ERROR]] YouTube API search failed:', error.response?.data || error.message);
-      throw new Error('Failed to search YouTube due to a server error.');
+        console.error('[[SERVER - ERROR]] YouTube API search failed:', error.response?.data || error.message);
+        const errorMessage = error.response?.data?.error?.message || error.message || 'An unknown error occurred with the YouTube API.';
+        throw new Error(`Failed to search YouTube: ${errorMessage}`);
     }
   }
 );
