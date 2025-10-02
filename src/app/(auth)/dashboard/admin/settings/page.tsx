@@ -44,12 +44,15 @@ export default function SettingsPage() {
         try {
             const results = await searchYouTube({ query: searchQuery, type: 'channel' });
             setSearchResults(results);
-        } catch (error) {
+        } catch (error: any) {
             console.error('[[CLIENT - ERROR]] YouTube channel search failed', error);
+            const description = error.message.includes('quota') 
+                ? 'The daily limit for YouTube searches has been reached. Please try again tomorrow.'
+                : error.message || 'Could not fetch YouTube channels.';
             toast({
                 variant: 'destructive',
                 title: 'Search Failed',
-                description: (error as Error).message || 'Could not fetch YouTube channels.'
+                description: description
             });
         } finally {
             setIsSearching(false);
@@ -341,5 +344,7 @@ export default function SettingsPage() {
         </div>
     );
 }
+
+    
 
     

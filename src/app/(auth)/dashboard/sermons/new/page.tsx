@@ -98,12 +98,15 @@ export default function NewSermonPage() {
                         });
                     }
 
-                } catch (error) {
+                } catch (error: any) {
                      console.error('[[CLIENT - ERROR]] YouTube video search failed on load', error);
+                     const description = error.message.includes('quota')
+                        ? 'The daily limit for YouTube searches has been reached. Please try again tomorrow.'
+                        : error.message || 'Could not fetch videos from your configured channel.';
                      toast({
                         variant: 'destructive',
                         title: 'Auto-Search Failed',
-                        description: (error as Error).message || 'Could not fetch videos from your configured channel.'
+                        description: description
                     });
                 } finally {
                     setIsSearching(false);
@@ -147,12 +150,15 @@ export default function NewSermonPage() {
     try {
         const results = await searchYouTube({ query: searchQuery, type: 'video' });
         setSearchResults(results);
-    } catch (error) {
+    } catch (error: any) {
         console.error('[[CLIENT - ERROR]] YouTube video search failed', error);
+        const description = error.message.includes('quota') 
+            ? 'The daily limit for YouTube searches has been reached. Please try again tomorrow.'
+            : error.message || 'Could not fetch YouTube videos.';
         toast({
             variant: 'destructive',
             title: 'Search Failed',
-            description: (error as Error).message || 'Could not fetch YouTube videos.'
+            description: description
         });
     } finally {
         setIsSearching(false);
@@ -430,3 +436,5 @@ export default function NewSermonPage() {
     </div>
   );
 }
+
+    
