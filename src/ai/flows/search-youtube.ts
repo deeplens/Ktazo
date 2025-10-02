@@ -31,7 +31,7 @@ const YouTubeChannelResultSchema = z.object({
     id: z.string(),
     name: z.string(),
     handle: z.string(),
-    thumbnailUrl: zstring(),
+    thumbnailUrl: z.string(),
 });
 export type YouTubeChannelResult = z.infer<typeof YouTubeChannelResultSchema>;
 
