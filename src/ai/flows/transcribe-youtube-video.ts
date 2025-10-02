@@ -58,10 +58,10 @@ const transcribeYoutubeVideoFlow = ai.defineFlow(
             console.log('[[SERVER - DEBUG]] Calling AI transcription fallback.');
             
             const { text } = await ai.generate({
-                model: 'googleai/gemini-2.5-flash-preview-tts',
+                model: 'googleai/gemini-2.5-flash',
                 prompt: [
                     { text: 'You are an expert audio transcription service. Your only task is to accurately transcribe the audio from the provided file. Do not add any commentary, analysis, or any text other than the transcription itself. Return only the transcribed text.' },
-                    { media: { url: videoUrl } }
+                    { media: { url: videoUrl, contentType: 'video/mp4' } }
                 ]
             });
 
