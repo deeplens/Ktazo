@@ -31,7 +31,7 @@ const YouTubeChannelResultSchema = z.object({
     id: z.string(),
     name: z.string(),
     handle: z.string(),
-    thumbnailUrl: z.string(),
+    thumbnailUrl: zstring(),
 });
 export type YouTubeChannelResult = z.infer<typeof YouTubeChannelResultSchema>;
 
@@ -69,13 +69,16 @@ const searchYouTubeFlow = ai.defineFlow(
             part: ['snippet'],
             q: query,
             type: type,
-            order: type === 'video' ? 'date' : 'relevance',
             maxResults: 10,
         };
 
         if (type === 'video' && channelId) {
             searchParams.channelId = channelId;
+            searchParams.order = 'date';
+        } else {
+            searchParams.order = 'relevance';
         }
+
 
       const response = await youtube.search.list(searchParams);
       
@@ -91,9 +94,9 @@ const searchYouTubeFlow = ai.defineFlow(
         return { videos };
       } else { // channel
         const channels = items.map(item => ({
-            id: item.snippet?.channelId || '',
+            id: item.id?.channelId || '',
             name: item.snippet?.title || 'No Name',
-            handle: item.snippet?.customUrl || '', // Note: customUrl might not be the @handle
+            handle: item.snippet?.customUrl || item.id?.channelId || '', // Fallback to channelId
             thumbnailUrl: item.snippet?.thumbnails?.high?.url || '',
         }));
         return { channels };
