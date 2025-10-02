@@ -6,6 +6,7 @@ config({path: '.env'});
 import './flows/generate-weekly-content';
 import './flows/rag-chatbot-companion';
 import './flows/transcribe-sermon';
+import './flows/transcribe-youtube-video';
 import './flows/translate-sermon-content';
 import './flows/generate-monday-clip';
 import './flows/translate-transcript';
