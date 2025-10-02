@@ -133,7 +133,7 @@ export default function SettingsPage() {
                                             value={searchQuery}
                                             onChange={(e) => setSearchQuery(e.target.value)}
                                         />
-                                        <Button type="button">
+                                        <Button type="button" onClick={() => console.log('[[CLIENT - DEBUG]] Searching YouTube for channel:', searchQuery)}>
                                             <Search className="mr-2" />
                                             Search
                                         </Button>

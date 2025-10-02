@@ -172,7 +172,7 @@ export default function NewSermonPage() {
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                         />
-                        <Button type="button">
+                        <Button type="button" onClick={() => console.log('[[CLIENT - DEBUG]] Searching YouTube for:', searchQuery)}>
                             <Search className="mr-2" />
                             Search
                         </Button>
