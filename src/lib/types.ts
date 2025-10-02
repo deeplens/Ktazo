@@ -166,6 +166,7 @@ export interface WeeklyContent {
 }
 
 export interface TenantSettings {
+    youtubeChannelUrl?: string;
     optionalServices: {
         ourDailyBread: boolean;
     };

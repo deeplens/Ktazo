@@ -7,7 +7,7 @@ import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Church, Globe, Palette, Volume2, Link as LinkIcon, Loader2, MessageSquareQuote, Mail, Smartphone } from "lucide-react";
+import { Church, Globe, Palette, Volume2, Link as LinkIcon, Loader2, MessageSquareQuote, Mail, Smartphone, Youtube } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useState, useEffect } from "react";
@@ -86,6 +86,18 @@ export default function SettingsPage() {
                      <div className="space-y-2">
                         <Label htmlFor="contact-info">Contact Info</Label>
                         <Input id="contact-info" placeholder="e.g., office@firstcommunity.org" />
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="youtube-channel-url">YouTube Channel URL</Label>
+                        <div className="flex items-center gap-2">
+                            <Youtube className="text-muted-foreground" />
+                            <Input 
+                                id="youtube-channel-url" 
+                                placeholder="https://www.youtube.com/c/YourChannel" 
+                                value={settings.youtubeChannelUrl || ''}
+                                onChange={e => handleSettingChange('youtubeChannelUrl', e.target.value)}
+                            />
+                        </div>
                     </div>
                     <div className="space-y-2">
                         <Label htmlFor="church-voice">Church Voice & Identity</Label>

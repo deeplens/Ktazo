@@ -595,6 +595,7 @@ export const saveAnswersForSermon = (userId: string, sermonId: string, answers: 
 const TENANT_SETTINGS_KEY = 'ktazo-tenant-settings';
 const initialTenantSettings: { [key: string]: TenantSettings } = {
   'tenant-1': {
+    youtubeChannelUrl: '',
     optionalServices: {
       ourDailyBread: false,
     },
@@ -614,6 +615,7 @@ export const getTenantSettings = (tenantId: string): TenantSettings => {
   if (typeof window !== 'undefined') {
     const stored = sessionStorage.getItem(TENANT_SETTINGS_KEY);
     const defaultSettings = initialTenantSettings[tenantId] || {
+        youtubeChannelUrl: '',
         optionalServices: { ourDailyBread: false },
         notifications: {
             oneLiners: { enabled: false, sendByEmail: false, sendBySms: false, audience: 'all' },
