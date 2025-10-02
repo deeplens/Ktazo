@@ -6,13 +6,24 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Loader2, Sparkles, Link as LinkIcon } from "lucide-react";
+import { Loader2, Sparkles, Link as LinkIcon, Search, Youtube } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { addSermon } from "@/lib/mock-data";
 import { suggestSermonTitle } from "@/ai/flows/suggest-sermon-title";
 import { transcribeYoutubeVideo } from "@/ai/flows/transcribe-youtube-video";
 import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import Image from "next/image";
+
+// Mock YouTube search results
+const mockSearchResults = [
+  { id: 'dQw4w9WgXcQ', title: 'Official Music Video', channel: 'Official Channel', thumbnailUrl: 'https://i.ytimg.com/vi/dQw4w9WgXcQ/hqdefault.jpg' },
+  { id: 'o-YBDTqX_ZU', title: 'lofi hip hop radio 📚 - beats to relax/study to', channel: 'Lofi Girl', thumbnailUrl: 'https://i.ytimg.com/vi/o-YBDTqX_ZU/hqdefault.jpg' },
+  { id: 'jfKfPfyJRdk', title: 'lofi hip hop radio 💤 - beats to sleep/chill to', channel: 'Lofi Girl', thumbnailUrl: 'https://i.ytimg.com/vi/jfKfPfyJRdk/hqdefault.jpg' },
+  { id: '5qap5aO4i9A', title: 'lofi hip hop radio 😴 - calm/sleep/study beats', channel: 'Lofi Girl', thumbnailUrl: 'https://i.ytimg.com/vi/5qap5aO4i9A/hqdefault.jpg' },
+];
+
 
 export default function NewSermonPage() {
   const [youtubeUrl, setYoutubeUrl] = useState('');
@@ -24,6 +35,9 @@ export default function NewSermonPage() {
   const [loadingMessage, setLoadingMessage] = useState('Transcribing...');
   const [transcript, setTranscript] = useState('');
   const [showTranscriptDialog, setShowTranscriptDialog] = useState(false);
+  const [showYouTubeBrowseDialog, setShowYouTubeBrowseDialog] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+
   const router = useRouter();
   const { toast } = useToast();
 
@@ -52,6 +66,11 @@ export default function NewSermonPage() {
     if (showTranscriptDialog) setShowTranscriptDialog(false);
     setIsLoading(false);
     router.push(`/dashboard/sermons/${newSermon.id}`);
+  };
+
+  const handleSelectVideo = (videoId: string) => {
+    setYoutubeUrl(`https://www.youtube.com/watch?v=${videoId}`);
+    setShowYouTubeBrowseDialog(false);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -122,20 +141,58 @@ export default function NewSermonPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-             <div className="space-y-2">
-                <Label htmlFor="youtube-url">YouTube URL</Label>
-                <div className="flex items-center gap-2">
-                    <LinkIcon className="text-muted-foreground" />
-                    <Input
-                        id="youtube-url"
-                        name="youtubeUrl"
-                        placeholder="https://www.youtube.com/watch?v=..."
-                        value={youtubeUrl}
-                        onChange={(e) => setYoutubeUrl(e.target.value)}
-                        required
-                        disabled={isLoading}
-                    />
-                </div>
+            <div className="space-y-2">
+              <Label htmlFor="youtube-url">YouTube URL</Label>
+              <div className="flex items-center gap-2">
+                <LinkIcon className="text-muted-foreground" />
+                <Input
+                  id="youtube-url"
+                  name="youtubeUrl"
+                  placeholder="https://www.youtube.com/watch?v=..."
+                  value={youtubeUrl}
+                  onChange={(e) => setYoutubeUrl(e.target.value)}
+                  required
+                  disabled={isLoading}
+                />
+                <Dialog open={showYouTubeBrowseDialog} onOpenChange={setShowYouTubeBrowseDialog}>
+                  <DialogTrigger asChild>
+                    <Button type="button" variant="outline" disabled={isLoading}>
+                      <Youtube className="mr-2" /> Browse
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-4xl">
+                    <DialogHeader>
+                      <DialogTitle>Browse YouTube</DialogTitle>
+                      <DialogDescription>Search for a sermon video on YouTube.</DialogDescription>
+                    </DialogHeader>
+                    <div className="flex w-full items-center space-x-2">
+                        <Input 
+                            type="search" 
+                            placeholder="Search for a sermon..." 
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                        />
+                        <Button type="button">
+                            <Search className="mr-2" />
+                            Search
+                        </Button>
+                    </div>
+                    <ScrollArea className="h-96">
+                        <div className="space-y-4 pr-6">
+                            {mockSearchResults.map(video => (
+                                <div key={video.id} className="flex items-center gap-4 hover:bg-accent/50 p-2 rounded-lg cursor-pointer" onClick={() => handleSelectVideo(video.id)}>
+                                    <Image src={video.thumbnailUrl} alt={video.title} width={120} height={90} className="rounded-md" />
+                                    <div>
+                                        <p className="font-semibold">{video.title}</p>
+                                        <p className="text-sm text-muted-foreground">{video.channel}</p>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </ScrollArea>
+                  </DialogContent>
+                </Dialog>
+              </div>
             </div>
 
             <div className="space-y-2">
