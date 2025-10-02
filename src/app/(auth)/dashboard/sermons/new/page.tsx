@@ -41,6 +41,7 @@ export default function NewSermonPage() {
   const [captionStatus, setCaptionStatus] = useState<'idle' | 'checking' | 'enabled' | 'disabled'>('idle');
   const [uploadTab, setUploadTab] = useState('youtube');
   const [audioFile, setAudioFile] = useState<File | null>(null);
+  const [transcriptFile, setTranscriptFile] = useState<File | null>(null);
   const [pastedTranscript, setPastedTranscript] = useState('');
   const [sourceUrl, setSourceUrl] = useState('');
 
@@ -190,6 +191,19 @@ export default function NewSermonPage() {
     });
   }
 
+  const handleTranscriptFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setTranscriptFile(file);
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        setPastedTranscript(ev.target?.result as string);
+      };
+      reader.readAsText(file);
+    }
+  };
+
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -217,21 +231,27 @@ export default function NewSermonPage() {
         const transcriptionResult = await transcribeYoutubeVideo({ videoUrl: youtubeUrl });
         currentTranscript = transcriptionResult.transcript;
       } else { // File Upload
-        if (!audioFile && !pastedTranscript) {
-            toast({ variant: 'destructive', title: "Missing Input", description: "Please upload an MP3 file or paste a transcript." });
+        if (!audioFile && !pastedTranscript && !transcriptFile) {
+            toast({ variant: 'destructive', title: "Missing Input", description: "Please upload an audio/transcript file or paste a transcript." });
             setIsLoading(false);
             return;
         }
 
-        if (audioFile) {
+        if (pastedTranscript) {
+            currentTranscript = pastedTranscript;
+            // If there's an audio file, it's just for reference, not transcription
+            if(audioFile) {
+                const audioDataUri = await fileToDataURI(audioFile);
+                setSourceUrl(audioDataUri);
+            } else {
+                setSourceUrl('');
+            }
+        } else if (audioFile) {
             setLoadingMessage('Transcribing audio file...');
             const audioDataUri = await fileToDataURI(audioFile);
             setSourceUrl(audioDataUri);
             const transcriptionResult = await transcribeSermon({ mediaUri: audioDataUri });
             currentTranscript = transcriptionResult.transcript;
-        } else {
-            currentTranscript = pastedTranscript;
-            setSourceUrl('');
         }
       }
       
@@ -259,7 +279,7 @@ export default function NewSermonPage() {
   const isProcessButtonDisabled = () => {
     if (isLoading || !speaker.trim()) return true;
     if (uploadTab === 'youtube' && !youtubeUrl.trim()) return true;
-    if (uploadTab === 'file' && !audioFile && !pastedTranscript.trim()) return true;
+    if (uploadTab === 'file' && !audioFile && !pastedTranscript.trim() && !transcriptFile) return true;
     return false;
   };
 
@@ -427,7 +447,7 @@ export default function NewSermonPage() {
                 <Card>
                     <CardHeader>
                         <CardTitle>File Upload</CardTitle>
-                        <CardDescription>Upload an MP3 audio file for AI transcription, or paste the transcript text directly.</CardDescription>
+                        <CardDescription>Upload an MP3 for transcription, or provide the transcript directly.</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
                         <div className="space-y-2">
@@ -437,7 +457,25 @@ export default function NewSermonPage() {
                                 type="file"
                                 accept=".mp3"
                                 onChange={(e) => setAudioFile(e.target.files?.[0] || null)}
-                                disabled={isLoading}
+                                disabled={isLoading || !!pastedTranscript.trim()}
+                            />
+                        </div>
+                        <div className="relative">
+                            <div className="absolute inset-0 flex items-center">
+                                <span className="w-full border-t" />
+                            </div>
+                            <div className="relative flex justify-center text-xs uppercase">
+                                <span className="bg-card px-2 text-muted-foreground">Or</span>
+                            </div>
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="transcript-file" className="flex items-center gap-2"><FileText/> Upload Transcript File (.txt)</Label>
+                            <Input
+                                id="transcript-file"
+                                type="file"
+                                accept=".txt"
+                                onChange={handleTranscriptFileChange}
+                                disabled={isLoading || !!audioFile}
                             />
                         </div>
                         <div className="relative">
@@ -456,7 +494,7 @@ export default function NewSermonPage() {
                                 rows={8}
                                 value={pastedTranscript}
                                 onChange={(e) => setPastedTranscript(e.target.value)}
-                                disabled={isLoading}
+                                disabled={isLoading || !!audioFile || !!transcriptFile}
                             />
                         </div>
                     </CardContent>
@@ -525,5 +563,3 @@ export default function NewSermonPage() {
     </div>
   );
 }
-
-    
