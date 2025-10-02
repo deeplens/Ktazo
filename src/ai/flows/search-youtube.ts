@@ -15,6 +15,7 @@ import { google } from 'googleapis';
 const YouTubeSearchInputSchema = z.object({
   query: z.string().describe('The search query.'),
   type: z.enum(['video', 'channel']).describe('The type of resource to search for.'),
+  channelId: z.string().optional().describe('An optional YouTube channel ID to search within.')
 });
 export type YouTubeSearchInput = z.infer<typeof YouTubeSearchInputSchema>;
 
@@ -48,7 +49,7 @@ const searchYouTubeFlow = ai.defineFlow(
     inputSchema: YouTubeSearchInputSchema,
     outputSchema: YouTubeSearchOutputSchema,
   },
-  async ({ query, type }) => {
+  async ({ query, type, channelId }) => {
     console.log(`[[SERVER - DEBUG]] Starting YouTube search for ${type}s with query: "${query}"`);
     
     const youtube = google.youtube('v3');
@@ -65,6 +66,8 @@ const searchYouTubeFlow = ai.defineFlow(
         part: ['snippet'],
         q: query,
         type: type,
+        channelId: channelId,
+        order: type === 'video' ? 'date' : 'relevance',
         maxResults: 10,
       });
       

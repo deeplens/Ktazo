@@ -43,18 +43,37 @@ export default function NewSermonPage() {
         if (!user) return;
         const settings = getTenantSettings(user.tenantId);
         if (settings.youtubeChannelUrl) {
-            // Extract a search term from the URL. This is a simple heuristic.
+            // Extract a channel ID or handle from the URL to search
             const urlParts = settings.youtubeChannelUrl.split('/');
-            const potentialHandle = urlParts.find(part => part.startsWith('@'));
-            const channelName = potentialHandle ? potentialHandle.substring(1) : urlParts.pop() || '';
+            const channelIdFromUrl = urlParts.find(part => part.startsWith('UC')); // Standard Channel ID
+            const handleFromUrl = urlParts.find(part => part.startsWith('@'));
             
-            if (channelName) {
-                setSearchQuery(channelName);
+            let channelId = channelIdFromUrl;
+            let query = '';
+
+            // We need a query, even if searching by channelId, but we can prioritize channelId if found.
+            if (handleFromUrl) {
+                query = handleFromUrl.substring(1);
+            } else if (!channelIdFromUrl) {
+                query = urlParts.pop() || '';
+            }
+
+            if (query || channelId) {
                 setIsSearching(true);
                 try {
-                    const results = await searchYouTube({ query: channelName, type: 'video' });
+                    const results = await searchYouTube({ query: query, type: 'video', channelId: channelId });
                     setSearchResults(results);
-                    setShowYouTubeBrowseDialog(true); // Open the dialog to show results
+
+                    // Auto-fill with the latest sermon
+                    if (results.videos && results.videos.length > 0) {
+                        const latestVideo = results.videos[0];
+                        setYoutubeUrl(`https://www.youtube.com/watch?v=${latestVideo.id}`);
+                        toast({
+                            title: "Sermon Suggested",
+                            description: `The latest video "${latestVideo.title}" has been pre-filled.`
+                        });
+                    }
+
                 } catch (error) {
                      console.error('[[CLIENT - ERROR]] YouTube video search failed on load', error);
                      toast({
