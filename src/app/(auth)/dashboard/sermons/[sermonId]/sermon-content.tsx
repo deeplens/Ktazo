@@ -293,26 +293,18 @@ export function SermonContent({
 
   const handleSaveOriginalTranscript = () => {
     updateSermonTranscript(sermon.id, originalTranscript, "en");
-    downloadTextFile(
-      originalTranscript,
-      `${sermon.title.toLowerCase().replace(/ /g, "-")}-original.txt`
-    );
     toast({
       title: "Success",
-      description: "Original transcript has been saved to your downloads.",
+      description: "Original transcript has been saved.",
     });
   };
 
   const handleSaveSpanishTranscript = () => {
     if (translatedTranscript) {
       updateSermonTranscript(sermon.id, translatedTranscript, "es");
-      downloadTextFile(
-        translatedTranscript,
-        `${sermon.title.toLowerCase().replace(/ /g, "-")}-spanish.txt`
-      );
       toast({
         title: "Success",
-        description: "Spanish transcript has been saved to your downloads.",
+        description: "Spanish transcript has been saved.",
       });
     }
   };
@@ -654,3 +646,5 @@ export function SermonContent({
     </div>
   );
 }
+
+    
