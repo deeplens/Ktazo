@@ -38,8 +38,11 @@ const generateSermonArtworkFlow = ai.defineFlow(
     try {
       console.log('[[DEBUG]] Starting generateSermonArtworkFlow');
       const {media} = await ai.generate({
-        model: googleAI.model('imagen-4.0-fast-generate-001'),
+        model: googleAI.model('gemini-2.5-flash-image-preview'),
         prompt: prompt,
+        config: {
+            responseModalities: ['IMAGE'],
+        }
       });
 
       if (!media.url) {
