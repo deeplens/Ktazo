@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Loader2, Sparkles, Link as LinkIcon, Search, Youtube, ArrowRight, CheckCircle2, XCircle, Key } from "lucide-react";
+import { Loader2, Sparkles, Link as LinkIcon, Search, Youtube, ArrowRight, CheckCircle2, XCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { addSermon, getTenantSettings } from "@/lib/mock-data";
 import { suggestSermonTitle } from "@/ai/flows/suggest-sermon-title";
@@ -24,7 +24,6 @@ import { cn } from "@/lib/utils";
 export default function NewSermonPage() {
   const { user } = useAuth();
   const [youtubeUrl, setYoutubeUrl] = useState('');
-  const [tempApiKey, setTempApiKey] = useState('');
   const [title, setTitle] = useState('');
   const [series, setSeries] = useState('');
   const [speaker, setSpeaker] = useState('');
@@ -103,6 +102,8 @@ export default function NewSermonPage() {
                      console.error('[[CLIENT - ERROR]] YouTube video search failed on load', error);
                      const description = error.message.includes('quota')
                         ? 'The daily limit for YouTube searches has been reached. Please try again tomorrow.'
+                        : error.message.includes('API key not valid')
+                        ? 'The provided YouTube API key is invalid. Please check your .env file.'
                         : error.message || 'Could not fetch videos from your configured channel.';
                      toast({
                         variant: 'destructive',
@@ -149,12 +150,14 @@ export default function NewSermonPage() {
     if (!searchQuery.trim()) return;
     setIsSearching(true);
     try {
-        const results = await searchYouTube({ query: searchQuery, type: 'video', apiKey: tempApiKey });
+        const results = await searchYouTube({ query: searchQuery, type: 'video' });
         setSearchResults(results);
     } catch (error: any) {
         console.error('[[CLIENT - ERROR]] YouTube video search failed', error);
         const description = error.message.includes('quota') 
             ? 'The daily limit for YouTube searches has been reached. Please try again tomorrow.'
+            : error.message.includes('API key not valid')
+            ? 'The provided YouTube API key is invalid. Please check your .env file.'
             : error.message || 'Could not fetch YouTube videos.';
         toast({
             variant: 'destructive',
@@ -285,15 +288,6 @@ export default function NewSermonPage() {
                       <DialogTitle>Browse YouTube</DialogTitle>
                       <DialogDescription>Search for a sermon video on YouTube.</DialogDescription>
                     </DialogHeader>
-                    <div className="flex w-full items-center space-x-2">
-                        <Key className="text-muted-foreground" />
-                        <Input 
-                            type="password"
-                            placeholder="Temporary YouTube API Key (optional)"
-                            value={tempApiKey}
-                            onChange={(e) => setTempApiKey(e.target.value)}
-                        />
-                    </div>
                     <div className="flex w-full items-center space-x-2">
                         <Input 
                             type="search" 
