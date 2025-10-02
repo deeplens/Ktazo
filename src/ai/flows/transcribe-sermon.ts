@@ -9,6 +9,7 @@
  */
 
 import { ai } from '@/ai/genkit';
+import { googleAI } from '@genkit-ai/googleai';
 import { z } from 'genkit';
 
 const TranscribeSermonInputSchema = z.object({
@@ -61,10 +62,11 @@ const transcribeSermonFlow = ai.defineFlow(
         contentType = 'video/*';
       }
       
-      const { text } = await transcribeMediaPrompt({
-        mediaUri: mediaUri,
-        contentType: contentType,
+      const { text } = await ai.generate({
+        model: googleAI.model('gemini-1.5-pro-latest'),
+        prompt: `Transcribe the following audio: {{media url="${mediaUri}" contentType="${contentType}"}}`,
       });
+
 
       if (!text) {
         throw new Error(
