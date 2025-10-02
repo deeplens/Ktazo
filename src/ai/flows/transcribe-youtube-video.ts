@@ -55,9 +55,9 @@ const transcribeYoutubeVideoFlow = ai.defineFlow(
         console.warn('[[SERVER - WARN]] Could not fetch YouTube captions. Falling back to AI transcription.', (captionError as Error).message);
         
         try {
-            console.log('[[SERVER - DEBUG]] Starting AI transcription fallback using gemini-2.5-flash.');
+            console.log('[[SERVER - DEBUG]] Starting AI transcription fallback using gemini-1.5-flash.');
             const { text } = await ai.generate({
-                model: 'googleai/gemini-2.5-flash',
+                model: 'googleai/gemini-1.5-flash',
                 prompt: [
                     { text: 'You are an expert audio transcription service. Your only task is to accurately transcribe the audio from the provided video file. Do not add any commentary, analysis, or any text other than the transcription itself. Return only the transcribed text.' },
                     { media: { url: videoUrl, contentType: 'video/*' } }
