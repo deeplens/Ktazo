@@ -36,7 +36,7 @@ const PresentationOutlineSchema = z.object({
         slide_title: z.string().describe('A concise title for the slide.'),
         narration_script: z.string().describe('A detailed, engaging script to be read aloud for that slide.'),
         image_prompt: z.string().describe('A detailed, descriptive prompt suitable for an image generation model to create a unique visual for the slide.'),
-    })).describe('An array of 3-5 slides representing the presentation outline.')
+    })).describe('An array of 3 to 5 slides representing the presentation outline.')
 });
 
 // Main exported function
@@ -112,7 +112,7 @@ const generatePresentationVideoFlow = ai.defineFlow(
                 responseModalities: ['AUDIO'],
                 speechConfig: {
                     voiceConfig: {
-                        prebuiltVoiceConfig: { voiceName: 'Kore' } // Male voice
+                        prebuiltVoiceConfig: { voiceName: 'Alnilam' } // Male voice
                     }
                 }
             },
