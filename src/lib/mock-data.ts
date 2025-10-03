@@ -1,6 +1,6 @@
 
 
-import type { Sermon, User, WeeklyContent, ReflectionAnswer, TenantSettings, PrayerRequest, GameScore, ServiceRequest } from './types';
+import type { Sermon, User, WeeklyContent, ReflectionAnswer, TenantSettings, PrayerRequest, GameScore, ServiceRequest, VideoSlide } from './types';
 
 export const mockUsers: User[] = [
   { id: 'user-master-1', tenantId: 'tenant-1', authId: 'auth-master-1', role: 'MASTER', name: 'Master User', email: 'master@ktazo.com', lastLoginAt: new Date().toISOString(), points: 0 },
@@ -464,23 +464,41 @@ const initialWeeklyContent: WeeklyContent[] = [
 ];
 
 const WEEKLY_CONTENT_STORAGE_KEY = 'ktazo-weekly-content';
+const VIDEO_OVERVIEW_STORAGE_KEY_PREFIX = 'ktazo-video-overview-';
 
 export const getMockWeeklyContent = (): WeeklyContent[] => {
-    if (typeof window !== 'undefined') {
-        const stored = sessionStorage.getItem(WEEKLY_CONTENT_STORAGE_KEY);
-        if (stored) {
-            try {
-                return JSON.parse(stored);
-            } catch (e) {
-                sessionStorage.setItem(WEEKLY_CONTENT_STORAGE_KEY, JSON.stringify(initialWeeklyContent));
-                return initialWeeklyContent;
-            }
-        } else {
-             sessionStorage.setItem(WEEKLY_CONTENT_STORAGE_KEY, JSON.stringify(initialWeeklyContent));
-             return initialWeeklyContent;
-        }
+    if (typeof window === 'undefined') {
+        return initialWeeklyContent;
     }
-    return initialWeeklyContent;
+
+    const stored = sessionStorage.getItem(WEEKLY_CONTENT_STORAGE_KEY);
+    let allContent: WeeklyContent[] = [];
+
+    if (stored) {
+        try {
+            allContent = JSON.parse(stored);
+        } catch (e) {
+            sessionStorage.setItem(WEEKLY_CONTENT_STORAGE_KEY, JSON.stringify(initialWeeklyContent));
+            allContent = initialWeeklyContent;
+        }
+    } else {
+        sessionStorage.setItem(WEEKLY_CONTENT_STORAGE_KEY, JSON.stringify(initialWeeklyContent));
+        allContent = initialWeeklyContent;
+    }
+
+    // Re-hydrate video overview data from separate storage
+    return allContent.map(content => {
+        const videoOverviewStored = sessionStorage.getItem(`${VIDEO_OVERVIEW_STORAGE_KEY_PREFIX}${content.id}`);
+        if (videoOverviewStored) {
+            try {
+                const videoOverview = JSON.parse(videoOverviewStored);
+                return { ...content, videoOverview };
+            } catch (e) {
+                console.error(`Failed to parse video overview for ${content.id}`, e);
+            }
+        }
+        return content;
+    });
 };
 
 export const saveWeeklyContent = (content: WeeklyContent) => {
@@ -489,63 +507,32 @@ export const saveWeeklyContent = (content: WeeklyContent) => {
     let allContent = getMockWeeklyContent();
     const index = allContent.findIndex(c => c.id === content.id);
 
-    if (index > -1) {
-        allContent[index] = content;
-    } else {
-        allContent.push(content);
-    }
-
-    const trySave = (data: WeeklyContent[]) => {
+    // Separate large video data
+    const contentToSave = { ...content };
+    if (contentToSave.videoOverview) {
         try {
-            sessionStorage.setItem(WEEKLY_CONTENT_STORAGE_KEY, JSON.stringify(data));
-            return true;
+            sessionStorage.setItem(`${VIDEO_OVERVIEW_STORAGE_KEY_PREFIX}${content.id}`, JSON.stringify(contentToSave.videoOverview));
+            delete contentToSave.videoOverview; // Remove from main object
         } catch (e) {
-            if (e instanceof DOMException && e.name === 'QuotaExceededError') {
-                return false;
-            }
-            console.error("Failed to save to session storage", e);
-            // For other errors, we might not want to trim data.
-            return true; 
+             console.error(`Failed to save video overview for ${content.id} separately. It will not be persisted.`, e);
         }
-    };
+    }
     
-    // Attempt to save the updated content
-    if (trySave(allContent)) {
-        return; // Success
+    if (index > -1) {
+        // Update existing content, ensuring not to overwrite video data if it wasn't passed in this save
+        const existingContent = allContent[index];
+        allContent[index] = { ...existingContent, ...contentToSave };
+    } else {
+        allContent.push(contentToSave);
     }
-
-    // If it fails due to quota, start trimming old content
-    console.warn("Session storage quota exceeded. Trimming old content.");
-
-    // Sort content by a timestamp derived from the ID, oldest first
-    const sortedContent = allContent.sort((a, b) => {
-        const timeA = parseInt(a.id.split('-').pop() || '0');
-        const timeB = parseInt(b.id.split('-').pop() || '0');
-        return timeA - timeB;
-    });
-
-    // Remove old items one by one until it fits, but don't remove the one we're trying to save
-    for (let i = 0; i < sortedContent.length; i++) {
-        const itemToRemove = sortedContent[i];
-        if (itemToRemove.id === content.id) continue; // Don't remove the current item
-
-        const indexToRemove = allContent.findIndex(c => c.id === itemToRemove.id);
-        if (indexToRemove > -1) {
-            allContent.splice(indexToRemove, 1);
-        }
-
-        // Try saving again
-        if (trySave(allContent)) {
-            console.log("Successfully saved after trimming old content.");
-            return;
-        }
+    
+    try {
+        sessionStorage.setItem(WEEKLY_CONTENT_STORAGE_KEY, JSON.stringify(allContent));
+    } catch(e) {
+        // This is a fallback, but the primary error should now be avoided.
+        console.error("Session storage quota exceeded even after separating video data.", e);
+        alert("There was an error saving the content. It might be too large.");
     }
-
-    // If we're here, it means even after removing all other content, the current item is too large.
-    // This is an edge case, but we should handle it.
-    console.error(`The content with ID "${content.id}" is too large to be saved to session storage on its own.`);
-    // As a last resort, we could clear everything BUT the auth key, and try to save just this one item.
-    // For this app, we'll just log the error to avoid destructive actions.
 };
 
 
