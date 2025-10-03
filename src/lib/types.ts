@@ -113,85 +113,6 @@ export interface SermonEscapeRoomPuzzle {
     feedback: string;
 }
 
-
-export const GameSchema = z.discriminatedUnion("type", [
-    z.object({
-        type: z.enum(['Quiz']),
-        title: z.string(),
-        audience: z.enum(['Youth', 'Adults']),
-        data: z.array(GameQuestionSchema),
-    }),
-    z.object({
-        type: z.enum(['Word Search']),
-        title: z.string(),
-        audience: z.enum(['Youth', 'Adults']),
-        data: z.object({ words: z.array(z.string()) }),
-    }),
-    z.object({
-        type: z.enum(['Fill in the Blank']),
-        title: z.string(),
-        audience: z.enum(['Youth', 'Adults']),
-        data: z.array(FillInTheBlankItemSchema),
-    }),
-    z.object({
-        type: z.enum(['Matching']),
-        title: z.string(),
-        audience: z.enum(['Youth', 'Adults']),
-        data: z.array(MatchingGameItemSchema),
-    }),
-    z.object({
-        type: z.enum(['Word Guess']),
-        title: z.string(),
-        audience: z.enum(['Youth', 'Adults']),
-        data: z.array(WordGuessItemSchema),
-    }),
-    z.object({
-        type: z.enum(['Wordle']),
-        title: z.string(),
-        audience: z.enum(['Youth', 'Adults']),
-        data: WordleItemSchema,
-    }),
-    z.object({
-        type: z.enum(['Jeopardy']),
-        title: z.string(),
-        audience: z.enum(['Youth', 'Adults']),
-        data: z.array(JeopardyCategorySchema),
-    }),
-    z.object({
-        type: z.enum(['Verse Scramble']),
-        title: z.string(),
-        audience: z.enum(['Youth', 'Adults']),
-        data: VerseScrambleItemSchema,
-    }),
-    z.object({
-        type: z.enum(['True/False']),
-        title: z.string(),
-        audience: z.enum(['Youth', 'Adults']),
-        data: z.array(TrueFalseQuestionSchema),
-    }),
-    z.object({
-        type: z.enum(['Word Cloud Hunt']),
-        title: z.string(),
-        audience: z.enum(['Youth', 'Adults']),
-        data: z.object({ words: z.array(z.string()) }),
-    }),
-    z.object({
-        type: z.enum(['Two Truths and a Lie']),
-        title: z.string(),
-        audience: z.enum(['Youth', 'Adults']),
-        data: z.array(TwoTruthsAndALieItemSchema),
-    }),
-    z.object({
-        type: z.enum(['Sermon Escape Room']),
-        title: z.string(),
-        audience: z.enum(['Youth', 'Adults']),
-        data: z.array(SermonEscapeRoomPuzzleSchema),
-    }),
-]);
-
-export interface Game extends z.infer<typeof GameSchema> {}
-
-
 export interface BibleReadingPlanItem {
     theme: string;
     passages: {
@@ -406,6 +327,83 @@ const SermonEscapeRoomPuzzleSchema = z.object({
     answer: z.string().describe('The correct answer or solution to the puzzle.'),
     feedback: z.string().describe('A piece of the story or a clue revealed upon solving the puzzle.'),
 });
+
+export const GameSchema = z.discriminatedUnion("type", [
+    z.object({
+        type: z.enum(['Quiz']),
+        title: z.string(),
+        audience: z.enum(['Youth', 'Adults']),
+        data: z.array(GameQuestionSchema),
+    }),
+    z.object({
+        type: z.enum(['Word Search']),
+        title: z.string(),
+        audience: z.enum(['Youth', 'Adults']),
+        data: z.object({ words: z.array(z.string()) }),
+    }),
+    z.object({
+        type: z.enum(['Fill in the Blank']),
+        title: z.string(),
+        audience: z.enum(['Youth', 'Adults']),
+        data: z.array(FillInTheBlankItemSchema),
+    }),
+    z.object({
+        type: z.enum(['Matching']),
+        title: z.string(),
+        audience: z.enum(['Youth', 'Adults']),
+        data: z.array(MatchingGameItemSchema),
+    }),
+    z.object({
+        type: z.enum(['Word Guess']),
+        title: z.string(),
+        audience: z.enum(['Youth', 'Adults']),
+        data: z.array(WordGuessItemSchema),
+    }),
+    z.object({
+        type: z.enum(['Wordle']),
+        title: z.string(),
+        audience: z.enum(['Youth', 'Adults']),
+        data: WordleItemSchema,
+    }),
+    z.object({
+        type: z.enum(['Jeopardy']),
+        title: z.string(),
+        audience: z.enum(['Youth', 'Adults']),
+        data: z.array(JeopardyCategorySchema),
+    }),
+    z.object({
+        type: z.enum(['Verse Scramble']),
+        title: z.string(),
+        audience: z.enum(['Youth', 'Adults']),
+        data: VerseScrambleItemSchema,
+    }),
+    z.object({
+        type: z.enum(['True/False']),
+        title: z.string(),
+        audience: z.enum(['Youth', 'Adults']),
+        data: z.array(TrueFalseQuestionSchema),
+    }),
+    z.object({
+        type: z.enum(['Word Cloud Hunt']),
+        title: z.string(),
+        audience: z.enum(['Youth', 'Adults']),
+        data: z.object({ words: z.array(z.string()) }),
+    }),
+    z.object({
+        type: z.enum(['Two Truths and a Lie']),
+        title: z.string(),
+        audience: z.enum(['Youth', 'Adults']),
+        data: z.array(TwoTruthsAndALieItemSchema),
+    }),
+    z.object({
+        type: z.enum(['Sermon Escape Room']),
+        title: z.string(),
+        audience: z.enum(['Youth', 'Adults']),
+        data: z.array(SermonEscapeRoomPuzzleSchema),
+    }),
+]);
+
+export type Game = z.infer<typeof GameSchema>;
 
 export const SummariesAndOneLinersSchema = z.object({ 
   summaryShort: z.string().describe('A short summary of the sermon.'),
