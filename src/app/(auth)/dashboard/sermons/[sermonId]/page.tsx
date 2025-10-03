@@ -5,12 +5,21 @@ import { getMockSermons, getMockWeeklyContent, saveWeeklyContent, updateSermonWe
 import { SermonContent } from "./sermon-content";
 import { useEffect, useState } from "react";
 import { Sermon, WeeklyContent } from "@/lib/types";
-import { generateWeeklyContent } from "@/ai/flows/generate-weekly-content";
+import { generateSummaries } from "@/ai/flows/generate-summaries";
+import { generateDevotionals } from "@/ai/flows/generate-devotionals";
+import { generateReflectionQuestions } from "@/ai/flows/generate-reflection-questions";
+import { generateGames } from "@/ai/flows/generate-games";
+import { generateEngagementContent } from "@/ai/flows/generate-engagement-content";
 import { generateMondayClip } from "@/ai/flows/generate-monday-clip";
 import { useAuth } from "@/lib/auth";
 import { useToast } from "@/hooks/use-toast";
 
 export const maxDuration = 300; // 5 minutes
+
+type GenerationProgress = {
+    step: 'summaries' | 'devotionals' | 'questions' | 'games' | 'engagement' | 'done' | 'error' | 'idle';
+    message: string;
+};
 
 export default function SermonDetailPage() {
   const params = useParams();
@@ -20,7 +29,7 @@ export default function SermonDetailPage() {
   
   const [sermon, setSermon] = useState<Sermon | null | undefined>(undefined);
   const [weeklyContent, setWeeklyContent] = useState<WeeklyContent | undefined>(undefined);
-  const [isGenerating, setIsGenerating] = useState(false);
+  const [generationProgress, setGenerationProgress] = useState<GenerationProgress>({ step: 'idle', message: '' });
   const [isGeneratingAudio, setIsGeneratingAudio] = useState(false);
 
   useEffect(() => {
@@ -37,43 +46,55 @@ export default function SermonDetailPage() {
     }
   }, [sermonId]);
 
-  const handleGenerateContent = async (transcript: string, language?: string) => {
+ const handleGenerateContent = async (transcript: string, language?: string) => {
     if (!sermon || !user) return;
-    setIsGenerating(true);
     const targetLang = language || 'English';
     const langCode = targetLang.toLowerCase().startsWith('span') ? 'es' : 'en';
 
     try {
-        console.log('[[CLIENT - DEBUG]] Calling generateWeeklyContent');
-        const generated = await generateWeeklyContent({ 
-            sermonId: sermon.id, 
-            tenantId: user.tenantId,
-            sermonTranscript: transcript,
-            targetLanguage: targetLang
-        });
-        console.log('[[CLIENT - DEBUG]] Received content from generateWeeklyContent', generated);
+        // Step 1: Summaries
+        setGenerationProgress({ step: 'summaries', message: 'Generating summaries and one-liners...' });
+        const summaries = await generateSummaries({ sermonTranscript: transcript, targetLanguage: targetLang });
+
+        // Step 2: Devotionals
+        setGenerationProgress({ step: 'devotionals', message: 'Generating daily devotionals...' });
+        const devotionals = await generateDevotionals({ sermonTranscript: transcript, summaryLong: summaries.summaryLong, targetLanguage: targetLang });
+
+        // Step 3: Reflection Questions
+        setGenerationProgress({ step: 'questions', message: 'Generating reflection questions...' });
+        const questions = await generateReflectionQuestions({ sermonTranscript: transcript, targetLanguage: targetLang });
+
+        // Step 4: Games
+        setGenerationProgress({ step: 'games', message: 'Generating interactive games...' });
+        const games = await generateGames({ sermonTranscript: transcript, targetLanguage: targetLang });
+
+        // Step 5: Engagement Content
+        setGenerationProgress({ step: 'engagement', message: 'Generating engagement content...' });
+        const engagement = await generateEngagementContent({ sermonTranscript: transcript, targetLanguage: targetLang });
+
+        setGenerationProgress({ step: 'done', message: 'Finalizing content...' });
         
         const newContent: WeeklyContent = {
             id: `wc-${sermon.id}-${langCode}-${Date.now()}`,
             sermonId: sermon.id,
             tenantId: user.tenantId,
             language: langCode,
-            summaryShort: generated.summaryShort,
-            summaryLong: generated.summaryLong,
-            oneLiners: generated.oneLiners,
+            summaryShort: summaries.summaryShort,
+            summaryLong: summaries.summaryLong,
+            oneLiners: summaries.oneLiners,
             sendOneLiners: true, // Default to true
             devotionals: [
-                { day: 'Monday', content: generated.devotionals.monday },
-                { day: 'Tuesday', content: generated.devotionals.tuesday },
-                { day: 'Wednesday', content: generated.devotionals.wednesday },
-                { day: 'Thursday', content: generated.devotionals.thursday },
-                { day: 'Friday', content: generated.devotionals.friday },
+                { day: 'Monday', content: devotionals.devotionals.monday },
+                { day: 'Tuesday', content: devotionals.devotionals.tuesday },
+                { day: 'Wednesday', content: devotionals.devotionals.wednesday },
+                { day: 'Thursday', content: devotionals.devotionals.thursday },
+                { day: 'Friday', content: devotionals.devotionals.friday },
             ],
-            reflectionQuestions: generated.reflectionQuestions,
-            games: generated.games,
-            bibleReadingPlan: generated.bibleReadingPlan,
-            spiritualPractices: generated.spiritualPractices,
-            outwardFocus: generated.outwardFocus,
+            reflectionQuestions: questions.reflectionQuestions,
+            games: games.games,
+            bibleReadingPlan: engagement.bibleReadingPlan,
+            spiritualPractices: engagement.spiritualPractices,
+            outwardFocus: engagement.outwardFocus,
             mondayClipUrl: undefined,
         };
         
@@ -85,7 +106,6 @@ export default function SermonDetailPage() {
         const updatedSermon = getMockSermons().find(s => s.id === sermon.id);
         if(updatedSermon) setSermon(updatedSermon);
 
-
         toast({
             title: "Content Generated",
             description: `Weekly content has been successfully generated in ${targetLang}.`,
@@ -93,15 +113,17 @@ export default function SermonDetailPage() {
 
     } catch (error) {
         console.error("Content generation failed", error);
+        setGenerationProgress({ step: 'error', message: (error as Error).message || "An unexpected error occurred." });
         toast({
             variant: "destructive",
             title: "Generation Failed",
             description: (error as Error).message || "An unexpected error occurred while generating content. Please try again in a moment.",
         });
     } finally {
-        setIsGenerating(false);
+        setTimeout(() => setGenerationProgress({ step: 'idle', message: '' }), 5000);
     }
   };
+
 
   const handleGenerateAudio = async () => {
     if (!sermon || !weeklyContent) return;
@@ -145,7 +167,7 @@ export default function SermonDetailPage() {
             weeklyContent={weeklyContent} 
             onGenerateContent={handleGenerateContent}
             onGenerateAudio={handleGenerateAudio}
-            isGenerating={isGenerating}
+            generationProgress={generationProgress}
             isGeneratingAudio={isGeneratingAudio}
          />;
 }

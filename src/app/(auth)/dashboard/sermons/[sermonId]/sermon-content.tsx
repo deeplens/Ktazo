@@ -55,22 +55,30 @@ import { cleanupTranscript } from "@/ai/flows/cleanup-transcript";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { generateSermonArtwork } from "@/ai/flows/generate-sermon-artwork";
+import { Progress } from "@/components/ui/progress";
+
+type GenerationProgress = {
+    step: 'summaries' | 'devotionals' | 'questions' | 'games' | 'engagement' | 'done' | 'error' | 'idle';
+    message: string;
+};
 
 interface SermonContentProps {
   sermon: Sermon;
   weeklyContent?: WeeklyContent;
   onGenerateContent: (transcript: string, language?: string) => Promise<void>;
   onGenerateAudio: () => Promise<void>;
-  isGenerating: boolean;
+  generationProgress: GenerationProgress;
   isGeneratingAudio: boolean;
 }
+
+const generationSteps = ['summaries', 'devotionals', 'questions', 'games', 'engagement', 'done'];
 
 export function SermonContent({
   sermon: initialSermon,
   weeklyContent: initialWeeklyContent,
   onGenerateContent,
   onGenerateAudio,
-  isGenerating,
+  generationProgress,
   isGeneratingAudio
 }: SermonContentProps) {
   const { user } = useAuth();
@@ -137,13 +145,9 @@ export function SermonContent({
     e?.preventDefault();
     if (!artworkPreview) return;
     
-    // If a new file was uploaded, use FormData
     if (uploadedArtwork) {
         const formData = new FormData();
         formData.append('artworkFile', uploadedArtwork);
-        // Here you would typically post this to a server endpoint.
-        // For the mock, we'll continue to use the data URI directly in `updateSermonArtwork`,
-        // but this structure prevents the client-action 400 error.
     }
 
     updateSermonArtwork(sermon.id, artworkPreview);
@@ -199,7 +203,7 @@ export function SermonContent({
       description: `"${sermon.title}" has been permanently deleted.`,
     });
     router.push("/dashboard/sermons");
-    router.refresh(); // Ensure the sermon list is updated
+    router.refresh(); 
   };
 
   const handleApprove = () => {
@@ -230,10 +234,8 @@ export function SermonContent({
 
       const newTranslatedTranscript = result.translatedTranscript;
       setTranslatedTranscript(newTranslatedTranscript);
-      // Persist to mock data
       updateSermonTranscript(sermon.id, newTranslatedTranscript, "es");
 
-      // Update sermon state to reflect new language availability
       setSermon(prev => prev ? { ...prev, translatedTranscript: newTranslatedTranscript, languages: [...prev.languages, 'es'] } : prev);
 
 
@@ -333,6 +335,7 @@ export function SermonContent({
     
   const hasGeneratedEnglish = sermon.weeklyContentIds && sermon.weeklyContentIds['en'];
   const hasGeneratedSpanish = sermon.weeklyContentIds && sermon.weeklyContentIds['es'];
+  const isGenerating = generationProgress.step !== 'idle' && generationProgress.step !== 'done' && generationProgress.step !== 'error';
 
   return (
     <div className="mx-auto grid max-w-6xl flex-1 auto-rows-max gap-4">
@@ -591,33 +594,34 @@ export function SermonContent({
                     />
                 ) : (
                     <div className="flex flex-col items-center justify-center text-center p-8 border-2 border-dashed rounded-lg">
-                    <p className="mb-4 text-muted-foreground">
-                        No content has been generated for this sermon language yet.
-                    </p>
-                    <Button
-                        onClick={handleGenerate}
-                        disabled={
-                        sermon.status === "DRAFT" ||
-                        isGenerating ||
-                        (activeTab === "spanish" && !translatedTranscript)
-                        }
-                    >
-                        {isGenerating ? (
+                    {isGenerating ? (
+                        <div className="flex flex-col items-center gap-4">
+                            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                            <p className="text-muted-foreground">{generationProgress.message}</p>
+                            <Progress value={(generationSteps.indexOf(generationProgress.step) + 1) / generationSteps.length * 100} className="w-full" />
+                        </div>
+                    ) : (
                         <>
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            Generating...
+                            <p className="mb-4 text-muted-foreground">
+                                No content has been generated for this sermon language yet.
+                            </p>
+                            <Button
+                                onClick={handleGenerate}
+                                disabled={
+                                sermon.status === "DRAFT" ||
+                                isGenerating ||
+                                (activeTab === "spanish" && !translatedTranscript)
+                                }
+                            >
+                                <Sparkles className="mr-2 h-4 w-4" />
+                                {generateButtonText}
+                            </Button>
+                            {sermon.status === "DRAFT" && (
+                                <p className="text-xs mt-2 text-muted-foreground">
+                                Transcription must be complete.
+                                </p>
+                            )}
                         </>
-                        ) : (
-                        <>
-                            <Sparkles className="mr-2 h-4 w-4" />
-                            {generateButtonText}
-                        </>
-                        )}
-                    </Button>
-                    {sermon.status === "DRAFT" && (
-                        <p className="text-xs mt-2 text-muted-foreground">
-                        Transcription must be complete.
-                        </p>
                     )}
                     </div>
                 )
