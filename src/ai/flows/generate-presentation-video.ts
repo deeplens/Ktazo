@@ -112,7 +112,7 @@ const generatePresentationVideoFlow = ai.defineFlow(
                 responseModalities: ['AUDIO'],
                 speechConfig: {
                     voiceConfig: {
-                        prebuiltVoiceConfig: { voiceName: 'Chiron' } // Male voice
+                        prebuiltVoiceConfig: { voiceName: 'Kore' } // Male voice
                     }
                 }
             },
