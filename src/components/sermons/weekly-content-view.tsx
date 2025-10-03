@@ -8,7 +8,7 @@ import { Separator } from "../ui/separator";
 import { Headphones, Loader2, Sparkles, Users, User, MessageCircleQuestion, Gamepad2, Globe, HeartHandshake, Briefcase, Target, MessageSquareQuote, Video } from "lucide-react";
 import { Button } from "../ui/button";
 import { Badge } from "../ui/badge";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { saveWeeklyContent as saveContent } from "@/lib/mock-data";
 import { Textarea } from "../ui/textarea";
@@ -25,6 +25,7 @@ import {
   CarouselItem,
   CarouselNext,
   CarouselPrevious,
+  type CarouselApi,
 } from "@/components/ui/carousel"
 import Image from "next/image";
 
@@ -40,6 +41,44 @@ export function WeeklyContentView({ content, onGenerateAudio, isGeneratingAudio,
     const { user } = useAuth();
     const { toast } = useToast();
     const [editableContent, setEditableContent] = useState<WeeklyContent>(JSON.parse(JSON.stringify(content)));
+    const [carouselApi, setCarouselApi] = useState<CarouselApi>()
+    const audioRefs = useRef<(HTMLAudioElement | null)[]>([]);
+
+    useEffect(() => {
+        setEditableContent(JSON.parse(JSON.stringify(content)));
+        audioRefs.current = audioRefs.current.slice(0, content.videoOverview?.length);
+    }, [content]);
+
+    useEffect(() => {
+        if (!carouselApi) {
+            return;
+        }
+        
+        const onSelect = () => {
+            // Stop all other audio elements when a new slide is selected
+            audioRefs.current.forEach((audio, index) => {
+                if (index !== carouselApi.selectedScrollSnap() && audio) {
+                    audio.pause();
+                    audio.currentTime = 0;
+                }
+            });
+            // Autoplay the selected slide's audio
+            const currentAudio = audioRefs.current[carouselApi.selectedScrollSnap()];
+            if (currentAudio) {
+                currentAudio.play().catch(e => console.error("Autoplay prevented:", e));
+            }
+        };
+
+        carouselApi.on("select", onSelect);
+        
+        // Initial play
+        onSelect();
+
+        return () => {
+            carouselApi.off("select", onSelect);
+        };
+
+    }, [carouselApi]);
     
     const canManage = user?.role === 'ADMIN' || user?.role === 'PASTOR' || user?.role === 'MASTER';
 
@@ -100,6 +139,12 @@ export function WeeklyContentView({ content, onGenerateAudio, isGeneratingAudio,
             default: return <Users className="h-4 w-4" />;
         }
     };
+
+    const handleAudioEnded = (index: number) => {
+        if (carouselApi && carouselApi.canScrollNext()) {
+            carouselApi.scrollNext();
+        }
+    };
     
   return (
     <div className="space-y-6">
@@ -122,7 +167,7 @@ export function WeeklyContentView({ content, onGenerateAudio, isGeneratingAudio,
                 <h3 className="font-semibold mb-1 flex items-center gap-2"><Video className="h-5 w-5"/> Video Overview</h3>
                 {content.videoOverview && content.videoOverview.length > 0 ? (
                     <div className="mt-2 p-4 bg-muted/50 rounded-lg">
-                        <Carousel className="w-full max-w-xl mx-auto">
+                        <Carousel className="w-full max-w-xl mx-auto" setApi={setCarouselApi}>
                             <CarouselContent>
                                 {content.videoOverview.map((slide, index) => (
                                     <CarouselItem key={index}>
@@ -140,7 +185,13 @@ export function WeeklyContentView({ content, onGenerateAudio, isGeneratingAudio,
                                                         {slide.narration_script}
                                                     </p>
                                                     {slide.audioUrl && (
-                                                        <audio controls src={slide.audioUrl} className="w-full mt-2"></audio>
+                                                        <audio 
+                                                            ref={el => audioRefs.current[index] = el}
+                                                            src={slide.audioUrl} 
+                                                            onEnded={() => handleAudioEnded(index)}
+                                                            controls 
+                                                            className="w-full mt-2"
+                                                        ></audio>
                                                     )}
                                                 </div>
                                             </CardContent>

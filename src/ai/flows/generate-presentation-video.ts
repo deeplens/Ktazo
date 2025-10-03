@@ -36,7 +36,7 @@ const PresentationOutlineSchema = z.object({
         slide_title: z.string().describe('A concise title for the slide.'),
         narration_script: z.string().describe('A detailed, engaging script to be read aloud for that slide.'),
         image_prompt: z.string().describe('A detailed, descriptive prompt suitable for an image generation model to create a unique visual for the slide.'),
-    })).describe('An array of 5-7 slides representing the presentation outline.')
+    })).describe('An array of 3-5 slides representing the presentation outline.')
 });
 
 // Main exported function
@@ -63,7 +63,7 @@ const outlinePrompt = ai.definePrompt({
     name: 'generatePresentationOutlinePrompt',
     input: { schema: GeneratePresentationVideoInputSchema },
     output: { schema: PresentationOutlineSchema },
-    prompt: `You are an expert at creating compelling presentations from long-form text. Analyze the following sermon transcript and create a presentation outline with 5 to 7 slides. For each slide, provide a concise title, a detailed narration script, and a highly descriptive image prompt for an AI image generator.
+    prompt: `You are an expert at creating compelling presentations from long-form text. Analyze the following sermon transcript and create a presentation outline with 3 to 5 slides. For each slide, provide a concise title, a detailed narration script, and a highly descriptive image prompt for an AI image generator.
 
     Sermon Transcript:
     {{{sermonTranscript}}}
@@ -108,7 +108,14 @@ const generatePresentationVideoFlow = ai.defineFlow(
           ai.generate({
             model: googleAI.model('gemini-2.5-flash-preview-tts'),
             prompt: slide.narration_script,
-            config: { responseModalities: ['AUDIO'] },
+            config: { 
+                responseModalities: ['AUDIO'],
+                speechConfig: {
+                    voiceConfig: {
+                        prebuiltVoiceConfig: { voiceName: 'Chiron' } // Male voice
+                    }
+                }
+            },
           })
         ]);
 
