@@ -507,19 +507,17 @@ export const saveWeeklyContent = (content: WeeklyContent) => {
     let allContent = getMockWeeklyContent();
     const index = allContent.findIndex(c => c.id === content.id);
 
-    // Separate large video data
+    // Separate large video data to avoid quota errors.
     const contentToSave = { ...content };
     if (contentToSave.videoOverview) {
-        try {
-            sessionStorage.setItem(`${VIDEO_OVERVIEW_STORAGE_KEY_PREFIX}${content.id}`, JSON.stringify(contentToSave.videoOverview));
-            delete contentToSave.videoOverview; // Remove from main object
-        } catch (e) {
-             console.error(`Failed to save video overview for ${content.id} separately. It will not be persisted.`, e);
-        }
+        // Do not save video overview to session storage. It's too large.
+        // In a real app, this data would live in a database and we'd only have a reference.
+        // For this demo, this means video overviews will not persist on page refresh.
+        delete contentToSave.videoOverview;
     }
     
     if (index > -1) {
-        // Update existing content, ensuring not to overwrite video data if it wasn't passed in this save
+        // Update existing content
         const existingContent = allContent[index];
         allContent[index] = { ...existingContent, ...contentToSave };
     } else {
@@ -529,8 +527,7 @@ export const saveWeeklyContent = (content: WeeklyContent) => {
     try {
         sessionStorage.setItem(WEEKLY_CONTENT_STORAGE_KEY, JSON.stringify(allContent));
     } catch(e) {
-        // This is a fallback, but the primary error should now be avoided.
-        console.error("Session storage quota exceeded even after separating video data.", e);
+        console.error("Session storage quota exceeded.", e);
         alert("There was an error saving the content. It might be too large.");
     }
 };
@@ -886,5 +883,7 @@ export const deleteServiceRequest = (requestId: string) => {
 
 // For initial load, we still need this export for components that use it directly
 export const mockWeeklyContent = getMockWeeklyContent();
+
+    
 
     
