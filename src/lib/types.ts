@@ -52,67 +52,6 @@ export interface GameScore {
     score: number;
 }
 
-export interface GameQuestion {
-    question: string;
-    options: string[];
-    correctAnswer: string;
-}
-
-export interface MatchingGameItem {
-    id: number;
-    term: string;
-    definition: string;
-}
-
-export interface FillInTheBlankItem {
-    sentence: string;
-    blank: string;
-}
-
-export interface WordGuessItem {
-    word: string;
-    hint: string;
-}
-
-export interface WordleItem {
-    word: string;
-}
-
-export interface JeopardyQuestion {
-    question: string;
-    answer: string;
-    points: number;
-}
-
-export interface JeopardyCategory {
-    title: string;
-    questions: JeopardyQuestion[];
-}
-
-export interface VerseScrambleItem {
-    verse: string;
-    reference: string;
-}
-
-export interface TrueFalseQuestion {
-    statement: string;
-    isTrue: boolean;
-}
-
-export interface TwoTruthsAndALieItem {
-    truth1: string;
-    truth2: string;
-lie: string;
-}
-
-export interface SermonEscapeRoomPuzzle {
-    type: 'Multiple Choice' | 'Text Answer' | 'Verse Code';
-    prompt: string;
-    options?: string[];
-    answer: string;
-    feedback: string;
-}
-
 export interface BibleReadingPlanItem {
     theme: string;
     passages: {
@@ -139,6 +78,7 @@ export interface WeeklyContent {
   language: string;
   summaryShort: string;
   summaryLong: string;
+  videoSummary?: string;
   oneLiners: {
     tuesday: string;
     thursday: string;
@@ -234,38 +174,6 @@ export interface FlourishingCategory {
 
 // Schemas for AI Flows
 import { z } from 'zod';
-
-const ReflectionQuestionGroupSchema = z.object({
-    audience: z.enum(['Individuals', 'Families', 'Small Groups', 'Youth']),
-    questions: z.array(z.string()).describe('An array of 3-4 reflection questions for the specified audience.'),
-});
-
-const BibleReadingPlanItemSchema = z.object({
-    theme: z.string().describe('The theme connecting the passages.'),
-    passages: z.array(z.object({
-        reference: z.string().describe('The Bible reference (e.g., "Genesis 1:1-5").'),
-        explanation: z.string().describe('A brief explanation of how this passage connects to the sermon theme.')
-    })).describe('An array of 2-3 related Bible passages.')
-});
-
-const SpiritualPracticeSchema = z.object({
-    title: z.string().describe('The name of the spiritual practice challenge.'),
-    description: z.string().describe('A short, practical description of the challenge and how to do it.'),
-});
-
-const OutwardFocusItemSchema = z.object({
-    title: z.string().describe('The title for this outward focus item.'),
-    description: z.string().describe('A short, 1-2 sentence description of the item.'),
-    details: z.string().describe('A longer paragraph providing more details, context, or specific steps for the item.'),
-});
-
-
-export const GenerateWeeklyContentInputSchema = z.object({
-  sermonId: z.string().describe('The ID of the sermon to generate content for.'),
-  tenantId: z.string().describe('The ID of the tenant.'),
-  sermonTranscript: z.string().describe('The full transcript of the sermon.'),
-  targetLanguage: z.string().optional().describe('The target language for the content (e.g., "Spanish"). Defaults to English if not provided.'),
-});
 
 const GameQuestionSchema = z.object({
     question: z.string(),
@@ -405,9 +313,43 @@ export const GameSchema = z.discriminatedUnion("type", [
 
 export type Game = z.infer<typeof GameSchema>;
 
+
+const ReflectionQuestionGroupSchema = z.object({
+    audience: z.enum(['Individuals', 'Families', 'Small Groups', 'Youth']),
+    questions: z.array(z.string()).describe('An array of 3-4 reflection questions for the specified audience.'),
+});
+
+const BibleReadingPlanItemSchema = z.object({
+    theme: z.string().describe('The theme connecting the passages.'),
+    passages: z.array(z.object({
+        reference: z.string().describe('The Bible reference (e.g., "Genesis 1:1-5").'),
+        explanation: z.string().describe('A brief explanation of how this passage connects to the sermon theme.')
+    })).describe('An array of 2-3 related Bible passages.')
+});
+
+const SpiritualPracticeSchema = z.object({
+    title: z.string().describe('The name of the spiritual practice challenge.'),
+    description: z.string().describe('A short, practical description of the challenge and how to do it.'),
+});
+
+const OutwardFocusItemSchema = z.object({
+    title: z.string().describe('The title for this outward focus item.'),
+    description: z.string().describe('A short, 1-2 sentence description of the item.'),
+    details: z.string().describe('A longer paragraph providing more details, context, or specific steps for the item.'),
+});
+
+
+export const GenerateWeeklyContentInputSchema = z.object({
+  sermonId: z.string().describe('The ID of the sermon to generate content for.'),
+  tenantId: z.string().describe('The ID of the tenant.'),
+  sermonTranscript: z.string().describe('The full transcript of the sermon.'),
+  targetLanguage: z.string().optional().describe('The target language for the content (e.g., "Spanish"). Defaults to English if not provided.'),
+});
+
 export const SummariesAndOneLinersSchema = z.object({ 
   summaryShort: z.string().describe('A short summary of the sermon.'),
   summaryLong: z.string().describe('A longer devotional guide summary of the sermon.'),
+  videoSummary: z.string().optional().describe('A short, engaging script for a 1-minute video summary of the sermon, suitable for platforms like YouTube Shorts or Reels.'),
   oneLiners: z.object({
     tuesday: z.string().describe('A concise, impactful one-liner quote or thought from the sermon for Tuesday.'),
     thursday: z.string().describe('A concise, impactful one-liner quote or thought from the sermon for Thursday.'),

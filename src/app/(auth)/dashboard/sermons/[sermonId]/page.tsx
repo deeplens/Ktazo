@@ -81,6 +81,7 @@ export default function SermonDetailPage() {
             language: langCode,
             summaryShort: summaries.summaryShort,
             summaryLong: summaries.summaryLong,
+            videoSummary: summaries.videoSummary,
             oneLiners: summaries.oneLiners,
             sendOneLiners: true, // Default to true
             devotionals: [

@@ -5,8 +5,6 @@
  * @fileOverview This flow generates summaries and one-liners from a sermon transcript.
  *
  * - generateSummaries - A function that handles the summary generation process.
- * - GenerateSummariesInput - The input type for the function.
- * - GenerateSummariesOutput - The return type for the function.
  */
 
 import {ai} from '@/ai/genkit';
@@ -40,7 +38,7 @@ const generateSummariesFlow = ai.defineFlow(
         name: 'summaryPrompt',
         input: { schema: GenerateSummariesInputSchema },
         output: { schema: SummariesAndOneLinersSchema },
-        prompt: `${langInstructionText}\n\nSermon Transcript: {{{sermonTranscript}}}\n\nGenerate the short summary, long summary, and mid-week one-liners based on the transcript.`,
+        prompt: `${langInstructionText}\n\nSermon Transcript: {{{sermonTranscript}}}\n\nGenerate the short summary, long summary, a 1-minute video summary, and mid-week one-liners based on the transcript.`,
     });
     
     const summaryResponse = await summaryPrompt(input);

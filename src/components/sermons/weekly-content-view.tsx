@@ -5,7 +5,7 @@ import { Game, ReflectionQuestionGroup, WeeklyContent } from "@/lib/types";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "../ui/accordion";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../ui/card";
 import { Separator } from "../ui/separator";
-import { Headphones, Loader2, Sparkles, Users, User, MessageCircleQuestion, Gamepad2, Globe, HeartHandshake, Briefcase, Target, MessageSquareQuote } from "lucide-react";
+import { Headphones, Loader2, Sparkles, Users, User, MessageCircleQuestion, Gamepad2, Globe, HeartHandshake, Briefcase, Target, MessageSquareQuote, Video } from "lucide-react";
 import { Button } from "../ui/button";
 import { Badge } from "../ui/badge";
 import { useState } from "react";
@@ -107,6 +107,15 @@ export function WeeklyContentView({ content, onGenerateAudio, isGeneratingAudio 
             <h3 className="font-semibold mb-1">Devotional Guide (Long Summary)</h3>
             <p className="text-muted-foreground text-sm">{content.summaryLong}</p>
           </div>
+          {content.videoSummary && (
+            <>
+                <Separator />
+                <div>
+                    <h3 className="font-semibold mb-1 flex items-center gap-2"><Video className="h-5 w-5"/> Video Summary Script</h3>
+                    <p className="text-muted-foreground text-sm whitespace-pre-wrap">{content.videoSummary}</p>
+                </div>
+            </>
+          )}
         </CardContent>
       </Card>
 
