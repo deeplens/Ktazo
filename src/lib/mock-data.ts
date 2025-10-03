@@ -468,6 +468,8 @@ const initialWeeklyContent: WeeklyContent[] = [
 
 const WEEKLY_CONTENT_STORAGE_KEY = 'ktazo-weekly-content';
 const VIDEO_OVERVIEW_STORAGE_KEY_PREFIX = 'ktazo-video-overview-';
+const VIDEO_SLIDE_STORAGE_KEY_PREFIX = 'ktazo-video-slide-';
+
 
 export const getMockWeeklyContent = (): WeeklyContent[] => {
     if (typeof window === 'undefined') {
@@ -489,24 +491,30 @@ export const getMockWeeklyContent = (): WeeklyContent[] => {
         allContent = initialWeeklyContent;
     }
 
-    // This part is client-side only and will re-hydrate the video overview if it exists.
-    if (typeof window !== 'undefined') {
-        return allContent.map(content => {
-            const videoOverviewStored = sessionStorage.getItem(`${VIDEO_OVERVIEW_STORAGE_KEY_PREFIX}${content.id}`);
-            if (videoOverviewStored) {
+    // Re-hydrate the video overview if it exists separately
+    return allContent.map(content => {
+        if (!content.videoOverview || content.videoOverview.length === 0) {
+            return content;
+        }
+        
+        const hydratedSlides: VideoSlide[] = content.videoOverview.map((slide, index) => {
+            const slideDataStored = sessionStorage.getItem(`${VIDEO_SLIDE_STORAGE_KEY_PREFIX}${content.id}-${index}`);
+            if (slideDataStored) {
                 try {
-                    const videoOverview = JSON.parse(videoOverviewStored);
-                    return { ...content, videoOverview };
+                    const slideData = JSON.parse(slideDataStored);
+                    return { ...slide, ...slideData }; // Merge base slide data with large data
                 } catch (e) {
-                    console.error(`Failed to parse video overview for ${content.id}`, e);
+                     console.error(`Failed to parse slide data for ${content.id}-${index}`, e);
                 }
             }
-            return content;
+            // Return the base slide if its large data can't be found/parsed
+            return slide;
         });
-    }
-    
-    return allContent;
+
+        return { ...content, videoOverview: hydratedSlides };
+    });
 };
+
 
 export const saveWeeklyContent = (content: WeeklyContent) => {
     if (typeof window === 'undefined') return;
@@ -514,13 +522,25 @@ export const saveWeeklyContent = (content: WeeklyContent) => {
     let allContent = getMockWeeklyContent();
     const index = allContent.findIndex(c => c.id === content.id);
 
-    // Create a copy to avoid modifying the original object passed to the function
     const contentToSave = { ...content };
 
-    // The large videoOverview data will not be persisted to avoid quota errors.
-    // It exists only in the component's state for the current session.
-    if (contentToSave.videoOverview) {
-        delete contentToSave.videoOverview;
+    if (contentToSave.videoOverview && contentToSave.videoOverview.length > 0) {
+        const smallSlides = contentToSave.videoOverview.map((slide, i) => {
+            const { imageUrl, audioUrl, ...restOfSlide } = slide;
+            
+            // Save large data separately
+            try {
+                sessionStorage.setItem(`${VIDEO_SLIDE_STORAGE_KEY_PREFIX}${content.id}-${i}`, JSON.stringify({ imageUrl, audioUrl }));
+            } catch (e) {
+                 console.error(`Failed to save slide ${i} for ${content.id}. It may not be persisted.`, e);
+            }
+            
+            // Return only the small data for the main object
+            return restOfSlide;
+        });
+        
+        // Update the content to save with only the small slide data
+        contentToSave.videoOverview = smallSlides;
     }
     
     if (index > -1) {
@@ -893,3 +913,4 @@ export const mockWeeklyContent = getMockWeeklyContent();
     
 
     
+

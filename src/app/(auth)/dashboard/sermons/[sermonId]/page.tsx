@@ -1,4 +1,5 @@
 
+
 'use client';
 import { notFound, useParams } from "next/navigation";
 import { getMockSermons, getMockWeeklyContent, saveWeeklyContent, updateSermonWeeklyContentId } from "@/lib/mock-data";
@@ -155,16 +156,36 @@ export default function SermonDetailPage() {
   };
   
   const handleGenerateVideo = async () => {
-    if (!sermon || !weeklyContent) return;
+    if (!sermon || !sermon.transcript) return;
     setIsGeneratingVideo(true);
     try {
         const result = await generatePresentationVideo({ sermonTranscript: sermon.transcript });
         
-        const updatedContent = { ...weeklyContent, videoOverview: result.slides };
-        // We update the local state to trigger a re-render with the new video data
-        setWeeklyContent(updatedContent);
-        // We still call saveWeeklyContent to persist other data, but the large video data will be stripped out
+        const currentContent = weeklyContent || {
+             id: `wc-${sermon.id}-en-${Date.now()}`,
+             sermonId: sermon.id,
+             tenantId: user!.tenantId,
+             language: 'en',
+             summaryShort: '',
+             summaryLong: '',
+             oneLiners: { tuesday: '', thursday: '' },
+             sendOneLiners: false,
+             devotionals: [],
+             reflectionQuestions: [],
+             games: [],
+             bibleReadingPlan: [],
+             spiritualPractices: [],
+             outwardFocus: { missionFocus: { title: '', description: '', details: '' }, serviceChallenge: { title: '', description: '', details: '' }, culturalEngagement: { title: '', description: '', details: '' } },
+        };
+        
+        const updatedContent = { ...currentContent, videoOverview: result.slides };
+        
         saveWeeklyContent(updatedContent);
+        setWeeklyContent(updatedContent);
+        
+        if (!sermon.weeklyContentIds?.['en']) {
+             updateSermonWeeklyContentId(sermon.id, updatedContent.id, 'en');
+        }
 
         toast({
             title: "Video Generated",
