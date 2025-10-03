@@ -19,6 +19,14 @@ import { mockMissionaries, Missionary } from "@/lib/missionaries";
 import { Input } from "../ui/input";
 import { Checkbox } from "../ui/checkbox";
 import { Switch } from "../ui/switch";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel"
+import Image from "next/image";
 
 interface WeeklyContentViewProps {
   content: WeeklyContent;
@@ -112,13 +120,41 @@ export function WeeklyContentView({ content, onGenerateAudio, isGeneratingAudio,
            <Separator />
             <div>
                 <h3 className="font-semibold mb-1 flex items-center gap-2"><Video className="h-5 w-5"/> Video Overview</h3>
-                {content.videoOverviewUrl ? (
-                    <div className="mt-2">
-                        <video controls src={content.videoOverviewUrl} className="w-full rounded-lg" />
+                {content.videoOverview && content.videoOverview.length > 0 ? (
+                    <div className="mt-2 p-4 bg-muted/50 rounded-lg">
+                        <Carousel className="w-full max-w-xl mx-auto">
+                            <CarouselContent>
+                                {content.videoOverview.map((slide, index) => (
+                                    <CarouselItem key={index}>
+                                        <Card>
+                                            <CardHeader>
+                                                <CardTitle>{slide.slide_title}</CardTitle>
+                                            </CardHeader>
+                                            <CardContent className="grid md:grid-cols-2 gap-4 items-center">
+                                                <div className="relative aspect-video w-full rounded-md overflow-hidden bg-muted">
+                                                    {slide.imageUrl && <Image src={slide.imageUrl} alt={slide.slide_title} fill objectFit="cover" />}
+                                                </div>
+                                                <div className="space-y-2">
+                                                    <p className="text-sm font-semibold">Narration:</p>
+                                                    <p className="text-sm text-muted-foreground italic h-24 overflow-y-auto">
+                                                        {slide.narration_script}
+                                                    </p>
+                                                    {slide.audioUrl && (
+                                                        <audio controls src={slide.audioUrl} className="w-full mt-2"></audio>
+                                                    )}
+                                                </div>
+                                            </CardContent>
+                                        </Card>
+                                    </CarouselItem>
+                                ))}
+                            </CarouselContent>
+                            <CarouselPrevious />
+                            <CarouselNext />
+                        </Carousel>
                     </div>
                 ) : (
                      <div className="flex items-center justify-between p-2 rounded-lg bg-muted/50 mt-2">
-                        <p className="text-sm text-muted-foreground">Generate a short video overview of the sermon.</p>
+                        <p className="text-sm text-muted-foreground">Generate a short, slide-based video overview of the sermon.</p>
                         <Button size="sm" onClick={onGenerateVideo} disabled={isGeneratingVideo}>
                             {isGeneratingVideo ? (
                                 <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Generating...</>

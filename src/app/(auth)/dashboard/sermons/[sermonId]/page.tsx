@@ -13,7 +13,7 @@ import { generateEngagementContent } from "@/ai/flows/generate-engagement-conten
 import { generateMondayClip } from "@/ai/flows/generate-monday-clip";
 import { useAuth } from "@/lib/auth";
 import { useToast } from "@/hooks/use-toast";
-import { generateSermonVideo } from "@/ai/flows/generate-sermon-video";
+import { generatePresentationVideo } from "@/ai/flows/generate-presentation-video";
 
 export const maxDuration = 300; // 5 minutes
 
@@ -158,9 +158,9 @@ export default function SermonDetailPage() {
     if (!sermon || !weeklyContent) return;
     setIsGeneratingVideo(true);
     try {
-        const result = await generateSermonVideo({ summary: weeklyContent.summaryLong });
+        const result = await generatePresentationVideo({ sermonTranscript: sermon.transcript });
         
-        const updatedContent = { ...weeklyContent, videoOverviewUrl: result.videoUrl };
+        const updatedContent = { ...weeklyContent, videoOverview: result.slides };
         saveWeeklyContent(updatedContent);
         setWeeklyContent(updatedContent);
 

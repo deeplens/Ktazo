@@ -1,4 +1,6 @@
 
+
+
 export type UserRole = 'MASTER' | 'ADMIN' | 'PASTOR' | 'MEMBER';
 
 export interface User {
@@ -70,6 +72,14 @@ export interface OutwardFocusItem {
     details: string;
 }
 
+export interface VideoSlide {
+    slide_title: string;
+    narration_script: string;
+    image_prompt: string;
+    imageUrl: string;
+    audioUrl: string;
+}
+
 export interface WeeklyContent {
   id: string;
   tenantId: string;
@@ -77,7 +87,7 @@ export interface WeeklyContent {
   language: string;
   summaryShort: string;
   summaryLong: string;
-  videoOverviewUrl?: string;
+  videoOverview?: VideoSlide[];
   oneLiners: {
     tuesday: string;
     thursday: string;
