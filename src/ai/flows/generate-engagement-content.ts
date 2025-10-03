@@ -14,9 +14,9 @@ import {z} from 'genkit';
 import { GenerateWeeklyContentInputSchema, EngagementSchema } from '@/lib/types';
 
 
-export const GenerateEngagementContentInputSchema = GenerateWeeklyContentInputSchema.pick({ sermonTranscript: true, targetLanguage: true });
-export type GenerateEngagementContentInput = z.infer<typeof GenerateEngagementContentInputSchema>;
-export type GenerateEngagementContentOutput = z.infer<typeof EngagementSchema>;
+const GenerateEngagementContentInputSchema = GenerateWeeklyContentInputSchema.pick({ sermonTranscript: true, targetLanguage: true });
+type GenerateEngagementContentInput = z.infer<typeof GenerateEngagementContentInputSchema>;
+type GenerateEngagementContentOutput = z.infer<typeof EngagementSchema>;
 
 export async function generateEngagementContent(input: GenerateEngagementContentInput): Promise<GenerateEngagementContentOutput> {
   return generateEngagementContentFlow(input);

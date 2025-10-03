@@ -18,8 +18,8 @@ const GenerateDevotionalsInputSchema = z.object({
     summaryLong: z.string(), 
     targetLanguage: z.string().optional() 
 });
-export type GenerateDevotionalsInput = z.infer<typeof GenerateDevotionalsInputSchema>;
-export type GenerateDevotionalsOutput = z.infer<typeof DevotionalsSchema>;
+type GenerateDevotionalsInput = z.infer<typeof GenerateDevotionalsInputSchema>;
+type GenerateDevotionalsOutput = z.infer<typeof DevotionalsSchema>;
 
 export async function generateDevotionals(input: GenerateDevotionalsInput): Promise<GenerateDevotionalsOutput> {
   return generateDevotionalsFlow(input);

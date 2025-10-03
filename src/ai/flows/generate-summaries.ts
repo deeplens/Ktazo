@@ -13,9 +13,9 @@ import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 import { GenerateWeeklyContentInputSchema, SummariesAndOneLinersSchema } from '@/lib/types';
 
-export const GenerateSummariesInputSchema = GenerateWeeklyContentInputSchema.pick({ sermonTranscript: true, targetLanguage: true });
-export type GenerateSummariesInput = z.infer<typeof GenerateSummariesInputSchema>;
-export type GenerateSummariesOutput = z.infer<typeof SummariesAndOneLinersSchema>;
+const GenerateSummariesInputSchema = GenerateWeeklyContentInputSchema.pick({ sermonTranscript: true, targetLanguage: true });
+type GenerateSummariesInput = z.infer<typeof GenerateSummariesInputSchema>;
+type GenerateSummariesOutput = z.infer<typeof SummariesAndOneLinersSchema>;
 
 export async function generateSummaries(input: GenerateSummariesInput): Promise<GenerateSummariesOutput> {
   return generateSummariesFlow(input);

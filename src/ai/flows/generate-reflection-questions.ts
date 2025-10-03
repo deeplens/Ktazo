@@ -14,9 +14,9 @@ import {z} from 'genkit';
 import { GenerateWeeklyContentInputSchema, ReflectionQuestionsSchema } from '@/lib/types';
 
 
-export const GenerateReflectionQuestionsInputSchema = GenerateWeeklyContentInputSchema.pick({ sermonTranscript: true, targetLanguage: true });
-export type GenerateReflectionQuestionsInput = z.infer<typeof GenerateReflectionQuestionsInputSchema>;
-export type GenerateReflectionQuestionsOutput = z.infer<typeof ReflectionQuestionsSchema>;
+const GenerateReflectionQuestionsInputSchema = GenerateWeeklyContentInputSchema.pick({ sermonTranscript: true, targetLanguage: true });
+type GenerateReflectionQuestionsInput = z.infer<typeof GenerateReflectionQuestionsInputSchema>;
+type GenerateReflectionQuestionsOutput = z.infer<typeof ReflectionQuestionsSchema>;
 
 export async function generateReflectionQuestions(input: GenerateReflectionQuestionsInput): Promise<GenerateReflectionQuestionsOutput> {
   return generateReflectionQuestionsFlow(input);
