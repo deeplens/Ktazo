@@ -197,6 +197,7 @@ const initialWeeklyContent: WeeklyContent[] = [
         language: 'en',
         summaryShort: "A brief look at Psalm 23, highlighting God's role as our provider and protector.",
         summaryLong: "This week's devotional guide explores the deep comfort and assurance found in Psalm 23. We delve into the metaphor of the shepherd and his sheep, understanding how God leads us, provides for our needs, restores our souls, and walks with us through life's darkest valleys. It's a message of profound trust and unwavering divine care.",
+        videoSummary: "A one-minute video script. Scene 1: A shepherd guiding sheep. Scene 2: A table with food. Scene 3: A person walking confidently through a dark valley.",
         oneLiners: {
             tuesday: "The Lord is my shepherd, I shall not want.",
             thursday: "Surely goodness and mercy shall follow me all the days of my life."
@@ -410,6 +411,7 @@ const initialWeeklyContent: WeeklyContent[] = [
         language: 'es',
         summaryShort: "Un breve vistazo al Salmo 23, destacando el papel de Dios como nuestro proveedor y protector.",
         summaryLong: "La guía devocional de esta semana explora el profundo consuelo y la seguridad que se encuentran en el Salmo 23...",
+        videoSummary: "Un guión de video de un minuto. Escena 1: Un pastor guiando a las ovejas. Escena 2: Una mesa con comida. Escena 3: Una persona caminando con confianza por un valle oscuro.",
         oneLiners: {
             tuesday: "El Señor es mi pastor, nada me faltará.",
             thursday: "Ciertamente el bien y la misericordia me seguirán todos los días de mi vida."
@@ -439,6 +441,7 @@ const initialWeeklyContent: WeeklyContent[] = [
         language: 'en',
         summaryShort: 'Exploring the connection between genuine faith and tangible actions as described in the book of James.',
         summaryLong: 'This study from the book of James challenges us to examine the nature of our faith. Is it a passive belief or an active, living force? We will see that James is not advocating for salvation by works, but is instead arguing that true, saving faith inevitably produces good works. It is a call to a faith that is visible, practical, and transformative.',
+        videoSummary: "A one-minute video script showing faith in action. Scene 1: Someone giving food to a person in need. Scene 2: A person visiting someone who is sick. Scene 3: A group of people cleaning up a local park.",
         oneLiners: {
             tuesday: "Faith by itself, if it does not have works, is dead.",
             thursday: "Show me your faith apart from your works, and I will show you my faith by my works."
@@ -507,13 +510,18 @@ export const saveWeeklyContent = (content: WeeklyContent) => {
     let allContent = getMockWeeklyContent();
     const index = allContent.findIndex(c => c.id === content.id);
 
-    // Separate large video data to avoid quota errors.
+    // Create a copy to avoid modifying the original object passed to the function
     const contentToSave = { ...content };
+
+    // Separate large video data to avoid quota errors.
     if (contentToSave.videoOverview) {
-        // Do not save video overview to session storage. It's too large.
-        // In a real app, this data would live in a database and we'd only have a reference.
-        // For this demo, this means video overviews will not persist on page refresh.
-        delete contentToSave.videoOverview;
+        try {
+            sessionStorage.setItem(`${VIDEO_OVERVIEW_STORAGE_KEY_PREFIX}${content.id}`, JSON.stringify(contentToSave.videoOverview));
+            delete contentToSave.videoOverview; // Remove from main object
+        } catch (e) {
+             console.error(`Failed to save video overview for ${content.id} separately. It will not be persisted.`, e);
+             // Optionally, alert the user or handle the error, but don't crash.
+        }
     }
     
     if (index > -1) {
@@ -527,8 +535,9 @@ export const saveWeeklyContent = (content: WeeklyContent) => {
     try {
         sessionStorage.setItem(WEEKLY_CONTENT_STORAGE_KEY, JSON.stringify(allContent));
     } catch(e) {
-        console.error("Session storage quota exceeded.", e);
-        alert("There was an error saving the content. It might be too large.");
+        console.error("Session storage quota exceeded when saving main content.", e);
+        // This might still fail if the content (even without video) is too large.
+        // A real app would need a more robust solution.
     }
 };
 
@@ -883,6 +892,8 @@ export const deleteServiceRequest = (requestId: string) => {
 
 // For initial load, we still need this export for components that use it directly
 export const mockWeeklyContent = getMockWeeklyContent();
+
+    
 
     
 
