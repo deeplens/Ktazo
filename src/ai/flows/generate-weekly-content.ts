@@ -235,7 +235,7 @@ const generateWeeklyContentFlow = ai.defineFlow(
   async (input) => {
     try {
         console.log('[[SERVER - DEBUG]] Starting generateWeeklyContentFlow');
-        const langInstruction = languageInstruction(input.targetLanguage);
+        const langInstructionText = languageInstruction(input.targetLanguage);
 
         // Step 1: Generate Summaries and One-Liners
         console.log('[[SERVER - DEBUG]] Step 1: Generating Summaries and One-Liners');
@@ -243,7 +243,7 @@ const generateWeeklyContentFlow = ai.defineFlow(
             name: 'summaryPrompt',
             input: { schema: GenerateWeeklyContentInputSchema },
             output: { schema: SummariesAndOneLinersSchema },
-            prompt: `${langInstruction}\n\nSermon Transcript: {{{sermonTranscript}}}\n\nGenerate the short summary, long summary, and mid-week one-liners based on the transcript.`,
+            prompt: `${langInstructionText}\n\nSermon Transcript: {{{sermonTranscript}}}\n\nGenerate the short summary, long summary, and mid-week one-liners based on the transcript.`,
         });
         const summaryResponse = await summaryPrompt(input);
         if (!summaryResponse.output) throw new Error('Failed to generate summaries.');
@@ -254,7 +254,7 @@ const generateWeeklyContentFlow = ai.defineFlow(
             name: 'devotionalPrompt',
             input: { schema: z.object({ sermonTranscript: z.string(), summaryLong: z.string(), targetLanguage: z.string().optional() }) },
             output: { schema: DevotionalsSchema },
-            prompt: `${langInstruction(input.targetLanguage)}\n\nSermon Devotional Guide: {{{summaryLong}}}\n\nBased on the provided devotional guide, generate five daily devotionals (Mon-Fri), each approximately 200 words.`,
+            prompt: `${languageInstruction(input.targetLanguage)}\n\nSermon Devotional Guide: {{{summaryLong}}}\n\nBased on the provided devotional guide, generate five daily devotionals (Mon-Fri), each approximately 200 words.`,
         });
         const devotionalResponse = await devotionalPrompt({ sermonTranscript: input.sermonTranscript, summaryLong: summaryResponse.output.summaryLong, targetLanguage: input.targetLanguage });
         if (!devotionalResponse.output) throw new Error('Failed to generate devotionals.');
@@ -265,7 +265,7 @@ const generateWeeklyContentFlow = ai.defineFlow(
             name: 'questionsPrompt',
             input: { schema: z.object({ sermonTranscript: z.string(), targetLanguage: z.string().optional() }) },
             output: { schema: ReflectionQuestionsSchema },
-            prompt: `${langInstruction(input.targetLanguage)}\n\nSermon Transcript: {{{sermonTranscript}}}\n\nGenerate reflection questions for Individuals, Families, Small Groups, and Youth based on the transcript.`,
+            prompt: `${languageInstruction(input.targetLanguage)}\n\nSermon Transcript: {{{sermonTranscript}}}\n\nGenerate reflection questions for Individuals, Families, Small Groups, and Youth based on the transcript.`,
         });
         const questionsResponse = await questionsPrompt(input);
         if (!questionsResponse.output) throw new Error('Failed to generate reflection questions.');
@@ -276,7 +276,7 @@ const generateWeeklyContentFlow = ai.defineFlow(
             name: 'gamesPrompt',
             input: { schema: GenerateWeeklyContentInputSchema },
             output: { schema: GamesSchema },
-            prompt: `${langInstruction(input.targetLanguage)}\n\nSermon Transcript: {{{sermonTranscript}}}\n\nGenerate exactly 12 interactive games. One game MUST be 'Jeopardy'. One game MUST be 'Verse Scramble'. One game MUST be a 'True/False' game with 20 questions. Fill the remaining 9 slots with a wide variety of the other available game types.`,
+            prompt: `${langInstructionText}\n\nSermon Transcript: {{{sermonTranscript}}}\n\nGenerate exactly 12 interactive games. One game MUST be 'Jeopardy'. One game MUST be 'Verse Scramble'. One game MUST be a 'True/False' game with 20 questions. Fill the remaining 9 slots with a wide variety of the other available game types.`,
         });
         const gamesResponse = await gamesPrompt(input);
         if (!gamesResponse.output) throw new Error('Failed to generate games.');
@@ -287,7 +287,7 @@ const generateWeeklyContentFlow = ai.defineFlow(
             name: 'engagementPrompt',
             input: { schema: GenerateWeeklyContentInputSchema },
             output: { schema: EngagementSchema },
-            prompt: `${langInstruction(input.targetLanguage)}\n\nSermon Transcript: {{{sermonTranscript}}}\n\nGenerate the Bible Reading Plan, Spiritual Practices, and Outward Focus sections.`,
+            prompt: `${langInstructionText}\n\nSermon Transcript: {{{sermonTranscript}}}\n\nGenerate the Bible Reading Plan, Spiritual Practices, and Outward Focus sections.`,
         });
         const engagementResponse = await engagementPrompt(input);
         if (!engagementResponse.output) throw new Error('Failed to generate engagement content.');
