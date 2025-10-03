@@ -489,19 +489,23 @@ export const getMockWeeklyContent = (): WeeklyContent[] => {
         allContent = initialWeeklyContent;
     }
 
-    // Re-hydrate video overview data from separate storage
-    return allContent.map(content => {
-        const videoOverviewStored = sessionStorage.getItem(`${VIDEO_OVERVIEW_STORAGE_KEY_PREFIX}${content.id}`);
-        if (videoOverviewStored) {
-            try {
-                const videoOverview = JSON.parse(videoOverviewStored);
-                return { ...content, videoOverview };
-            } catch (e) {
-                console.error(`Failed to parse video overview for ${content.id}`, e);
+    // This part is client-side only and will re-hydrate the video overview if it exists.
+    if (typeof window !== 'undefined') {
+        return allContent.map(content => {
+            const videoOverviewStored = sessionStorage.getItem(`${VIDEO_OVERVIEW_STORAGE_KEY_PREFIX}${content.id}`);
+            if (videoOverviewStored) {
+                try {
+                    const videoOverview = JSON.parse(videoOverviewStored);
+                    return { ...content, videoOverview };
+                } catch (e) {
+                    console.error(`Failed to parse video overview for ${content.id}`, e);
+                }
             }
-        }
-        return content;
-    });
+            return content;
+        });
+    }
+    
+    return allContent;
 };
 
 export const saveWeeklyContent = (content: WeeklyContent) => {
@@ -513,21 +517,14 @@ export const saveWeeklyContent = (content: WeeklyContent) => {
     // Create a copy to avoid modifying the original object passed to the function
     const contentToSave = { ...content };
 
-    // Separate large video data to avoid quota errors.
+    // The large videoOverview data will not be persisted to avoid quota errors.
+    // It exists only in the component's state for the current session.
     if (contentToSave.videoOverview) {
-        try {
-            sessionStorage.setItem(`${VIDEO_OVERVIEW_STORAGE_KEY_PREFIX}${content.id}`, JSON.stringify(contentToSave.videoOverview));
-            delete contentToSave.videoOverview; // Remove from main object
-        } catch (e) {
-             console.error(`Failed to save video overview for ${content.id} separately. It will not be persisted.`, e);
-             // Optionally, alert the user or handle the error, but don't crash.
-        }
+        delete contentToSave.videoOverview;
     }
     
     if (index > -1) {
-        // Update existing content
-        const existingContent = allContent[index];
-        allContent[index] = { ...existingContent, ...contentToSave };
+        allContent[index] = { ...allContent[index], ...contentToSave };
     } else {
         allContent.push(contentToSave);
     }
@@ -536,8 +533,6 @@ export const saveWeeklyContent = (content: WeeklyContent) => {
         sessionStorage.setItem(WEEKLY_CONTENT_STORAGE_KEY, JSON.stringify(allContent));
     } catch(e) {
         console.error("Session storage quota exceeded when saving main content.", e);
-        // This might still fail if the content (even without video) is too large.
-        // A real app would need a more robust solution.
     }
 };
 

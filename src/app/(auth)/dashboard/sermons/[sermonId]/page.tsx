@@ -160,12 +160,11 @@ export default function SermonDetailPage() {
     try {
         const result = await generatePresentationVideo({ sermonTranscript: sermon.transcript });
         
-        // This now saves the large video data separately via saveWeeklyContent's new logic
         const updatedContent = { ...weeklyContent, videoOverview: result.slides };
-        saveWeeklyContent(updatedContent);
-        
         // We update the local state to trigger a re-render with the new video data
         setWeeklyContent(updatedContent);
+        // We still call saveWeeklyContent to persist other data, but the large video data will be stripped out
+        saveWeeklyContent(updatedContent);
 
         toast({
             title: "Video Generated",
