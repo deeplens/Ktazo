@@ -1,5 +1,4 @@
 
-
 export type UserRole = 'MASTER' | 'ADMIN' | 'PASTOR' | 'MEMBER';
 
 export interface User {
@@ -78,7 +77,7 @@ export interface WeeklyContent {
   language: string;
   summaryShort: string;
   summaryLong: string;
-  videoSummary?: string;
+  videoOverviewUrl?: string;
   oneLiners: {
     tuesday: string;
     thursday: string;
@@ -340,8 +339,6 @@ const OutwardFocusItemSchema = z.object({
 
 
 export const GenerateWeeklyContentInputSchema = z.object({
-  sermonId: z.string().describe('The ID of the sermon to generate content for.'),
-  tenantId: z.string().describe('The ID of the tenant.'),
   sermonTranscript: z.string().describe('The full transcript of the sermon.'),
   targetLanguage: z.string().optional().describe('The target language for the content (e.g., "Spanish"). Defaults to English if not provided.'),
 });
@@ -349,7 +346,6 @@ export const GenerateWeeklyContentInputSchema = z.object({
 export const SummariesAndOneLinersSchema = z.object({ 
   summaryShort: z.string().describe('A short summary of the sermon.'),
   summaryLong: z.string().describe('A longer devotional guide summary of the sermon.'),
-  videoSummary: z.string().optional().describe('A short, engaging script for a 1-minute video summary of the sermon, suitable for platforms like YouTube Shorts or Reels.'),
   oneLiners: z.object({
     tuesday: z.string().describe('A concise, impactful one-liner quote or thought from the sermon for Tuesday.'),
     thursday: z.string().describe('A concise, impactful one-liner quote or thought from the sermon for Thursday.'),

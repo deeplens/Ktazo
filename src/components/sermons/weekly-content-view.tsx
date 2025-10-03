@@ -24,9 +24,11 @@ interface WeeklyContentViewProps {
   content: WeeklyContent;
   onGenerateAudio: () => void;
   isGeneratingAudio: boolean;
+  onGenerateVideo: () => void;
+  isGeneratingVideo: boolean;
 }
 
-export function WeeklyContentView({ content, onGenerateAudio, isGeneratingAudio }: WeeklyContentViewProps) {
+export function WeeklyContentView({ content, onGenerateAudio, isGeneratingAudio, onGenerateVideo, isGeneratingVideo }: WeeklyContentViewProps) {
     const { user } = useAuth();
     const { toast } = useToast();
     const [editableContent, setEditableContent] = useState<WeeklyContent>(JSON.parse(JSON.stringify(content)));
@@ -107,15 +109,26 @@ export function WeeklyContentView({ content, onGenerateAudio, isGeneratingAudio 
             <h3 className="font-semibold mb-1">Devotional Guide (Long Summary)</h3>
             <p className="text-muted-foreground text-sm">{content.summaryLong}</p>
           </div>
-          {content.videoSummary && (
-            <>
-                <Separator />
-                <div>
-                    <h3 className="font-semibold mb-1 flex items-center gap-2"><Video className="h-5 w-5"/> Video Summary Script</h3>
-                    <p className="text-muted-foreground text-sm whitespace-pre-wrap">{content.videoSummary}</p>
-                </div>
-            </>
-          )}
+           <Separator />
+            <div>
+                <h3 className="font-semibold mb-1 flex items-center gap-2"><Video className="h-5 w-5"/> Video Overview</h3>
+                {content.videoOverviewUrl ? (
+                    <div className="mt-2">
+                        <video controls src={content.videoOverviewUrl} className="w-full rounded-lg" />
+                    </div>
+                ) : (
+                     <div className="flex items-center justify-between p-2 rounded-lg bg-muted/50 mt-2">
+                        <p className="text-sm text-muted-foreground">Generate a short video overview of the sermon.</p>
+                        <Button size="sm" onClick={onGenerateVideo} disabled={isGeneratingVideo}>
+                            {isGeneratingVideo ? (
+                                <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Generating...</>
+                            ) : (
+                                <><Sparkles className="mr-2 h-4 w-4" />Generate Video</>
+                            )}
+                        </Button>
+                    </div>
+                )}
+            </div>
         </CardContent>
       </Card>
 

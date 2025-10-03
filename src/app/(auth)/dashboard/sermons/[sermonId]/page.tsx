@@ -13,6 +13,7 @@ import { generateEngagementContent } from "@/ai/flows/generate-engagement-conten
 import { generateMondayClip } from "@/ai/flows/generate-monday-clip";
 import { useAuth } from "@/lib/auth";
 import { useToast } from "@/hooks/use-toast";
+import { generateSermonVideo } from "@/ai/flows/generate-sermon-video";
 
 export const maxDuration = 300; // 5 minutes
 
@@ -31,6 +32,7 @@ export default function SermonDetailPage() {
   const [weeklyContent, setWeeklyContent] = useState<WeeklyContent | undefined>(undefined);
   const [generationProgress, setGenerationProgress] = useState<GenerationProgress>({ step: 'idle', message: '' });
   const [isGeneratingAudio, setIsGeneratingAudio] = useState(false);
+  const [isGeneratingVideo, setIsGeneratingVideo] = useState(false);
 
   useEffect(() => {
     if (sermonId) {
@@ -81,7 +83,6 @@ export default function SermonDetailPage() {
             language: langCode,
             summaryShort: summaries.summaryShort,
             summaryLong: summaries.summaryLong,
-            videoSummary: summaries.videoSummary,
             oneLiners: summaries.oneLiners,
             sendOneLiners: true, // Default to true
             devotionals: [
@@ -152,6 +153,33 @@ export default function SermonDetailPage() {
         setIsGeneratingAudio(false);
     }
   };
+  
+  const handleGenerateVideo = async () => {
+    if (!sermon || !weeklyContent) return;
+    setIsGeneratingVideo(true);
+    try {
+        const result = await generateSermonVideo({ summary: weeklyContent.summaryLong });
+        
+        const updatedContent = { ...weeklyContent, videoOverviewUrl: result.videoUrl };
+        saveWeeklyContent(updatedContent);
+        setWeeklyContent(updatedContent);
+
+        toast({
+            title: "Video Generated",
+            description: "The sermon video overview has been successfully generated.",
+        });
+
+    } catch (error) {
+        console.error("Video generation failed", error);
+        toast({
+            variant: "destructive",
+            title: "Video Generation Failed",
+            description: (error as Error).message || "An unexpected error occurred. Please try again.",
+        });
+    } finally {
+        setIsGeneratingVideo(false);
+    }
+  };
 
 
   if (sermon === undefined) {
@@ -168,7 +196,9 @@ export default function SermonDetailPage() {
             weeklyContent={weeklyContent} 
             onGenerateContent={handleGenerateContent}
             onGenerateAudio={handleGenerateAudio}
+            onGenerateVideo={handleGenerateVideo}
             generationProgress={generationProgress}
             isGeneratingAudio={isGeneratingAudio}
+            isGeneratingVideo={isGeneratingVideo}
          />;
 }

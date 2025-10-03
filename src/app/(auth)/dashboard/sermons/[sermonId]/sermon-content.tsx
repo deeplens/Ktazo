@@ -67,8 +67,10 @@ interface SermonContentProps {
   weeklyContent?: WeeklyContent;
   onGenerateContent: (transcript: string, language?: string) => Promise<void>;
   onGenerateAudio: () => Promise<void>;
+  onGenerateVideo: () => Promise<void>;
   generationProgress: GenerationProgress;
   isGeneratingAudio: boolean;
+  isGeneratingVideo: boolean;
 }
 
 const generationSteps = ['summaries', 'devotionals', 'questions', 'games', 'engagement', 'done'];
@@ -78,8 +80,10 @@ export function SermonContent({
   weeklyContent: initialWeeklyContent,
   onGenerateContent,
   onGenerateAudio,
+  onGenerateVideo,
   generationProgress,
-  isGeneratingAudio
+  isGeneratingAudio,
+  isGeneratingVideo
 }: SermonContentProps) {
   const { user } = useAuth();
   const router = useRouter();
@@ -591,6 +595,8 @@ export function SermonContent({
                     content={activeTab === 'spanish' ? getMockWeeklyContent().find(c => c.id === sermon.weeklyContentIds!['es'])! : weeklyContent!}
                     onGenerateAudio={onGenerateAudio}
                     isGeneratingAudio={isGeneratingAudio}
+                    onGenerateVideo={onGenerateVideo}
+                    isGeneratingVideo={isGeneratingVideo}
                     />
                 ) : (
                     <div className="flex flex-col items-center justify-center text-center p-8 border-2 border-dashed rounded-lg">

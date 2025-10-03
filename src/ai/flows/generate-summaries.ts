@@ -38,7 +38,7 @@ const generateSummariesFlow = ai.defineFlow(
         name: 'summaryPrompt',
         input: { schema: GenerateSummariesInputSchema },
         output: { schema: SummariesAndOneLinersSchema },
-        prompt: `${langInstructionText}\n\nSermon Transcript: {{{sermonTranscript}}}\n\nGenerate the short summary, long summary, a 1-minute video summary, and mid-week one-liners based on the transcript.`,
+        prompt: `${langInstructionText}\n\nSermon Transcript: {{{sermonTranscript}}}\n\nGenerate the short summary, long summary, and mid-week one-liners based on the transcript.`,
     });
     
     const summaryResponse = await summaryPrompt(input);

@@ -19,3 +19,4 @@ import './flows/generate-sermon-artwork';
 import './flows/suggest-sermon-title';
 import './flows/search-youtube';
 import './flows/check-youtube-captions';
+import './flows/generate-sermon-video';
