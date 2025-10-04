@@ -12,13 +12,14 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useState, useEffect } from "react";
 import { getTenantSettings, saveTenantSettings } from "@/lib/mock-data";
 import { useAuth } from "@/lib/auth";
-import { TenantSettings } from "@/lib/types";
+import { TenantSettings, YouTubeChannelResult } from "@/lib/types";
 import { useToast } from "@/hooks/use-toast";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import Image from "next/image";
 import { YouTubeSearchOutput, searchYouTube } from "@/ai/flows/search-youtube";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 
 export default function SettingsPage() {
@@ -30,15 +31,59 @@ export default function SettingsPage() {
     const [searchQuery, setSearchQuery] = useState('');
     const [isSearching, setIsSearching] = useState(false);
     const [searchResults, setSearchResults] = useState<YouTubeSearchOutput>({});
+    const [isFetchingChannelInfo, setIsFetchingChannelInfo] = useState(false);
+    const [channelInfo, setChannelInfo] = useState<YouTubeChannelResult | null>(null);
 
 
     useEffect(() => {
         if (user) {
             const currentSettings = getTenantSettings(user.tenantId);
             setSettings(currentSettings);
+            if (currentSettings.youtubeChannelUrl) {
+                fetchChannelInfo(currentSettings.youtubeChannelUrl);
+            }
         }
     }, [user]);
     
+    const fetchChannelInfo = async (url: string) => {
+        if (!url || !url.includes('youtube.com')) {
+            setChannelInfo(null);
+            return;
+        }
+
+        setIsFetchingChannelInfo(true);
+        try {
+            const urlParts = url.split('/');
+            const handleOrId = urlParts.pop() || '';
+            const query = handleOrId.startsWith('@') ? handleOrId.substring(1) : handleOrId;
+            
+            const result = await searchYouTube({ query: query, type: 'channel' });
+            if (result.channels && result.channels.length > 0) {
+                 const bestMatch = result.channels.find(c => c.handle === handleOrId || c.id === handleOrId) || result.channels[0];
+                 setChannelInfo(bestMatch);
+            } else {
+                setChannelInfo(null);
+            }
+
+        } catch (error: any) {
+            console.error('[[CLIENT - ERROR]] Failed to fetch channel info', error);
+            setChannelInfo(null);
+        } finally {
+            setIsFetchingChannelInfo(false);
+        }
+    };
+
+    useEffect(() => {
+        const handler = setTimeout(() => {
+            if (settings?.youtubeChannelUrl) {
+                fetchChannelInfo(settings.youtubeChannelUrl);
+            } else {
+                setChannelInfo(null);
+            }
+        }, 1000); // Debounce the fetch
+        return () => clearTimeout(handler);
+    }, [settings?.youtubeChannelUrl]);
+
     const handleSearch = async () => {
         if (!searchQuery.trim()) return;
         setIsSearching(true);
@@ -99,9 +144,10 @@ export default function SettingsPage() {
         });
     }
 
-    const handleSelectChannel = (handle: string) => {
-        const url = handle.startsWith('@') ? `https://www.youtube.com/${handle}` : `https://www.youtube.com/channel/${handle}`;
+    const handleSelectChannel = (channel: YouTubeChannelResult) => {
+        const url = channel.handle.startsWith('@') ? `https://www.youtube.com/${channel.handle}` : `https://www.youtube.com/channel/${channel.id}`;
         handleSettingChange('youtubeChannelUrl', url);
+        setChannelInfo(channel);
         setShowYouTubeBrowseDialog(false);
     };
 
@@ -143,7 +189,19 @@ export default function SettingsPage() {
                     <div className="space-y-2">
                         <Label htmlFor="youtube-channel-url">YouTube Channel URL</Label>
                         <div className="flex items-center gap-2">
-                            <Youtube className="text-muted-foreground" />
+                            {isFetchingChannelInfo ? (
+                                <Loader2 className="h-10 w-10 animate-spin text-muted-foreground" />
+                            ) : channelInfo ? (
+                                <Avatar className="h-10 w-10">
+                                    <AvatarImage src={channelInfo.thumbnailUrl} alt={channelInfo.name} />
+                                    <AvatarFallback><Youtube/></AvatarFallback>
+                                </Avatar>
+                            ) : (
+                                 <Avatar className="h-10 w-10 bg-muted">
+                                    <AvatarFallback><Youtube className="text-muted-foreground"/></AvatarFallback>
+                                </Avatar>
+                            )}
+
                             <Input 
                                 id="youtube-channel-url" 
                                 placeholder="https://www.youtube.com/@YourChannel" 
@@ -177,7 +235,7 @@ export default function SettingsPage() {
                                     <ScrollArea className="h-72">
                                         <div className="space-y-4 pr-6">
                                             {searchResults.channels?.map(channel => (
-                                                <div key={channel.id} className="flex items-center gap-4 hover:bg-accent/50 p-2 rounded-lg cursor-pointer" onClick={() => handleSelectChannel(channel.handle || channel.id)}>
+                                                <div key={channel.id} className="flex items-center gap-4 hover:bg-accent/50 p-2 rounded-lg cursor-pointer" onClick={() => handleSelectChannel(channel)}>
                                                     <Image src={channel.thumbnailUrl} alt={channel.name} width={48} height={48} className="rounded-full" />
                                                     <div>
                                                         <p className="font-semibold">{channel.name}</p>

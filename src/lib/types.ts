@@ -2,6 +2,7 @@
 
 
 
+
 export type UserRole = 'MASTER' | 'ADMIN' | 'PASTOR' | 'MEMBER';
 
 export interface User {
@@ -186,6 +187,13 @@ export interface FlourishingQuestionSet {
 export interface FlourishingCategory {
     name: FlourishingCategoryName;
     questions: FlourishingQuestionSet;
+}
+
+export interface YouTubeChannelResult {
+    id: string;
+    name: string;
+    handle: string;
+    thumbnailUrl: string;
 }
 
 // Schemas for AI Flows
