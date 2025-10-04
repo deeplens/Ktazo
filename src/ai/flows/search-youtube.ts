@@ -95,11 +95,11 @@ const searchYouTubeFlow = ai.defineFlow(
         return { videos };
       } else { // channel
         const channels = items
-          .filter(item => item.id?.channelId)
+          .filter(item => item.id?.channelId && item.snippet)
           .map(item => ({
             id: item.id!.channelId!,
             name: item.snippet!.title || 'No Name',
-            handle: item.snippet!.customUrl, // This is the handle, e.g., @YourChannel
+            handle: (item.snippet as any).channelHandle, // Correctly access the handle if it exists
             thumbnailUrl: item.snippet!.thumbnails?.high?.url || '',
         }));
         return { channels };
