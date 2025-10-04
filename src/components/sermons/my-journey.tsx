@@ -31,6 +31,12 @@ const categoryIcons = {
   Purpose: <UserCheck className="h-5 w-5" />,
 };
 
+const categoryGraphics = {
+    Mission: <Rocket className="h-16 w-16 text-muted-foreground/30" />,
+    Vision: <Lightbulb className="h-16 w-16 text-muted-foreground/30" />,
+    Purpose: <UserCheck className="h-16 w-16 text-muted-foreground/30" />,
+}
+
 export function MyJourney({ questions, sermonTitle }: MyJourneyProps) {
   const { user } = useAuth();
   const [reflections, setReflections] = useState<Record<string, string>>({});
@@ -110,13 +116,18 @@ export function MyJourney({ questions, sermonTitle }: MyJourneyProps) {
             <h3 className="font-semibold flex items-center gap-2 mb-2 text-md">
               {categoryIcons[q.category]} {q.category}: {q.question}
             </h3>
-            <Textarea
-              placeholder="Your private reflection..."
-              rows={5}
-              value={reflections[q.question] || ''}
-              onChange={(e) => handleReflectionChange(q.question, e.target.value)}
-              className="bg-white dark:bg-zinc-900"
-            />
+            <div className="flex flex-col sm:flex-row gap-4">
+                <div className="hidden sm:flex items-center justify-center p-4">
+                    {categoryGraphics[q.category]}
+                </div>
+                <Textarea
+                placeholder="Your private reflection..."
+                rows={6}
+                value={reflections[q.question] || ''}
+                onChange={(e) => handleReflectionChange(q.question, e.target.value)}
+                className="bg-white dark:bg-zinc-900 flex-1"
+                />
+            </div>
             <div className="text-right mt-2">
               <Dialog onOpenChange={(open) => !open && setActiveQuestion(null)}>
                 <DialogTrigger asChild>
