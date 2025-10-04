@@ -54,7 +54,7 @@ export default function SettingsPage() {
         setIsFetchingChannelInfo(true);
         try {
             const urlParts = url.split('/');
-            const handleOrId = urlParts.pop()?.split('?')[0] || ''; // Clean query params
+            const handleOrId = urlParts.pop()?.split('?')[0] || '';
             const query = handleOrId.startsWith('@') ? handleOrId.substring(1) : handleOrId;
             
             if (!query) {
@@ -164,7 +164,7 @@ export default function SettingsPage() {
     }
 
     const handleSelectChannel = (channel: YouTubeChannelResult) => {
-        const url = channel.handle.startsWith('@') ? `https://www.youtube.com/${channel.handle}` : `https://www.youtube.com/channel/${channel.id}`;
+        const url = channel.handle ? `https://www.youtube.com/${channel.handle}` : `https://www.youtube.com/channel/${channel.id}`;
         handleSettingChange('youtubeChannelUrl', url);
         setChannelInfo(channel);
         setShowYouTubeBrowseDialog(false);
@@ -258,7 +258,7 @@ export default function SettingsPage() {
                                                     <Image src={channel.thumbnailUrl} alt={channel.name} width={48} height={48} className="rounded-full" />
                                                     <div>
                                                         <p className="font-semibold">{channel.name}</p>
-                                                        <p className="text-sm text-muted-foreground">{channel.handle}</p>
+                                                        <p className="text-sm text-muted-foreground">{channel.handle || `channel/${channel.id}`}</p>
                                                     </div>
                                                 </div>
                                             ))}

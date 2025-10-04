@@ -3,6 +3,7 @@
 
 
 
+
 export type UserRole = 'MASTER' | 'ADMIN' | 'PASTOR' | 'MEMBER';
 
 export interface User {
@@ -192,7 +193,7 @@ export interface FlourishingCategory {
 export interface YouTubeChannelResult {
     id: string;
     name: string;
-    handle: string;
+    handle?: string;
     thumbnailUrl: string;
 }
 
