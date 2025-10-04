@@ -108,9 +108,9 @@ export function MyJourney({ questions, sermonTitle }: MyJourneyProps) {
   return (
     <Card className="relative overflow-hidden">
         <Image 
-            src="https://picsum.photos/seed/grass_path/1200/800"
-            alt="A green field of grass representing a journey"
-            data-ai-hint="green field"
+            src="https://picsum.photos/seed/vibrant_field/1200/800"
+            alt="A vibrant green field representing a journey"
+            data-ai-hint="vibrant field"
             fill
             className="object-cover z-0"
         />
@@ -221,5 +221,3 @@ export function MyJourney({ questions, sermonTitle }: MyJourneyProps) {
     </Card>
   );
 }
-
-    
