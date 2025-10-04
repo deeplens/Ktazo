@@ -117,7 +117,7 @@ const searchYouTubeFlow = ai.defineFlow(
             const items = channelsResponse.data.items || [];
             
             const channels = items
-                .filter(item => item.id && (isChannelIdQuery ? true : item.id.kind === 'youtube#searchResult') && item.snippet)
+                .filter(item => item.id && (isChannelIdQuery ? item.id : item.id.channelId) && item.snippet)
                 .map(item => {
                     const id = isChannelIdQuery ? item.id! : item.id!.channelId!;
                     return {
