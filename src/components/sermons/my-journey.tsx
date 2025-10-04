@@ -14,6 +14,7 @@ import { ScrollArea } from '../ui/scroll-area';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { cn } from '@/lib/utils';
 import { Input } from '../ui/input';
+import Image from 'next/image';
 
 interface MyJourneyProps {
   questions: JourneyQuestion[];
@@ -105,108 +106,120 @@ export function MyJourney({ questions, sermonTitle }: MyJourneyProps) {
   };
 
   return (
-    <Card className="bg-amber-100">
-      <CardHeader>
-        <CardTitle className="font-headline flex items-center gap-2">My Journey</CardTitle>
-        <CardDescription>A private space to reflect on your mission, vision, and purpose. Your responses are only visible to you.</CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        {questions.map((q, index) => (
-          <Dialog key={index} onOpenChange={(open) => !open && setActiveQuestion(null)}>
-            <div className="p-4 border rounded-lg bg-background">
-                <h3 className="font-semibold flex items-center gap-2 mb-2 text-md">
-                {categoryIcons[q.category]} {q.category}: {q.question}
-                </h3>
-                <div className="flex flex-col sm:flex-row gap-4">
-                    <div className="hidden sm:flex items-center justify-center p-4">
-                        {categoryGraphics[q.category]}
-                    </div>
-                    <Textarea
-                    placeholder="Your private reflection..."
-                    rows={6}
-                    value={reflections[q.question] || ''}
-                    onChange={(e) => handleReflectionChange(q.question, e.target.value)}
-                    className="bg-white dark:bg-zinc-900 flex-1"
-                    />
-                </div>
-                <div className="text-right mt-2">
-                
-                    <DialogTrigger asChild>
-                    <Button variant="ghost" size="sm" onClick={() => startChat(q)}>
-                        <Bot className="mr-2 h-4 w-4" />
-                        Chat with your AI Mentor
-                    </Button>
-                    </DialogTrigger>
-                
-                </div>
-            </div>
-            <DialogContent className="max-w-2xl h-[80vh] flex flex-col">
-                <DialogHeader>
-                <DialogTitle className="flex items-center gap-2"><Bot /> AI Mentor</DialogTitle>
-                </DialogHeader>
-                <div className="flex-1 flex flex-col min-h-0">
-                <ScrollArea className="flex-1 p-4 pr-6 -mx-4">
-                    <div className="space-y-4">
-                    {chatMessages.map((message, index) => (
-                        <div
-                        key={index}
-                        className={cn(
-                            'flex items-start gap-4',
-                            message.role === 'user' ? 'justify-end' : 'justify-start'
-                        )}
-                        >
-                        {message.role === 'assistant' && (
-                            <Avatar className="h-9 w-9 border-2 border-primary/50">
-                            <AvatarFallback className="bg-primary/10"><Bot className="text-primary" /></AvatarFallback>
-                            </Avatar>
-                        )}
-                        <div
-                            className={cn(
-                            'max-w-md rounded-lg p-3 text-sm shadow-sm',
-                            message.role === 'user'
-                                ? 'bg-primary text-primary-foreground'
-                                : 'bg-card border'
-                            )}
-                        >
-                            <p className="whitespace-pre-wrap">{message.content}</p>
-                        </div>
-                        {message.role === 'user' && user && (
-                            <Avatar className="h-9 w-9">
-                            <AvatarImage src={user.photoUrl || `https://avatar.vercel.sh/${user.email}.png`} alt="User" />
-                            <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
-                            </Avatar>
-                        )}
-                        </div>
-                    ))}
-                    {isLoadingChat && (
-                        <div className="flex items-start gap-4 justify-start">
-                            <Avatar className="h-9 w-9 border-2 border-primary/50">
-                                <AvatarFallback className='bg-primary/10'><Bot className="text-primary"/></AvatarFallback>
-                            </Avatar>
-                            <div className="bg-card border rounded-lg p-3 shadow-sm">
-                                <Loader2 className="h-5 w-5 animate-spin text-primary" />
+    <Card className="relative overflow-hidden">
+        <Image 
+            src="https://picsum.photos/seed/grass_path/1200/800"
+            alt="A green field of grass representing a journey"
+            data-ai-hint="green field"
+            fill
+            className="object-cover z-0"
+        />
+        <div className="absolute inset-0 bg-background/80 dark:bg-background/90 z-10"></div>
+        <div className="relative z-20">
+            <CardHeader>
+                <CardTitle className="font-headline flex items-center gap-2">My Journey</CardTitle>
+                <CardDescription>A private space to reflect on your mission, vision, and purpose. Your responses are only visible to you.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+                {questions.map((q, index) => (
+                <Dialog key={index} onOpenChange={(open) => !open && setActiveQuestion(null)}>
+                    <div className="p-4 border rounded-lg bg-background/70 dark:bg-background/50">
+                        <h3 className="font-semibold flex items-center gap-2 mb-2 text-md">
+                        {categoryIcons[q.category]} {q.category}: {q.question}
+                        </h3>
+                        <div className="flex flex-col sm:flex-row gap-4">
+                            <div className="hidden sm:flex items-center justify-center p-4">
+                                {categoryGraphics[q.category]}
                             </div>
+                            <Textarea
+                            placeholder="Your private reflection..."
+                            rows={6}
+                            value={reflections[q.question] || ''}
+                            onChange={(e) => handleReflectionChange(q.question, e.target.value)}
+                            className="bg-background dark:bg-zinc-900 flex-1"
+                            />
                         </div>
-                    )}
+                        <div className="text-right mt-2">
+                        
+                            <DialogTrigger asChild>
+                            <Button variant="ghost" size="sm" onClick={() => startChat(q)}>
+                                <Bot className="mr-2 h-4 w-4" />
+                                Chat with your AI Mentor
+                            </Button>
+                            </DialogTrigger>
+                        
+                        </div>
                     </div>
-                </ScrollArea>
-                <form onSubmit={handleChatSubmit} className="flex items-center gap-2 pt-4 border-t">
-                    <Input
-                    placeholder="Ask a question or share a thought..."
-                    value={chatInput}
-                    onChange={(e) => setChatInput(e.target.value)}
-                    disabled={isLoadingChat}
-                    className="flex-1"
-                    />
-                    <Button type="submit" disabled={isLoadingChat || !chatInput.trim()} size="icon">
-                    <Send className="h-4 w-4" />
-                    </Button>
-                </form>
-                </div>
-            </DialogContent>
-          </Dialog>
-        ))}
-      </CardContent>
+                    <DialogContent className="max-w-2xl h-[80vh] flex flex-col">
+                        <DialogHeader>
+                        <DialogTitle className="flex items-center gap-2"><Bot /> AI Mentor</DialogTitle>
+                        </DialogHeader>
+                        <div className="flex-1 flex flex-col min-h-0">
+                        <ScrollArea className="flex-1 p-4 pr-6 -mx-4">
+                            <div className="space-y-4">
+                            {chatMessages.map((message, index) => (
+                                <div
+                                key={index}
+                                className={cn(
+                                    'flex items-start gap-4',
+                                    message.role === 'user' ? 'justify-end' : 'justify-start'
+                                )}
+                                >
+                                {message.role === 'assistant' && (
+                                    <Avatar className="h-9 w-9 border-2 border-primary/50">
+                                    <AvatarFallback className="bg-primary/10"><Bot className="text-primary" /></AvatarFallback>
+                                    </Avatar>
+                                )}
+                                <div
+                                    className={cn(
+                                    'max-w-md rounded-lg p-3 text-sm shadow-sm',
+                                    message.role === 'user'
+                                        ? 'bg-primary text-primary-foreground'
+                                        : 'bg-card border'
+                                    )}
+                                >
+                                    <p className="whitespace-pre-wrap">{message.content}</p>
+                                </div>
+                                {message.role === 'user' && user && (
+                                    <Avatar className="h-9 w-9">
+                                    <AvatarImage src={user.photoUrl || `https://avatar.vercel.sh/${user.email}.png`} alt="User" />
+                                    <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
+                                    </Avatar>
+                                )}
+                                </div>
+                            ))}
+                            {isLoadingChat && (
+                                <div className="flex items-start gap-4 justify-start">
+                                    <Avatar className="h-9 w-9 border-2 border-primary/50">
+                                        <AvatarFallback className='bg-primary/10'><Bot className="text-primary"/></AvatarFallback>
+                                    </Avatar>
+                                    <div className="bg-card border rounded-lg p-3 shadow-sm">
+                                        <Loader2 className="h-5 w-5 animate-spin text-primary" />
+                                    </div>
+                                </div>
+                            )}
+                            </div>
+                        </ScrollArea>
+                        <form onSubmit={handleChatSubmit} className="flex items-center gap-2 pt-4 border-t">
+                            <Input
+                            placeholder="Ask a question or share a thought..."
+                            value={chatInput}
+                            onChange={(e) => setChatInput(e.target.value)}
+                            disabled={isLoadingChat}
+                            className="flex-1"
+                            />
+                            <Button type="submit" disabled={isLoadingChat || !chatInput.trim()} size="icon">
+                            <Send className="h-4 w-4" />
+                            </Button>
+                        </form>
+                        </div>
+                    </DialogContent>
+                </Dialog>
+                ))}
+            </CardContent>
+      </div>
     </Card>
   );
 }
+
+    
