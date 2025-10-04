@@ -1,6 +1,5 @@
 
 
-
 'use client';
 import { notFound, useParams } from "next/navigation";
 import { getMockSermons, getMockWeeklyContent, saveWeeklyContent, updateSermonWeeklyContentId } from "@/lib/mock-data";
@@ -57,29 +56,26 @@ export default function SermonDetailPage() {
     const langCode = targetLang.toLowerCase().startsWith('span') ? 'es' : 'en';
 
     try {
-        // Step 1: Summaries
-        setGenerationProgress({ step: 'summaries', message: 'Generating summaries and one-liners...' });
-        const summaries = await generateSummaries({ sermonTranscript: transcript, targetLanguage: targetLang });
+        setGenerationProgress({ step: 'summaries', message: 'Generating all weekly content...' });
 
-        // Step 2: Devotionals
+        // Run all content generation flows in parallel
+        const [
+            summaries,
+            questions,
+            journey,
+            games,
+            engagement
+        ] = await Promise.all([
+            generateSummaries({ sermonTranscript: transcript, targetLanguage: targetLang }),
+            generateReflectionQuestions({ sermonTranscript: transcript, targetLanguage: targetLang }),
+            generateJourneyContent({ sermonTranscript: transcript, targetLanguage: targetLang }),
+            generateGames({ sermonTranscript: transcript, targetLanguage: targetLang }),
+            generateEngagementContent({ sermonTranscript: transcript, targetLanguage: targetLang })
+        ]);
+        
         setGenerationProgress({ step: 'devotionals', message: 'Generating daily devotionals...' });
+        // Devotionals depend on the long summary, so it runs after summaries are back.
         const devotionals = await generateDevotionals({ sermonTranscript: transcript, summaryLong: summaries.summaryLong, targetLanguage: targetLang });
-
-        // Step 3: Reflection Questions
-        setGenerationProgress({ step: 'questions', message: 'Generating reflection questions...' });
-        const questions = await generateReflectionQuestions({ sermonTranscript: transcript, targetLanguage: targetLang });
-
-        // Step 4: Journey Questions
-        setGenerationProgress({ step: 'journey', message: 'Generating My Journey questions...' });
-        const journey = await generateJourneyContent({ sermonTranscript: transcript, targetLanguage: targetLang });
-
-        // Step 5: Games
-        setGenerationProgress({ step: 'games', message: 'Generating interactive games...' });
-        const games = await generateGames({ sermonTranscript: transcript, targetLanguage: targetLang });
-
-        // Step 6: Engagement Content
-        setGenerationProgress({ step: 'engagement', message: 'Generating engagement content...' });
-        const engagement = await generateEngagementContent({ sermonTranscript: transcript, targetLanguage: targetLang });
 
 
         setGenerationProgress({ step: 'done', message: 'Finalizing content...' });
