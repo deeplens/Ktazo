@@ -1,5 +1,6 @@
 
 
+
 'use client';
 import { notFound, useParams } from "next/navigation";
 import { getMockSermons, getMockWeeklyContent, saveWeeklyContent, updateSermonWeeklyContentId } from "@/lib/mock-data";
@@ -11,6 +12,7 @@ import { generateDevotionals } from "@/ai/flows/generate-devotionals";
 import { generateReflectionQuestions } from "@/ai/flows/generate-reflection-questions";
 import { generateGames } from "@/ai/flows/generate-games";
 import { generateEngagementContent } from "@/ai/flows/generate-engagement-content";
+import { generateJourneyContent } from "@/ai/flows/generate-journey-content";
 import { generateMondayClip } from "@/ai/flows/generate-monday-clip";
 import { useAuth } from "@/lib/auth";
 import { useToast } from "@/hooks/use-toast";
@@ -19,7 +21,7 @@ import { generatePresentationVideo } from "@/ai/flows/generate-presentation-vide
 export const maxDuration = 300; // 5 minutes
 
 type GenerationProgress = {
-    step: 'summaries' | 'devotionals' | 'questions' | 'games' | 'engagement' | 'done' | 'error' | 'idle';
+    step: 'summaries' | 'devotionals' | 'questions' | 'journey' | 'games' | 'engagement' | 'done' | 'error' | 'idle';
     message: string;
 };
 
@@ -67,13 +69,18 @@ export default function SermonDetailPage() {
         setGenerationProgress({ step: 'questions', message: 'Generating reflection questions...' });
         const questions = await generateReflectionQuestions({ sermonTranscript: transcript, targetLanguage: targetLang });
 
-        // Step 4: Games
+        // Step 4: Journey Questions
+        setGenerationProgress({ step: 'journey', message: 'Generating My Journey questions...' });
+        const journey = await generateJourneyContent({ sermonTranscript: transcript, targetLanguage: targetLang });
+
+        // Step 5: Games
         setGenerationProgress({ step: 'games', message: 'Generating interactive games...' });
         const games = await generateGames({ sermonTranscript: transcript, targetLanguage: targetLang });
 
-        // Step 5: Engagement Content
+        // Step 6: Engagement Content
         setGenerationProgress({ step: 'engagement', message: 'Generating engagement content...' });
         const engagement = await generateEngagementContent({ sermonTranscript: transcript, targetLanguage: targetLang });
+
 
         setGenerationProgress({ step: 'done', message: 'Finalizing content...' });
         
@@ -94,6 +101,7 @@ export default function SermonDetailPage() {
                 { day: 'Friday', content: devotionals.devotionals.friday },
             ],
             reflectionQuestions: questions.reflectionQuestions,
+            journeyQuestions: journey.journeyQuestions,
             games: games.games,
             bibleReadingPlan: engagement.bibleReadingPlan,
             spiritualPractices: engagement.spiritualPractices,

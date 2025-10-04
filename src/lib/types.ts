@@ -1,6 +1,7 @@
 
 
 
+
 export type UserRole = 'MASTER' | 'ADMIN' | 'PASTOR' | 'MEMBER';
 
 export interface User {
@@ -80,6 +81,11 @@ export interface VideoSlide {
     audioUrl: string;
 }
 
+export interface JourneyQuestion {
+    question: string;
+    category: 'Mission' | 'Vision' | 'Purpose';
+}
+
 export interface WeeklyContent {
   id: string;
   tenantId: string;
@@ -95,6 +101,7 @@ export interface WeeklyContent {
   sendOneLiners: boolean;
   devotionals: { day: string; content: string }[];
   reflectionQuestions: ReflectionQuestionGroup[];
+  journeyQuestions?: JourneyQuestion[];
   games: Game[];
   bibleReadingPlan: BibleReadingPlanItem[];
   spiritualPractices: SpiritualPractice[];
@@ -347,6 +354,11 @@ const OutwardFocusItemSchema = z.object({
     details: z.string().describe('A longer paragraph providing more details, context, or specific steps for the item.'),
 });
 
+const JourneyQuestionSchema = z.object({
+    question: z.string().describe('A challenging question related to the category.'),
+    category: z.enum(['Mission', 'Vision', 'Purpose']),
+});
+
 
 export const GenerateWeeklyContentInputSchema = z.object({
   sermonTranscript: z.string().describe('The full transcript of the sermon.'),
@@ -374,6 +386,10 @@ export const DevotionalsSchema = z.object({
 
 export const ReflectionQuestionsSchema = z.object({ 
   reflectionQuestions: z.array(ReflectionQuestionGroupSchema).describe('An array of reflection question groups for different audiences.'),
+});
+
+export const JourneyQuestionsSchema = z.object({ 
+  journeyQuestions: z.array(JourneyQuestionSchema).describe('An array of 3-5 challenging questions about mission, vision, and purpose, targeted at Gen Z.'),
 });
 
 export const GamesSchema = z.object({ 

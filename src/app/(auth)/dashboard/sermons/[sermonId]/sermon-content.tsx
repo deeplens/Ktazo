@@ -1,5 +1,6 @@
 
 
+
 'use client';
 
 import { useRouter } from "next/navigation";
@@ -58,7 +59,7 @@ import { generateSermonArtwork } from "@/ai/flows/generate-sermon-artwork";
 import { Progress } from "@/components/ui/progress";
 
 type GenerationProgress = {
-    step: 'summaries' | 'devotionals' | 'questions' | 'games' | 'engagement' | 'done' | 'error' | 'idle';
+    step: 'summaries' | 'devotionals' | 'questions' | 'journey' | 'games' | 'engagement' | 'done' | 'error' | 'idle';
     message: string;
 };
 
@@ -73,7 +74,7 @@ interface SermonContentProps {
   isGeneratingVideo: boolean;
 }
 
-const generationSteps = ['summaries', 'devotionals', 'questions', 'games', 'engagement', 'done'];
+const generationSteps = ['summaries', 'devotionals', 'questions', 'journey', 'games', 'engagement', 'done'];
 
 export function SermonContent({
   sermon: initialSermon,

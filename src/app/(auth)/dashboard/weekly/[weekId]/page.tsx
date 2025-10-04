@@ -1,5 +1,6 @@
 
 
+
 'use client';
 import { notFound, useParams } from "next/navigation";
 import Image from "next/image";
@@ -7,10 +8,10 @@ import { getMockSermons, getMockWeeklyContent, getAnswersForSermon, saveAnswersF
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
-import { Gamepad2, Headphones, MessageCircleQuestion, Users, User, HeartHandshake, MessageSquare, MicVocal, Languages, BookOpen, HandHeart, Sparkles, Globe, Target, Briefcase, Flower, Puzzle, Search, Brackets, Binary, WholeWord, KeyRound, Type, CheckSquare, Brain, Quote, ListChecks, Star, Wrench, Trophy, Award, Info, Heart, Smile, PiggyBank, Leaf, Scale, Cross, ArrowLeft } from "lucide-react";
+import { Gamepad2, Headphones, MessageCircleQuestion, Users, User, HeartHandshake, MessageSquare, MicVocal, Languages, BookOpen, HandHeart, Sparkles, Globe, Target, Briefcase, Flower, Puzzle, Search, Brackets, Binary, WholeWord, KeyRound, Type, CheckSquare, Brain, Quote, ListChecks, Star, Wrench, Trophy, Award, Info, Heart, Smile, PiggyBank, Leaf, Scale, Cross, ArrowLeft, Bot } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from "@/components/ui/dialog";
-import { Sermon, WeeklyContent, Game, VerseScrambleItem, BibleReadingPlanItem, SpiritualPractice, OutwardFocusItem, JeopardyCategory, FlourishingCategoryName, FlourishingQuestionSet } from "@/lib/types";
+import { Sermon, WeeklyContent, Game, VerseScrambleItem, BibleReadingPlanItem, SpiritualPractice, OutwardFocusItem, JeopardyCategory, FlourishingCategoryName, FlourishingQuestionSet, JourneyQuestion } from "@/lib/types";
 import { useEffect, useState } from "react";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -29,6 +30,7 @@ import { Progress } from "@/components/ui/progress";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { flourishingQuestions } from "@/lib/flourishing-questions";
+import { MyJourney } from "@/components/sermons/my-journey";
 
 export default function WeeklyPage() {
   const params = useParams();
@@ -798,6 +800,10 @@ function WeeklyPageContent({ sermon, weeklyContent, answers, setAnswers, gameSco
           </CardFooter>
       </Card>
 
+      {weeklyContent.journeyQuestions && weeklyContent.journeyQuestions.length > 0 && (
+        <MyJourney questions={weeklyContent.journeyQuestions} sermonTitle={sermon.title} />
+      )}
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <PrayerWall sermonId={sermon.id} />
         <ServiceWall sermonId={sermon.id} />
@@ -805,12 +811,3 @@ function WeeklyPageContent({ sermon, weeklyContent, answers, setAnswers, gameSco
     </div>
   );
 }
-
-    
-
-    
-
-
-
-
-
