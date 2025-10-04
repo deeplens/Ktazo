@@ -104,21 +104,13 @@ export default function NewSermonPage() {
         const settings = getTenantSettings(user.tenantId);
         if (settings.youtubeChannelUrl) {
             const urlParts = settings.youtubeChannelUrl.split('/');
-            const channelIdFromUrl = urlParts.find(part => part.startsWith('UC'));
-            const handleFromUrl = urlParts.find(part => part.startsWith('@'));
-            
-            let channelId = channelIdFromUrl;
-            let query = '';
+            // Look for a handle (@) or a channel ID (UC...)
+            const handleOrId = urlParts.find(part => part.startsWith('@') || part.startsWith('UC'));
 
-            if (handleFromUrl) {
-                query = handleFromUrl.substring(1);
-            } else if (!channelIdFromUrl) {
-                query = urlParts.pop() || '';
-            }
-
-            if (query || channelId) {
+            if (handleOrId) {
                 try {
-                    const results = await searchYouTube({ query: query, type: 'video', channelId: channelId });
+                    // We search by the handle or ID, but importantly, ask for videos from that channel
+                    const results = await searchYouTube({ query: '', type: 'video', channelId: handleOrId.startsWith('@') ? undefined : handleOrId });
                     
                     if (results.videos && results.videos.length > 0) {
                         const latestVideo = results.videos[0];
@@ -126,7 +118,7 @@ export default function NewSermonPage() {
                         setSuggestedVideo(latestVideo);
                         toast({
                             title: "Sermon Suggested",
-                            description: `The latest video "${latestVideo.title}" has been pre-filled.`
+                            description: `The latest video from your channel, "${latestVideo.title}", has been pre-filled.`
                         });
                     }
 
@@ -591,5 +583,7 @@ export default function NewSermonPage() {
     </div>
   );
 }
+
+    
 
     

@@ -73,9 +73,13 @@ const searchYouTubeFlow = ai.defineFlow(
                 maxResults: 20,
             };
 
+            // If a channelId is provided, search within that channel and order by date
             if (channelId) {
                 searchParams.channelId = channelId;
+                searchParams.q = query; // Keep query for filtering within the channel
                 searchParams.order = 'date';
+            } else {
+                 searchParams.order = 'relevance';
             }
 
             const response = await youtube.search.list(searchParams);
@@ -134,3 +138,5 @@ const searchYouTubeFlow = ai.defineFlow(
     }
   }
 );
+
+    
