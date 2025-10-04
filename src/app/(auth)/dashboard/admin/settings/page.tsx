@@ -54,19 +54,38 @@ export default function SettingsPage() {
         setIsFetchingChannelInfo(true);
         try {
             const urlParts = url.split('/');
-            const handleOrId = urlParts.pop() || '';
+            const handleOrId = urlParts.pop()?.split('?')[0] || ''; // Clean query params
             const query = handleOrId.startsWith('@') ? handleOrId.substring(1) : handleOrId;
+            
+            if (!query) {
+                 setChannelInfo(null);
+                 setIsFetchingChannelInfo(false);
+                 return;
+            }
             
             const result = await searchYouTube({ query: query, type: 'channel' });
             if (result.channels && result.channels.length > 0) {
-                 const bestMatch = result.channels.find(c => c.handle === handleOrId || c.id === handleOrId) || result.channels[0];
+                 const bestMatch = result.channels.find(c => c.handle === handleOrId || c.id === handleOrId || c.name.toLowerCase() === query.toLowerCase()) || result.channels[0];
                  setChannelInfo(bestMatch);
             } else {
                 setChannelInfo(null);
+                toast({
+                    variant: 'destructive',
+                    title: 'Channel Not Found',
+                    description: `Could not find a YouTube channel for "${query}". Please check the URL.`
+                })
             }
 
         } catch (error: any) {
             console.error('[[CLIENT - ERROR]] Failed to fetch channel info', error);
+            const description = error.message.includes('quota')
+                ? 'The daily limit for YouTube searches has been reached. Please try again tomorrow.'
+                : 'Could not fetch channel information. Please check the URL and your API key.';
+            toast({
+                variant: 'destructive',
+                title: 'Error Fetching Channel',
+                description: description,
+            });
             setChannelInfo(null);
         } finally {
             setIsFetchingChannelInfo(false);
@@ -228,7 +247,7 @@ export default function SettingsPage() {
                                             onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
                                         />
                                         <Button type="button" onClick={handleSearch} disabled={isSearching}>
-                                            {isSearching ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Search className="mr-2" />}
+                                            {isSearching ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Search className="mr-2 h-4 w-4" />}
                                             Search
                                         </Button>
                                     </div>

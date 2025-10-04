@@ -69,7 +69,7 @@ const searchYouTubeFlow = ai.defineFlow(
             part: ['snippet'],
             q: query,
             type: type,
-            maxResults: 10,
+            maxResults: type === 'video' ? 20 : 10,
         };
 
         if (type === 'video' && channelId) {
@@ -85,20 +85,35 @@ const searchYouTubeFlow = ai.defineFlow(
       const items = response.data.items || [];
 
       if (type === 'video') {
-        const videos = items.map(item => ({
-          id: item.id?.videoId || '',
-          title: item.snippet?.title || 'No Title',
-          channel: item.snippet?.channelTitle || 'Unknown Channel',
-          thumbnailUrl: item.snippet?.thumbnails?.high?.url || '',
+        const videos = items
+          .filter(item => item.id?.videoId)
+          .map(item => ({
+            id: item.id?.videoId || '',
+            title: item.snippet?.title || 'No Title',
+            channel: item.snippet?.channelTitle || 'Unknown Channel',
+            thumbnailUrl: item.snippet?.thumbnails?.high?.url || '',
         }));
         return { videos };
       } else { // channel
-        const channels = items.map(item => ({
-            id: item.id?.channelId || '',
+        const channelIds = items.map(item => item.id?.channelId).filter(id => !!id) as string[];
+        
+        if (channelIds.length === 0) {
+            return { channels: [] };
+        }
+
+        const channelDetailsResponse = await youtube.channels.list({
+            key: apiKey,
+            part: ['snippet'],
+            id: channelIds,
+        });
+
+        const channels = (channelDetailsResponse.data.items || []).map(item => ({
+            id: item.id || '',
             name: item.snippet?.title || 'No Name',
-            handle: item.snippet?.customUrl || item.id?.channelId || '', // Fallback to channelId
+            handle: item.snippet?.customUrl || `@channel-${item.id}`,
             thumbnailUrl: item.snippet?.thumbnails?.high?.url || '',
         }));
+
         return { channels };
       }
 
