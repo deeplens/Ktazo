@@ -54,25 +54,23 @@ export default function SettingsPage() {
         setIsFetchingChannelInfo(true);
         try {
             const urlParts = url.split('/');
-            const handleOrId = urlParts.pop()?.split('?')[0] || '';
-            const query = handleOrId.startsWith('@') ? handleOrId.substring(1) : handleOrId;
-            
-            if (!query) {
+            const identifier = urlParts[urlParts.length - 1].split('?')[0] || '';
+
+            if (!identifier) {
                  setChannelInfo(null);
                  setIsFetchingChannelInfo(false);
                  return;
             }
             
-            const result = await searchYouTube({ query: query, type: 'channel' });
+            const result = await searchYouTube({ query: identifier, type: 'channel' });
             if (result.channels && result.channels.length > 0) {
-                 const bestMatch = result.channels.find(c => c.handle === handleOrId || c.id === handleOrId || c.name.toLowerCase() === query.toLowerCase()) || result.channels[0];
-                 setChannelInfo(bestMatch);
+                 setChannelInfo(result.channels[0]);
             } else {
                 setChannelInfo(null);
                 toast({
                     variant: 'destructive',
                     title: 'Channel Not Found',
-                    description: `Could not find a YouTube channel for "${query}". Please check the URL.`
+                    description: `Could not find a YouTube channel for the provided URL.`
                 })
             }
 

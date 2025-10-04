@@ -13,9 +13,9 @@ import { z } from 'genkit';
 import { google } from 'googleapis';
 
 const YouTubeSearchInputSchema = z.object({
-  query: z.string().describe('The search query.'),
+  query: z.string().describe('The search query. Can be text or a channel ID.'),
   type: z.enum(['video', 'channel']).describe('The type of resource to search for.'),
-  channelId: z.string().optional().describe('An optional YouTube channel ID to search within.'),
+  channelId: z.string().optional().describe('An optional YouTube channel ID to search within for videos.'),
 });
 export type YouTubeSearchInput = z.infer<typeof YouTubeSearchInputSchema>;
 
@@ -30,7 +30,7 @@ export type YouTubeVideoResult = z.infer<typeof YouTubeVideoResultSchema>;
 const YouTubeChannelResultSchema = z.object({
     id: z.string(),
     name: z.string(),
-    handle: z.string().optional(), // Handle is not always present
+    handle: z.string().optional(),
     thumbnailUrl: z.string(),
 });
 export type YouTubeChannelResult = z.infer<typeof YouTubeChannelResultSchema>;
@@ -60,50 +60,76 @@ const searchYouTubeFlow = ai.defineFlow(
 
     if (!apiKey) {
       console.warn('[[SERVER - WARN]] YouTube API key is missing. YouTube search functionality will be disabled. Please add a YOUTUBE_API_KEY to your .env file.');
-      return { videos: [], channels: [] }; // Gracefully return empty results
+      return { videos: [], channels: [] };
     }
 
     try {
-        const searchParams: any = {
-            key: apiKey,
-            part: ['snippet'],
-            q: query,
-            type: type,
-            maxResults: type === 'video' ? 20 : 10,
-        };
+        if (type === 'video') {
+            const searchParams: any = {
+                key: apiKey,
+                part: ['snippet'],
+                q: query,
+                type: 'video',
+                maxResults: 20,
+            };
 
-        if (type === 'video' && channelId) {
-            searchParams.channelId = channelId;
-            searchParams.order = 'date';
-        } else {
-            searchParams.order = 'relevance';
+            if (channelId) {
+                searchParams.channelId = channelId;
+                searchParams.order = 'date';
+            } else {
+                searchParams.order = 'relevance';
+            }
+
+            const response = await youtube.search.list(searchParams);
+            const items = response.data.items || [];
+            const videos = items
+                .filter(item => item.id?.videoId)
+                .map(item => ({
+                    id: item.id!.videoId!,
+                    title: item.snippet?.title || 'No Title',
+                    channel: item.snippet?.channelTitle || 'Unknown Channel',
+                    thumbnailUrl: item.snippet?.thumbnails?.high?.url || '',
+                }));
+            return { videos };
+
+        } else { // channel search
+             const isChannelIdQuery = query.startsWith('UC') && query.length === 24;
+             
+             let channelsResponse;
+             if (isChannelIdQuery) {
+                // If the query is a channel ID, use the channels.list endpoint for a direct lookup.
+                 channelsResponse = await youtube.channels.list({
+                     key: apiKey,
+                     part: ['snippet'],
+                     id: [query],
+                 });
+             } else {
+                 // Otherwise, use the search.list endpoint for a text-based query.
+                 channelsResponse = await youtube.search.list({
+                    key: apiKey,
+                    part: ['snippet'],
+                    q: query,
+                    type: 'channel',
+                    maxResults: 10,
+                });
+             }
+
+            const items = channelsResponse.data.items || [];
+            
+            const channels = items
+                .filter(item => (item.id && (typeof item.id === 'string' || item.id.channelId)) && item.snippet)
+                .map(item => {
+                    const id = typeof item.id === 'string' ? item.id : item.id!.channelId!;
+                    return {
+                        id: id,
+                        name: item.snippet!.title || 'No Name',
+                        handle: item.snippet!.customUrl, 
+                        thumbnailUrl: item.snippet!.thumbnails?.high?.url || '',
+                    }
+                });
+
+            return { channels };
         }
-
-      const response = await youtube.search.list(searchParams);
-      
-      const items = response.data.items || [];
-
-      if (type === 'video') {
-        const videos = items
-          .filter(item => item.id?.videoId)
-          .map(item => ({
-            id: item.id?.videoId || '',
-            title: item.snippet?.title || 'No Title',
-            channel: item.snippet?.channelTitle || 'Unknown Channel',
-            thumbnailUrl: item.snippet?.thumbnails?.high?.url || '',
-        }));
-        return { videos };
-      } else { // channel
-        const channels = items
-          .filter(item => item.id?.channelId && item.snippet)
-          .map(item => ({
-            id: item.id!.channelId!,
-            name: item.snippet!.title || 'No Name',
-            handle: item.snippet!.channelTitle, // Use channelTitle as a fallback for handle
-            thumbnailUrl: item.snippet!.thumbnails?.high?.url || '',
-        }));
-        return { channels };
-      }
 
     } catch (error: any) {
         console.error('[[SERVER - ERROR]] YouTube API search failed:', error.response?.data || error.message);
