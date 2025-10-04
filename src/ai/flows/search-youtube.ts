@@ -99,7 +99,7 @@ const searchYouTubeFlow = ai.defineFlow(
           .map(item => ({
             id: item.id!.channelId!,
             name: item.snippet!.title || 'No Name',
-            handle: (item.snippet as any).channelHandle, // Correctly access the handle if it exists
+            handle: item.snippet!.channelTitle, // Use channelTitle as a fallback for handle
             thumbnailUrl: item.snippet!.thumbnails?.high?.url || '',
         }));
         return { channels };
