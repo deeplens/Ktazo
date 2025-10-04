@@ -1,6 +1,5 @@
 
 
-
 'use client';
 import { notFound, useParams } from "next/navigation";
 import Image from "next/image";
@@ -771,11 +770,14 @@ function WeeklyPageContent({ sermon, weeklyContent, answers, setAnswers, gameSco
             <CardTitle className="font-headline flex items-center gap-2"><MessageCircleQuestion /> Reflection Questions</CardTitle>
             <CardDescription>Ponder these questions on your own, or discuss them with your family, friends, or small group.</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-6">
-              {weeklyContent.reflectionQuestions.map((group, groupIndex) => (
-                  <div key={`${group.audience}-${groupIndex}`}>
-                      <h3 className="font-semibold flex items-center gap-2 mb-4 text-lg border-b pb-2">{getIconForAudience(group.audience)} {group.audience}</h3>
-                      <div className="space-y-6">
+          <CardContent>
+            <Accordion type="single" collapsible className="w-full" defaultValue="item-0">
+                {weeklyContent.reflectionQuestions.map((group, groupIndex) => (
+                  <AccordionItem value={`item-${groupIndex}`} key={`${group.audience}-${groupIndex}`}>
+                      <AccordionTrigger>
+                          <h3 className="font-semibold flex items-center gap-2 text-lg">{getIconForAudience(group.audience)} {group.audience}</h3>
+                      </AccordionTrigger>
+                      <AccordionContent className="space-y-6">
                           {group.questions.map((q, i) => {
                             const questionId = `q-${groupIndex}-${i}`;
                             return (
@@ -791,9 +793,10 @@ function WeeklyPageContent({ sermon, weeklyContent, answers, setAnswers, gameSco
                                 </div>
                             )
                           })}
-                      </div>
-                  </div>
+                      </AccordionContent>
+                  </AccordionItem>
               ))}
+            </Accordion>
           </CardContent>
           <CardFooter>
               <Button onClick={handleSaveAnswers}>Save Answers</Button>
