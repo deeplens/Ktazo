@@ -24,25 +24,25 @@ import { transcribeSermon } from "@/ai/flows/transcribe-sermon";
 
 const sampleVideos: YouTubeVideoResult[] = [
     {
-        id: 'dQw4w9WgXcQ', // Placeholder ID
+        id: 'KMU0tzLwhbE',
         title: 'Sermon: The Parable of the Sower',
         channel: 'Grace Community Church',
         thumbnailUrl: 'https://i.ytimg.com/vi/KMU0tzLwhbE/hqdefault.jpg'
     },
     {
-        id: 'o-YBDTqX_ZU', // Placeholder ID
+        id: 'O1bEa-O5s-A',
         title: 'Hope in Times of Trouble - Psalm 46',
         channel: 'Citylight Church',
         thumbnailUrl: 'https://i.ytimg.com/vi/O1bEa-O5s-A/hqdefault.jpg'
     },
     {
-        id: 'M7lc1UVf-VE', // Placeholder ID
+        id: 'T8h3f0iW4lY',
         title: 'Living a Life of Purpose',
         channel: 'Redemption Church',
         thumbnailUrl: 'https://i.ytimg.com/vi/T8h3f0iW4lY/hqdefault.jpg'
     },
     {
-        id: '7_aJH3hZg-I',
+        id: 'Y8ayP6d3P8w',
         title: 'The Sermon on the Mount: The Beatitudes',
         channel: 'Faith Chapel',
         thumbnailUrl: 'https://i.ytimg.com/vi/Y8ayP6d3P8w/hqdefault.jpg'
@@ -61,6 +61,8 @@ export default function NewSermonPage() {
   const [transcript, setTranscript] = useState('');
   const [showTranscriptDialog, setShowTranscriptDialog] = useState(false);
   const [showYouTubeBrowseDialog, setShowYouTubeBrowseDialog] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isSearching, setIsSearching] = useState(false);
   const [searchResults, setSearchResults] = useState<YouTubeSearchOutput>({ videos: [] });
   const [suggestedVideo, setSuggestedVideo] = useState<YouTubeVideoResult | null>(null);
   const [captionStatus, setCaptionStatus] = useState<'idle' | 'checking' | 'enabled' | 'disabled'>('idle');
@@ -177,6 +179,29 @@ export default function NewSermonPage() {
   const openBrowseDialog = () => {
     setSearchResults({ videos: sampleVideos });
     setShowYouTubeBrowseDialog(true);
+  }
+
+  const handleSearch = async () => {
+      if (!searchQuery.trim()) return;
+      setIsSearching(true);
+      try {
+        const results = await searchYouTube({ query: searchQuery, type: 'video' });
+        setSearchResults(results);
+      } catch (error: any) {
+        console.error('[[CLIENT - ERROR]] YouTube video search failed', error);
+        const description = error.message.includes('quota') 
+            ? 'The daily limit for YouTube searches has been reached. Please try again tomorrow.'
+            : error.message.includes('API key not valid')
+            ? 'The provided YouTube API key is invalid. Please check your .env file.'
+            : error.message || 'Could not fetch YouTube videos.';
+        toast({
+            variant: 'destructive',
+            title: 'Search Failed',
+            description: description
+        });
+      } finally {
+        setIsSearching(false);
+      }
   }
 
   const handleSelectVideo = (video: YouTubeVideoResult) => {
@@ -408,9 +433,22 @@ export default function NewSermonPage() {
                             </DialogTrigger>
                             <DialogContent className="max-w-4xl">
                                 <DialogHeader>
-                                <DialogTitle>Browse Sample Sermons</DialogTitle>
-                                <DialogDescription>Select a sample sermon video to upload.</DialogDescription>
+                                <DialogTitle>Browse YouTube Sermons</DialogTitle>
+                                <DialogDescription>Select a sample sermon video or search for one.</DialogDescription>
                                 </DialogHeader>
+                                <div className="flex w-full items-center space-x-2">
+                                    <Input 
+                                        type="search" 
+                                        placeholder="Search for sermons..." 
+                                        value={searchQuery}
+                                        onChange={(e) => setSearchQuery(e.target.value)}
+                                        onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                                    />
+                                    <Button type="button" onClick={handleSearch} disabled={isSearching}>
+                                        {isSearching ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Search className="mr-2 h-4 w-4" />}
+                                        Search
+                                    </Button>
+                                </div>
                                 <ScrollArea className="h-96">
                                     <div className="space-y-4 pr-6">
                                         {searchResults.videos?.map(video => (
@@ -422,7 +460,8 @@ export default function NewSermonPage() {
                                                 </div>
                                             </div>
                                         ))}
-                                        {!searchResults.videos?.length && <div className="text-center text-muted-foreground p-8">No videos found.</div>}
+                                        {isSearching && <div className="flex justify-center p-8"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>}
+                                        {!isSearching && !searchResults.videos?.length && <div className="text-center text-muted-foreground p-8">No videos found.</div>}
                                     </div>
                                 </ScrollArea>
                             </DialogContent>
@@ -552,3 +591,5 @@ export default function NewSermonPage() {
     </div>
   );
 }
+
+    
