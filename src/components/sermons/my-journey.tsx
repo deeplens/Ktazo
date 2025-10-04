@@ -105,7 +105,7 @@ export function MyJourney({ questions, sermonTitle }: MyJourneyProps) {
   };
 
   return (
-    <Card>
+    <Card className="bg-muted/50">
       <CardHeader>
         <CardTitle className="font-headline flex items-center gap-2">My Journey</CardTitle>
         <CardDescription>A private space to reflect on your mission, vision, and purpose. Your responses are only visible to you.</CardDescription>
