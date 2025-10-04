@@ -76,8 +76,6 @@ const searchYouTubeFlow = ai.defineFlow(
             if (channelId) {
                 searchParams.channelId = channelId;
                 searchParams.order = 'date';
-            } else {
-                searchParams.order = 'relevance';
             }
 
             const response = await youtube.search.list(searchParams);
@@ -97,14 +95,12 @@ const searchYouTubeFlow = ai.defineFlow(
              
              let channelsResponse;
              if (isChannelIdQuery) {
-                // If the query is a channel ID, use the channels.list endpoint for a direct lookup.
                  channelsResponse = await youtube.channels.list({
                      key: apiKey,
                      part: ['snippet'],
                      id: [query],
                  });
              } else {
-                 // Otherwise, use the search.list endpoint for a text-based query.
                  channelsResponse = await youtube.search.list({
                     key: apiKey,
                     part: ['snippet'],
