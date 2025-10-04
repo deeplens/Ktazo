@@ -123,7 +123,8 @@ export function MyJourney({ questions, sermonTitle }: MyJourneyProps) {
             <CardContent className="space-y-6">
                 {questions.map((q, index) => (
                 <Dialog key={index} onOpenChange={(open) => !open && setActiveQuestion(null)}>
-                    <div className="p-4 border rounded-lg bg-background/70 dark:bg-background/50">
+                    <DialogTrigger asChild>
+                    <div className="p-4 border rounded-lg bg-background/70 dark:bg-background/50 hover:bg-background/90 dark:hover:bg-background/70 cursor-pointer transition-colors">
                         <h3 className="font-semibold flex items-center gap-2 mb-2 text-md">
                         {categoryIcons[q.category]} {q.category}: {q.question}
                         </h3>
@@ -136,20 +137,18 @@ export function MyJourney({ questions, sermonTitle }: MyJourneyProps) {
                             rows={6}
                             value={reflections[q.question] || ''}
                             onChange={(e) => handleReflectionChange(q.question, e.target.value)}
-                            className="bg-background dark:bg-zinc-900 flex-1"
+                            className="bg-background dark:bg-zinc-900 flex-1 cursor-text"
+                            onClick={(e) => e.stopPropagation()} // Prevent card click from triggering dialog
                             />
                         </div>
                         <div className="text-right mt-2">
-                        
-                            <DialogTrigger asChild>
-                            <Button variant="ghost" size="sm" onClick={() => startChat(q)}>
+                            <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); startChat(q); }}>
                                 <Bot className="mr-2 h-4 w-4" />
                                 Chat with your AI Mentor
                             </Button>
-                            </DialogTrigger>
-                        
                         </div>
                     </div>
+                    </DialogTrigger>
                     <DialogContent className="max-w-2xl h-[80vh] flex flex-col">
                         <DialogHeader>
                         <DialogTitle className="flex items-center gap-2"><Bot /> AI Mentor</DialogTitle>
