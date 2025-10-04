@@ -125,76 +125,75 @@ export function MyJourney({ questions, sermonTitle }: MyJourneyProps) {
                     Chat with your AI Mentor
                   </Button>
                 </DialogTrigger>
+                <DialogContent className="max-w-2xl h-[80vh] flex flex-col">
+                    <DialogHeader>
+                    <DialogTitle className="flex items-center gap-2"><Bot /> AI Mentor</DialogTitle>
+                    </DialogHeader>
+                    <div className="flex-1 flex flex-col min-h-0">
+                    <ScrollArea className="flex-1 p-4 pr-6 -mx-4">
+                        <div className="space-y-4">
+                        {chatMessages.map((message, index) => (
+                            <div
+                            key={index}
+                            className={cn(
+                                'flex items-start gap-4',
+                                message.role === 'user' ? 'justify-end' : 'justify-start'
+                            )}
+                            >
+                            {message.role === 'assistant' && (
+                                <Avatar className="h-9 w-9 border-2 border-primary/50">
+                                <AvatarFallback className="bg-primary/10"><Bot className="text-primary" /></AvatarFallback>
+                                </Avatar>
+                            )}
+                            <div
+                                className={cn(
+                                'max-w-md rounded-lg p-3 text-sm shadow-sm',
+                                message.role === 'user'
+                                    ? 'bg-primary text-primary-foreground'
+                                    : 'bg-card border'
+                                )}
+                            >
+                                <p className="whitespace-pre-wrap">{message.content}</p>
+                            </div>
+                            {message.role === 'user' && user && (
+                                <Avatar className="h-9 w-9">
+                                <AvatarImage src={user.photoUrl || `https://avatar.vercel.sh/${user.email}.png`} alt="User" />
+                                <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
+                                </Avatar>
+                            )}
+                            </div>
+                        ))}
+                        {isLoadingChat && (
+                            <div className="flex items-start gap-4 justify-start">
+                                <Avatar className="h-9 w-9 border-2 border-primary/50">
+                                    <AvatarFallback className='bg-primary/10'><Bot className="text-primary"/></AvatarFallback>
+                                </Avatar>
+                                <div className="bg-card border rounded-lg p-3 shadow-sm">
+                                    <Loader2 className="h-5 w-5 animate-spin text-primary" />
+                                </div>
+                            </div>
+                        )}
+                        </div>
+                    </ScrollArea>
+                    <form onSubmit={handleChatSubmit} className="flex items-center gap-2 pt-4 border-t">
+                        <Input
+                        placeholder="Ask a question or share a thought..."
+                        value={chatInput}
+                        onChange={(e) => setChatInput(e.target.value)}
+                        disabled={isLoadingChat}
+                        className="flex-1"
+                        />
+                        <Button type="submit" disabled={isLoadingChat || !chatInput.trim()} size="icon">
+                        <Send className="h-4 w-4" />
+                        </Button>
+                    </form>
+                    </div>
+                </DialogContent>
               </Dialog>
             </div>
           </div>
         ))}
       </CardContent>
-
-      <DialogContent className="max-w-2xl h-[80vh] flex flex-col">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2"><Bot /> AI Mentor</DialogTitle>
-        </DialogHeader>
-        <div className="flex-1 flex flex-col min-h-0">
-          <ScrollArea className="flex-1 p-4 pr-6 -mx-4">
-            <div className="space-y-4">
-              {chatMessages.map((message, index) => (
-                <div
-                  key={index}
-                  className={cn(
-                    'flex items-start gap-4',
-                    message.role === 'user' ? 'justify-end' : 'justify-start'
-                  )}
-                >
-                  {message.role === 'assistant' && (
-                    <Avatar className="h-9 w-9 border-2 border-primary/50">
-                      <AvatarFallback className="bg-primary/10"><Bot className="text-primary" /></AvatarFallback>
-                    </Avatar>
-                  )}
-                  <div
-                    className={cn(
-                      'max-w-md rounded-lg p-3 text-sm shadow-sm',
-                      message.role === 'user'
-                        ? 'bg-primary text-primary-foreground'
-                        : 'bg-card border'
-                    )}
-                  >
-                    <p className="whitespace-pre-wrap">{message.content}</p>
-                  </div>
-                  {message.role === 'user' && user && (
-                    <Avatar className="h-9 w-9">
-                      <AvatarImage src={user.photoUrl || `https://avatar.vercel.sh/${user.email}.png`} alt="User" />
-                      <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
-                    </Avatar>
-                  )}
-                </div>
-              ))}
-              {isLoadingChat && (
-                <div className="flex items-start gap-4 justify-start">
-                    <Avatar className="h-9 w-9 border-2 border-primary/50">
-                        <AvatarFallback className='bg-primary/10'><Bot className="text-primary"/></AvatarFallback>
-                    </Avatar>
-                    <div className="bg-card border rounded-lg p-3 shadow-sm">
-                        <Loader2 className="h-5 w-5 animate-spin text-primary" />
-                    </div>
-                </div>
-              )}
-            </div>
-          </ScrollArea>
-          <form onSubmit={handleChatSubmit} className="flex items-center gap-2 pt-4 border-t">
-            <Input
-              placeholder="Ask a question or share a thought..."
-              value={chatInput}
-              onChange={(e) => setChatInput(e.target.value)}
-              disabled={isLoadingChat}
-              className="flex-1"
-            />
-            <Button type="submit" disabled={isLoadingChat || !chatInput.trim()} size="icon">
-              <Send className="h-4 w-4" />
-            </Button>
-          </form>
-        </div>
-      </DialogContent>
     </Card>
   );
 }
