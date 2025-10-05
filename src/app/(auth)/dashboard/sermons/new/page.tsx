@@ -125,6 +125,7 @@ export default function NewSermonPage() {
                         if (results.videos && results.videos.length > 0) {
                             const latestVideo = results.videos[0];
                             setYoutubeUrl(`https://www.youtube.com/watch?v=${latestVideo.id}`);
+                            setTitle(latestVideo.title);
                             setSuggestedVideo(latestVideo);
                             toast({
                                 title: "Sermon Suggested",
@@ -220,6 +221,7 @@ export default function NewSermonPage() {
 
   const handleSelectVideo = (video: YouTubeVideoResult) => {
     setYoutubeUrl(`https://www.youtube.com/watch?v=${video.id}`);
+    setTitle(video.title);
     setSuggestedVideo(video);
     setShowYouTubeBrowseDialog(false);
   };
@@ -605,3 +607,5 @@ export default function NewSermonPage() {
     </div>
   );
 }
+
+    
