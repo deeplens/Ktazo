@@ -42,6 +42,13 @@ const checkYoutubeCaptionsFlow = ai.defineFlow(
       if ((error as Error).message.includes('disabled on this video')) {
         return { captionsEnabled: false };
       }
+      // If the error is anything else (e.g. 'No transcript found for language'), 
+      // it means captions exist, just not in the default language we checked.
+      // For the purpose of this check, we'll consider that as captions being enabled.
+      if ((error as Error).message.includes('No transcript found')) {
+        return { captionsEnabled: true };
+      }
+      
       // Re-throw other unexpected errors
       console.error("[[SERVER - ERROR]] Unexpected error in checkYoutubeCaptionsFlow:", error);
       throw new Error(`An unexpected error occurred while checking captions for ${videoUrl}.`);
