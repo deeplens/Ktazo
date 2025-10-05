@@ -335,65 +335,7 @@ export default function NewSermonPage() {
       </div>
 
       <form onSubmit={handleSubmit}>
-        <Card className="mt-8">
-          <CardHeader>
-            <CardTitle>Sermon Details</CardTitle>
-            <CardDescription>
-              Provide the details for the new sermon. A title will be suggested if left blank.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="title">Sermon Title (Optional)</Label>
-                <Input
-                  id="title"
-                  name="title"
-                  placeholder="e.g., The Good Shepherd"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  disabled={isLoading}
-                />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="speaker">Speaker</Label>
-              <Input
-                id="speaker"
-                name="speaker"
-                placeholder="e.g., Pastor John Doe"
-                value={speaker}
-                onChange={(e) => setSpeaker(e.target.value)}
-                required
-                disabled={isLoading}
-              />
-            </div>
-            <div className="grid md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="series">Series (Optional)</Label>
-                <Input
-                  id="series"
-                  name="series"
-                  placeholder="e.g., Psalms"
-                  value={series}
-                  onChange={(e) => setSeries(e.target.value)}
-                  disabled={isLoading}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="date">Date (Optional)</Label>
-                <Input
-                  id="date"
-                  name="date"
-                  type="date"
-                  value={date}
-                  onChange={(e) => setDate(e.target.value)}
-                  disabled={isLoading}
-                />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Tabs defaultValue="youtube" className="mt-6" onValueChange={setUploadTab}>
+        <Tabs defaultValue="youtube" className="mt-8" onValueChange={setUploadTab}>
             <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="youtube"><Youtube className="mr-2"/> From YouTube</TabsTrigger>
                 <TabsTrigger value="file"><UploadCloud className="mr-2"/> From File</TabsTrigger>
@@ -543,6 +485,64 @@ export default function NewSermonPage() {
                 </Card>
             </TabsContent>
         </Tabs>
+
+        <Card className="mt-6">
+          <CardHeader>
+            <CardTitle>Sermon Details</CardTitle>
+            <CardDescription>
+              Provide the details for the new sermon. A title will be suggested if left blank.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="title">Sermon Title (Optional)</Label>
+                <Input
+                  id="title"
+                  name="title"
+                  placeholder="e.g., The Good Shepherd"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  disabled={isLoading}
+                />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="speaker">Speaker</Label>
+              <Input
+                id="speaker"
+                name="speaker"
+                placeholder="e.g., Pastor John Doe"
+                value={speaker}
+                onChange={(e) => setSpeaker(e.target.value)}
+                required
+                disabled={isLoading}
+              />
+            </div>
+            <div className="grid md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="series">Series (Optional)</Label>
+                <Input
+                  id="series"
+                  name="series"
+                  placeholder="e.g., Psalms"
+                  value={series}
+                  onChange={(e) => setSeries(e.target.value)}
+                  disabled={isLoading}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="date">Date (Optional)</Label>
+                <Input
+                  id="date"
+                  name="date"
+                  type="date"
+                  value={date}
+                  onChange={(e) => setDate(e.target.value)}
+                  disabled={isLoading}
+                />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
         <CardFooter className="flex justify-end gap-2 mt-4 px-0">
           <Button variant="outline" type="button" onClick={() => router.back()} disabled={isLoading}>
