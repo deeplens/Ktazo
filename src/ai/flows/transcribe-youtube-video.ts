@@ -92,8 +92,8 @@ const transcribeYoutubeVideoFlow = ai.defineFlow(
         }
       }
 
-      // If we reach here, no suitable caption track was found
-      throw new Error("No suitable caption track found. Falling back to AI.");
+      // If we reach here, no suitable caption track was found or download failed unexpectedly
+      throw new Error("No suitable caption track found for direct download.");
 
     } catch (error: any) {
         console.warn(`[[SERVER - WARN]] Failed to download YouTube transcript directly: ${error.message}. Falling back to AI transcription.`);
@@ -104,7 +104,7 @@ const transcribeYoutubeVideoFlow = ai.defineFlow(
                 model: 'googleai/gemini-2.5-flash',
                 prompt: [
                     { text: 'You are an expert audio transcription service. Your only task is to accurately transcribe the audio from the provided video file. Do not add any commentary, analysis, or any text other than the transcription itself. Return only the transcribed text.' },
-                    { media: { url: videoUrl, contentType: 'video/mp4' } }
+                    { media: { url: videoUrl } }
                 ]
             });
             if (!text) {
