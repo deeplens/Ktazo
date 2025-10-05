@@ -9,7 +9,6 @@
  */
 
 import {ai} from '@/ai/genkit';
-import {googleAI} from '@genkit-ai/google-genai';
 import {z} from 'genkit';
 import { YoutubeTranscript } from 'youtube-transcript';
 
@@ -38,45 +37,30 @@ const transcribeYoutubeVideoFlow = ai.defineFlow(
     console.log('[[SERVER - DEBUG]] Starting transcribeYoutubeVideoFlow for:', videoUrl);
     
     try {
-      // First, try to get the transcript directly from YouTube captions
+      // Attempt to download the transcript directly from YouTube captions.
       console.log('[[SERVER - DEBUG]] Attempting to fetch transcript from YouTube captions.');
       const transcriptParts = await YoutubeTranscript.fetchTranscript(videoUrl);
       
       if (transcriptParts && transcriptParts.length > 0) {
-        console.log('[[SERVER - DEBUG]] Found existing YouTube transcript.');
+        console.log('[[SERVER - DEBUG]] Successfully downloaded YouTube transcript.');
         const fullTranscript = transcriptParts.map(part => part.text).join(' ');
-        console.log('[[SERVER - DEBUG]] Finishing transcribeYoutubeVideoFlow via captions.');
         return { transcript: fullTranscript };
       }
       
-      throw new Error("No transcript available from YouTube captions.");
+      // This part should ideally not be reached if fetchTranscript throws an error on failure.
+      throw new Error("No transcript parts were found even though the fetch was successful.");
 
-    } catch (captionError) {
-        console.warn('[[SERVER - WARN]] Could not fetch YouTube captions, falling back to AI transcription.', (captionError as Error).message);
+    } catch (error) {
+        console.error("[[SERVER - ERROR]] Failed to download YouTube transcript:", error);
         
-        try {
-            console.log('[[SERVER - DEBUG]] Calling AI transcription fallback.');
-            
-            const { text } = await ai.generate({
-                model: 'googleai/gemini-2.5-flash',
-                prompt: [
-                    { text: 'You are an expert audio transcription service. Your only task is to accurately transcribe the audio from the provided file. Do not add any commentary, analysis, or any text other than the transcription itself. Return only the transcribed text.' },
-                    { media: { url: videoUrl, contentType: 'video/mp4' } }
-                ]
-            });
-
-            if (!text) {
-                throw new Error('AI transcription fallback failed: No text was returned from the model.');
-            }
-            console.log('[[SERVER - DEBUG]] Finishing transcribeYoutubeVideoFlow via AI fallback.');
-            return { transcript: text };
-        } catch (transcriptionError) {
-             console.error("[[SERVER - ERROR]] AI transcription fallback failed:", transcriptionError);
-             let finalMessage = `Failed to process YouTube video. An unexpected error occurred while trying to fetch the video transcript or audio. `;
-             finalMessage += `Details: ${(transcriptionError as Error).message}`;
-             
-             throw new Error(finalMessage);
+        let errorMessage = 'Failed to download transcript from YouTube.';
+        if ((error as Error).message.includes('disabled on this video')) {
+            errorMessage = 'Transcription failed because captions are disabled for this YouTube video. Please try a different video or upload a transcript file directly.';
+        } else if ((error as Error).message.includes('No transcript found')) {
+            errorMessage = 'No English transcript could be found for this YouTube video. Please try a different video or upload a transcript file directly.';
         }
+        
+        throw new Error(errorMessage);
     }
   }
 );
