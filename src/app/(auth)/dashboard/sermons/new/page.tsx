@@ -71,6 +71,7 @@ export default function NewSermonPage() {
   const [transcriptFile, setTranscriptFile] = useState<File | null>(null);
   const [pastedTranscript, setPastedTranscript] = useState('');
   const [sourceUrl, setSourceUrl] = useState('');
+  const [configuredChannelId, setConfiguredChannelId] = useState<string | null>(null);
 
 
   const router = useRouter();
@@ -104,36 +105,45 @@ export default function NewSermonPage() {
         const settings = getTenantSettings(user.tenantId);
         if (settings.youtubeChannelUrl) {
             const urlParts = settings.youtubeChannelUrl.split('/');
-            // Look for a handle (@) or a channel ID (UC...)
-            const handleOrId = urlParts.find(part => part.startsWith('@') || part.startsWith('UC'));
-
-            if (handleOrId) {
-                try {
-                    // We search by the handle or ID, but importantly, ask for videos from that channel
-                    const results = await searchYouTube({ query: '', type: 'video', channelId: handleOrId.startsWith('@') ? undefined : handleOrId });
-                    
-                    if (results.videos && results.videos.length > 0) {
-                        const latestVideo = results.videos[0];
-                        setYoutubeUrl(`https://www.youtube.com/watch?v=${latestVideo.id}`);
-                        setSuggestedVideo(latestVideo);
-                        toast({
-                            title: "Sermon Suggested",
-                            description: `The latest video from your channel, "${latestVideo.title}", has been pre-filled.`
+            const identifier = urlParts.find(part => part.startsWith('@') || part.startsWith('UC'));
+            
+            if (identifier) {
+                // Determine if it's a channel ID or a handle that needs to be resolved
+                let channelId = identifier.startsWith('UC') ? identifier : undefined;
+                if (!channelId) {
+                    // It's a handle, we need to find the channelId
+                    const channelSearchResult = await searchYouTube({query: identifier, type: 'channel'});
+                    if (channelSearchResult.channels && channelSearchResult.channels.length > 0) {
+                        channelId = channelSearchResult.channels[0].id;
+                    }
+                }
+                
+                if (channelId) {
+                    setConfiguredChannelId(channelId);
+                    try {
+                        const results = await searchYouTube({ query: '', type: 'video', channelId: channelId });
+                        if (results.videos && results.videos.length > 0) {
+                            const latestVideo = results.videos[0];
+                            setYoutubeUrl(`https://www.youtube.com/watch?v=${latestVideo.id}`);
+                            setSuggestedVideo(latestVideo);
+                            toast({
+                                title: "Sermon Suggested",
+                                description: `The latest video from your channel, "${latestVideo.title}", has been pre-filled.`
+                            });
+                        }
+                    } catch (error: any) {
+                         console.error('[[CLIENT - ERROR]] YouTube video search failed on load', error);
+                         const description = error.message.includes('quota')
+                            ? 'The daily limit for YouTube searches has been reached. Please try again tomorrow.'
+                            : error.message.includes('API key not valid')
+                            ? 'The provided YouTube API key is invalid. Please check your .env file.'
+                            : error.message || 'Could not fetch videos from your configured channel.';
+                         toast({
+                            variant: 'destructive',
+                            title: 'Auto-Search Failed',
+                            description: description
                         });
                     }
-
-                } catch (error: any) {
-                     console.error('[[CLIENT - ERROR]] YouTube video search failed on load', error);
-                     const description = error.message.includes('quota')
-                        ? 'The daily limit for YouTube searches has been reached. Please try again tomorrow.'
-                        : error.message.includes('API key not valid')
-                        ? 'The provided YouTube API key is invalid. Please check your .env file.'
-                        : error.message || 'Could not fetch videos from your configured channel.';
-                     toast({
-                        variant: 'destructive',
-                        title: 'Auto-Search Failed',
-                        description: description
-                    });
                 }
             }
         }
@@ -168,9 +178,21 @@ export default function NewSermonPage() {
     router.push(`/dashboard/sermons/${newSermon.id}`);
   };
 
-  const openBrowseDialog = () => {
-    setSearchResults({ videos: sampleVideos });
+  const openBrowseDialog = async () => {
+    setIsSearching(true);
     setShowYouTubeBrowseDialog(true);
+    if (configuredChannelId) {
+        try {
+            const results = await searchYouTube({ query: '', type: 'video', channelId: configuredChannelId });
+            setSearchResults(results);
+        } catch (error) {
+            console.error("[[CLIENT - ERROR]] Failed to fetch channel videos for browse dialog.", error);
+            setSearchResults({ videos: sampleVideos }); // Fallback
+        }
+    } else {
+        setSearchResults({ videos: sampleVideos });
+    }
+    setIsSearching(false);
   }
 
   const handleSearch = async () => {
@@ -426,7 +448,7 @@ export default function NewSermonPage() {
                             <DialogContent className="max-w-4xl">
                                 <DialogHeader>
                                 <DialogTitle>Browse YouTube Sermons</DialogTitle>
-                                <DialogDescription>Select a sample sermon video or search for one.</DialogDescription>
+                                <DialogDescription>{configuredChannelId ? "Recent videos from your channel. Or search all of YouTube." : "Select a sample sermon video or search for one."}</DialogDescription>
                                 </DialogHeader>
                                 <div className="flex w-full items-center space-x-2">
                                     <Input 
@@ -583,7 +605,3 @@ export default function NewSermonPage() {
     </div>
   );
 }
-
-    
-
-    
