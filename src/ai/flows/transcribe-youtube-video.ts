@@ -12,7 +12,6 @@ import {ai} from '@/ai/genkit';
 import {googleAI} from '@genkit-ai/google-genai';
 import {z} from 'genkit';
 import { google } from 'googleapis';
-import { YoutubeTranscript } from 'youtube-transcript';
 
 
 const TranscribeYoutubeVideoInputSchema = z.object({
@@ -29,6 +28,15 @@ export async function transcribeYoutubeVideo(input: TranscribeYoutubeVideoInput)
   return transcribeYoutubeVideoFlow(input);
 }
 
+// Helper to parse SRT format
+function parseSrt(srt: string): string {
+    return srt
+        .replace(/(\d{2}:\d{2}:\d{2},\d{3}) --> (\d{2}:\d{2}:\d{2},\d{3})/g, '') // Remove timestamps
+        .replace(/\d+\r?\n/g, '') // Remove line numbers
+        .replace(/<[^>]*>/g, '')   // Remove HTML tags
+        .replace(/\r?\n/g, ' ')     // Replace newlines with spaces
+        .trim();
+}
 
 const transcribeYoutubeVideoFlow = ai.defineFlow(
   {
@@ -39,23 +47,57 @@ const transcribeYoutubeVideoFlow = ai.defineFlow(
   async ({videoUrl}) => {
     console.log('[[SERVER - DEBUG]] Starting transcribeYoutubeVideoFlow for:', videoUrl);
     
-    // Fallback to youtube-transcript library. It's often faster for public videos.
-    try {
-      console.log('[[SERVER - DEBUG]] Attempting to fetch transcript directly from YouTube captions.');
-      const transcriptParts = await YoutubeTranscript.fetchTranscript(videoUrl);
-      
-      if (transcriptParts && transcriptParts.length > 0) {
-        console.log('[[SERVER - DEBUG]] Successfully downloaded YouTube transcript via library.');
-        const fullTranscript = transcriptParts.map(part => part.text).join(' ');
-        return { transcript: fullTranscript };
-      }
-      
-      throw new Error("No transcript parts were found even though the library fetch was successful.");
+    const videoIdMatch = videoUrl.match(/(?:v=)([\w-]{11})/);
+    if (!videoIdMatch) {
+        throw new Error('Invalid YouTube URL. Could not extract video ID.');
+    }
+    const videoId = videoIdMatch[1];
+    const youtube = google.youtube('v3');
+    const apiKey = process.env.YOUTUBE_API_KEY;
 
-    } catch (error) {
-        console.warn("[[SERVER - WARN]] Failed to download YouTube transcript via library, falling back to AI.", error);
+    if (!apiKey) {
+      throw new Error('YouTube API key is missing. Cannot transcribe video.');
+    }
+    
+    try {
+      // 1. Check for available caption tracks
+      console.log('[[SERVER - DEBUG]] Listing caption tracks for video:', videoId);
+      const captionListResponse = await youtube.captions.list({
+        key: apiKey,
+        part: ['id', 'snippet'],
+        videoId: videoId,
+      });
+
+      const tracks = captionListResponse.data.items || [];
+      // Prefer manual English captions, then ASR English, then any caption track
+      const enTrack = tracks.find(t => t.snippet?.language === 'en');
+      const asrTrack = tracks.find(t => t.snippet?.trackKind === 'ASR' && t.snippet?.language?.startsWith('en'));
+      const anyTrack = tracks[0];
+
+      const chosenTrack = enTrack || asrTrack || anyTrack;
+
+      if (chosenTrack && chosenTrack.id) {
+        // 2. Download the chosen caption track
+        console.log(`[[SERVER - DEBUG]] Found caption track: ${chosenTrack.id}. Downloading...`);
+        const captionDownloadResponse = await youtube.captions.download({
+          key: apiKey,
+          id: chosenTrack.id,
+          tfmt: 'srt' // Request SubRip format
+        });
+
+        if (typeof captionDownloadResponse.data === 'string') {
+          const transcript = parseSrt(captionDownloadResponse.data);
+          console.log('[[SERVER - DEBUG]] Successfully downloaded and parsed YouTube transcript.');
+          return { transcript };
+        }
+      }
+
+      // If we reach here, no suitable caption track was found
+      throw new Error("No suitable caption track found. Falling back to AI.");
+
+    } catch (error: any) {
+        console.warn(`[[SERVER - WARN]] Failed to download YouTube transcript directly: ${error.message}. Falling back to AI transcription.`);
         
-        let aiTranscriptionError: Error | null = null;
         try {
             console.log('[[SERVER - DEBUG]] Falling back to AI-based transcription for YouTube URL.');
             const { text } = await ai.generate({
@@ -71,25 +113,11 @@ const transcribeYoutubeVideoFlow = ai.defineFlow(
             console.log('[[SERVER - DEBUG]] Successfully transcribed via AI fallback.');
             return { transcript: text };
 
-        } catch (err) {
-            aiTranscriptionError = err as Error;
-        }
-
-        // If we're here, both methods failed. Construct a clear error message.
-        let finalMessage = 'Failed to process YouTube video. ';
-        if ((error as Error).message.includes('disabled')) {
-            finalMessage += 'Captions are disabled for this video, and AI transcription also failed. ';
-        } else {
-            finalMessage += 'An unexpected error occurred while trying to fetch the video transcript or audio. ';
-        }
-        
-        if (aiTranscriptionError) {
-             finalMessage += `Details: ${aiTranscriptionError.message}`;
-             
+        } catch (aiError: any) {
+             const finalMessage = `Failed to process YouTube video. Direct download failed, and AI transcription also failed. Details: ${aiError.message}`;
+             console.error("[[SERVER - ERROR]] " + finalMessage, aiError);
              throw new Error(finalMessage);
         }
-        
-        throw new Error((error as Error).message || "An unknown error occurred during transcription.");
     }
   }
 );
