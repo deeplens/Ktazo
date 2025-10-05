@@ -66,7 +66,7 @@ export default function NewSermonPage() {
   const [searchResults, setSearchResults] = useState<YouTubeSearchOutput>({ videos: [] });
   const [suggestedVideo, setSuggestedVideo] = useState<YouTubeVideoResult | null>(null);
   const [captionStatus, setCaptionStatus] = useState<'idle' | 'checking' | 'enabled' | 'disabled'>('idle');
-  const [uploadTab, setUploadTab] = useState('youtube');
+  const [uploadTab, setUploadTab] = useState('file');
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const [transcriptFile, setTranscriptFile] = useState<File | null>(null);
   const [pastedTranscript, setPastedTranscript] = useState('');
@@ -88,7 +88,13 @@ export default function NewSermonPage() {
       setCaptionStatus(result.captionsEnabled ? 'enabled' : 'disabled');
     } catch (error) {
       console.error("[[CLIENT - ERROR]] Caption check failed", error);
-      setCaptionStatus('disabled');
+      // Specifically check for 'captionsNotAvailable' error from YouTube API
+      if (error instanceof Error && error.message.includes('captionsNotAvailable')) {
+        setCaptionStatus('disabled');
+      } else {
+        // For other errors, we can be pessimistic or optimistic. Let's be pessimistic.
+        setCaptionStatus('disabled');
+      }
     }
   };
   
@@ -337,7 +343,7 @@ export default function NewSermonPage() {
       </div>
 
       <form onSubmit={handleSubmit}>
-        <Tabs defaultValue="youtube" className="mt-8" onValueChange={setUploadTab}>
+        <Tabs defaultValue="file" className="mt-8" onValueChange={setUploadTab}>
             <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="youtube"><Youtube className="mr-2"/> From YouTube</TabsTrigger>
                 <TabsTrigger value="file"><UploadCloud className="mr-2"/> From File</TabsTrigger>
